@@ -1,0 +1,157 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "UUID": "com.memetcircus.musedeck",
+  "Name": "MuseDeck",
+  "Version": "1.0.0.0",
+  "Author": "memetcircus",
+  "Description": "Human-in-the-Loop Mission Control & Telemetry Console for Meta Muse Code CLI & Meta Model API (SAM 3.1 & Muse Spark). Built for Meta Global AI Developer Hackathon.",
+  "Category": "MuseDeck",
+  "CategoryIcon": "imgs/category-icon",
+  "URL": "https://github.com/memetcircus/musedeck",
+  "Icon": "imgs/plugin-icon",
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "7.1"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "13"
+    }
+  ],
+  "Nodejs": {
+    "Version": "24",
+    "Debug": "enabled"
+  },
+  "CodePath": "bin/plugin.js",
+  "Profiles": [
+    {
+      "Name": "MuseDeck",
+      "DeviceType": 0,
+      "Readonly": false,
+      "DontAutoSwitchWhenInstalled": false
+    }
+  ],
+  "Actions": [
+    {
+      "Name": "Agent Status",
+      "UUID": "com.memetcircus.musedeck.status",
+      "Icon": "imgs/actions/status/icon",
+      "Tooltip": "Dynamic visual status badge for Meta Muse Code (IDLE, PLANNING, WAITING_APPROVAL, EXECUTING, ERROR)",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/status/key" }]
+    },
+    {
+      "Name": "Active Task",
+      "UUID": "com.memetcircus.musedeck.task",
+      "Icon": "imgs/actions/task/icon",
+      "Tooltip": "Telemetry display showing the active task and current subagent step",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/task/key" }]
+    },
+    {
+      "Name": "Diff Summary",
+      "UUID": "com.memetcircus.musedeck.diff",
+      "Icon": "imgs/actions/diff/icon",
+      "Tooltip": "Displays git diff metrics (+lines / -lines). Tap to open diff inspector.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/diff/key" }]
+    },
+    {
+      "Name": "Approve (HITL)",
+      "UUID": "com.memetcircus.musedeck.approve",
+      "Icon": "imgs/actions/approve/icon",
+      "Tooltip": "Physical Human-in-the-Loop Approval key. Press to unpause agent when waiting for review.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/approve/key" }]
+    },
+    {
+      "Name": "Reject (HITL)",
+      "UUID": "com.memetcircus.musedeck.reject",
+      "Icon": "imgs/actions/reject/icon",
+      "Tooltip": "Physical Human-in-the-Loop Rejection key. Press to reject diff and request revision.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/reject/key" }]
+    },
+    {
+      "Name": "SAM 3.1 Snip",
+      "UUID": "com.memetcircus.musedeck.sam-snip",
+      "Icon": "imgs/actions/sam-snip/icon",
+      "Tooltip": "Interactive screen snip, SAM 3.1 foreground segmentation, and clipboard copy with live thumbnail preview.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/sam-snip/key" }]
+    },
+    {
+      "Name": "Image to Code",
+      "UUID": "com.memetcircus.musedeck.spark-code",
+      "Icon": "imgs/actions/spark-code/icon",
+      "Tooltip": "Dispatches SAM 3.1 segmented UI to Meta Muse Spark to synthesize React & Tailwind CSS code.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/spark-code/key" }]
+    },
+    {
+      "Name": "Run Muse",
+      "UUID": "com.memetcircus.musedeck.run-muse",
+      "Icon": "imgs/actions/run-muse/icon",
+      "Tooltip": "Start or execute the queued Meta Muse Code task.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/run-muse/key" }]
+    },
+    {
+      "Name": "Halt / Stop",
+      "UUID": "com.memetcircus.musedeck.halt",
+      "Icon": "imgs/actions/halt/icon",
+      "Tooltip": "Emergency stop. Immediately halts child processes and cancels running agent workflows.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/halt/key" }]
+    },
+    {
+      "Name": "Reset Agent",
+      "UUID": "com.memetcircus.musedeck.reset",
+      "Icon": "imgs/actions/reset/icon",
+      "Tooltip": "Clears agent buffers and resets state back to IDLE.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/reset/key" }]
+    },
+    {
+      "Name": "Prompt Task",
+      "UUID": "com.memetcircus.musedeck.prompt-task",
+      "Icon": "imgs/actions/prompt-task/icon",
+      "Tooltip": "Sends a preset coding task to Muse Code.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/prompt-task/key" }]
+    },
+    {
+      "Name": "Write Tests",
+      "UUID": "com.memetcircus.musedeck.write-tests",
+      "Icon": "imgs/actions/write-tests/icon",
+      "Tooltip": "Triggers Muse Code to generate comprehensive test coverage in parallel worktrees.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/write-tests/key" }]
+    },
+    {
+      "Name": "Fix Bug",
+      "UUID": "com.memetcircus.musedeck.fix-bug",
+      "Icon": "imgs/actions/fix-bug/icon",
+      "Tooltip": "Passes the latest runtime error or exception to Muse Code for automated patch generation.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/fix-bug/key" }]
+    },
+    {
+      "Name": "Commit & PR",
+      "UUID": "com.memetcircus.musedeck.commit-pr",
+      "Icon": "imgs/actions/commit-pr/icon",
+      "Tooltip": "Stages verified changes, generates semantic commit message, and prepares pull request.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/commit-pr/key" }]
+    },
+    {
+      "Name": "Web Console",
+      "UUID": "com.memetcircus.musedeck.web-console",
+      "Icon": "imgs/actions/web-console/icon",
+      "Tooltip": "Opens the MuseDeck Web Mission Control dashboard in browser.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/web-console/key" }]
+    }
+  ]
+}

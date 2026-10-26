@@ -1,0 +1,49 @@
+{
+  "name": "musedeck",
+  "version": "1.0.0",
+  "description": "Physical Human-in-the-Loop Mission Control & Telemetry Console for Meta Muse Code CLI & Meta Model API (SAM 3.1 & Muse Spark) on Elgato Stream Deck",
+  "type": "module",
+  "main": "dist/server/index.js",
+  "scripts": {
+    "dev": "tsx watch src/server/index.ts",
+    "start": "node dist/server/index.js",
+    "build:server": "tsc -p tsconfig.server.json",
+    "build:plugin": "rollup -c rollup.config.mjs",
+    "build": "npm run build:server && npm run build:plugin",
+    "test:agent": "tsx test/test-agent.ts",
+    "test:meta": "tsx test/test-meta.ts"
+  },
+  "keywords": [
+    "streamdeck",
+    "elgato",
+    "meta",
+    "muse-code",
+    "sam-3.1",
+    "muse-spark",
+    "hitl",
+    "ai-agent",
+    "telemetry"
+  ],
+  "author": "memetcircus",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@elgato/streamdeck": "^2.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^24.0.0",
+    "@types/ws": "^8.5.14",
+    "rollup": "^4.30.0",
+    "tslib": "^2.8.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

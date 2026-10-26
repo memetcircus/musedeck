@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+.env
+*.log
+com.memetcircus.musedeck.sdPlugin/bin/
+com.memetcircus.musedeck.sdPlugin/logs/
+temp/

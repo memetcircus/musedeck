@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MuseDeck | Human-in-the-Loop Mission Control for Meta Muse Code</title>
+  <meta name="description" content="Physical hardware bridge and telemetry console connecting Elgato Stream Deck directly to Meta Muse Code CLI, SAM 3.1, and Muse Spark.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- TOP NAVIGATION & STATUS -->
+    <header class="top-nav">
+      <div class="brand">
+        <div class="brand-logo">
+          <span class="logo-icon">⚡</span>
+        </div>
+        <div class="brand-text">
+          <h1>MUSEDECK</h1>
+          <span class="badge hackathon-badge">Meta AI Hackathon • Track 1: Indie Dev</span>
+        </div>
+      </div>
+
+      <div class="header-metrics">
+        <div class="metric-chip">
+          <span class="metric-label">STREAM DECK</span>
+          <span id="surface-status" class="metric-value status-online">CONNECTED</span>
+        </div>
+        <div class="metric-chip">
+          <span class="metric-label">UPTIME</span>
+          <span id="uptime-display" class="metric-value">00:00:00</span>
+        </div>
+        <div class="metric-chip">
+          <span class="metric-label">META API</span>
+          <span class="metric-value text-cyan">SAM 3.1 + SPARK</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN GRID LAYOUT -->
+    <main class="main-grid">
+      <!-- LEFT COLUMN: 15-KEY VIRTUAL STREAM DECK MK.2 -->
+      <section class="deck-section card">
+        <div class="section-header">
+          <div class="header-title">
+            <span class="section-icon">🎛️</span>
+            <h2>Physical Telemetry Console (Stream Deck MK.2)</h2>
+          </div>
+          <span class="layout-tag">15-KEY TACTILE GRID</span>
+        </div>
+
+        <p class="section-subtext">Click any key below or press the physical keys on your Stream Deck to trigger actions and approvals.</p>
+
+        <div id="deck-grid" class="deck-grid">
+          <!-- Row 1: Telemetry & Review Gate -->
+          <button class="deck-key key-status" id="key-0" data-index="0" title="Agent Status">
+            <div class="key-inner">
+              <span class="key-glyph">🤖</span>
+              <span class="key-title" id="key-status-title">READY</span>
+              <span class="key-sub" id="key-status-sub">MUSE AGENT</span>
+            </div>
+          </button>
+          <button class="deck-key key-task" id="key-1" data-index="1" title="Active Task">
+            <div class="key-inner">
+              <span class="key-glyph">📋</span>
+              <span class="key-title">ACTIVE TASK</span>
+              <span class="key-sub" id="key-task-sub">System Idle</span>
+            </div>
+          </button>
+          <button class="deck-key key-diff" id="key-2" data-index="2" title="Diff Summary">
+            <div class="key-inner">
+              <span class="key-glyph">🔀</span>
+              <span class="key-title" id="key-diff-title">NO DIFF</span>
+              <span class="key-sub text-green" id="key-diff-sub">+0 / -0</span>
+            </div>
+          </button>
+          <button class="deck-key key-approve" id="key-3" data-index="3" title="HITL Approve (Key 3)">
+            <div class="key-inner">
+              <span class="key-glyph">⚡</span>
+              <span class="key-title">APPROVE</span>
+              <span class="key-sub text-green">[PRESS Y]</span>
+            </div>
+          </button>
+          <button class="deck-key key-reject" id="key-4" data-index="4" title="HITL Reject (Key 4)">
+            <div class="key-inner">
+              <span class="key-glyph">❌</span>
+              <span class="key-title">REJECT</span>
+              <span class="key-sub text-red">[PRESS N]</span>
+            </div>
+          </button>
+
+          <!-- Row 2: Vision & Core Actions -->
+          <button class="deck-key key-sam" id="key-5" data-index="5" title="SAM 3.1 Snip (Key 5)">
+            <div class="key-inner" id="key-5-inner">
+              <span class="key-glyph">✂️</span>
+              <span class="key-title">SAM 3.1</span>
+              <span class="key-sub">UI SNIP</span>
+            </div>
+          </button>
+          <button class="deck-key key-spark" id="key-6" data-index="6" title="Muse Spark Code Synthesis">
+            <div class="key-inner">
+              <span class="key-glyph">✨</span>
+              <span class="key-title">IMG-TO-CODE</span>
+              <span class="key-sub">MUSE SPARK</span>
+            </div>
+          </button>
+          <button class="deck-key key-run" id="key-7" data-index="7" title="Run Muse Task">
+            <div class="key-inner">
+              <span class="key-glyph">🚀</span>
+              <span class="key-title">RUN MUSE</span>
+              <span class="key-sub">START TASK</span>
+            </div>
+          </button>
+          <button class="deck-key key-halt" id="key-8" data-index="8" title="Emergency Stop">
+            <div class="key-inner">
+              <span class="key-glyph">🛑</span>
+              <span class="key-title">HALT</span>
+              <span class="key-sub">EMERGENCY</span>
+            </div>
+          </button>
+          <button class="deck-key key-reset" id="key-9" data-index="9" title="Reset Agent">
+            <div class="key-inner">
+              <span class="key-glyph">🔄</span>
+              <span class="key-title">RESET</span>
+              <span class="key-sub">CLEAR STATE</span>
+            </div>
+          </button>
+
+          <!-- Row 3: Presets & Tools -->
+          <button class="deck-key" id="key-10" data-index="10" title="Quick Task Prompt">
+            <div class="key-inner">
+              <span class="key-glyph">📝</span>
+              <span class="key-title">PROMPT</span>
+              <span class="key-sub">CUSTOM TASK</span>
+            </div>
+          </button>
+          <button class="deck-key" id="key-11" data-index="11" title="Write Tests">
+            <div class="key-inner">
+              <span class="key-glyph">🧪</span>
+              <span class="key-title">TESTS</span>
+              <span class="key-sub">WRITE SUITE</span>
+            </div>
+          </button>
+          <button class="deck-key" id="key-12" data-index="12" title="Auto-Debug Fix Bug">
+            <div class="key-inner">
+              <span class="key-glyph">🛠️</span>
+              <span class="key-title">FIX BUG</span>
+              <span class="key-sub">AUTO DEBUG</span>
+            </div>
+          </button>
+          <button class="deck-key" id="key-13" data-index="13" title="Commit & PR">
+            <div class="key-inner">
+              <span class="key-glyph">📦</span>
+              <span class="key-title">COMMIT</span>
+              <span class="key-sub">META FLOW</span>
+            </div>
+          </button>
+          <button class="deck-key" id="key-14" data-index="14" title="Documentation & Help">
+            <div class="key-inner">
+              <span class="key-glyph">🌐</span>
+              <span class="key-title">CONSOLE</span>
+              <span class="key-sub">OVERVIEW</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- QUICK TASK INPUT BAR -->
+        <div class="task-input-bar">
+          <input type="text" id="task-prompt-input" placeholder="Type an instruction for Meta Muse Code (e.g. 'Add JWT auth & tests')...">
+          <button id="dispatch-task-btn" class="btn btn-primary">Dispatch to Muse</button>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: TELEMETRY, HITL GATE & MULTIMODAL INSPECTOR -->
+      <section class="telemetry-section">
+        <!-- HITL GATE CARD -->
+        <div class="card hitl-card" id="hitl-banner">
+          <div class="hitl-header">
+            <div class="hitl-status-pill" id="hitl-pill">
+              <span class="pulse-dot"></span>
+              <span id="hitl-state-text">AGENT IDLE</span>
+            </div>
+            <span class="hitl-desc" id="hitl-step-desc">Awaiting developer task</span>
+          </div>
+
+          <div class="hitl-diff-box" id="diff-box">
+            <div class="diff-header">
+              <span>ACTIVE WORKTREE DIFF</span>
+              <span id="diff-stats-pill" class="pill-dim">0 files changed</span>
+            </div>
+            <pre id="diff-content"><code>// No active diffs pending approval.</code></pre>
+          </div>
+
+          <div class="hitl-actions">
+            <button id="web-approve-btn" class="btn btn-success" disabled>
+              <span>⚡ Approve Changes (Key 3)</span>
+            </button>
+            <button id="web-reject-btn" class="btn btn-danger" disabled>
+              <span>❌ Reject & Revise (Key 4)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- MULTIMODAL SAM 3.1 & MUSE SPARK STUDIO -->
+        <div class="card multimodal-card">
+          <div class="section-header">
+            <div class="header-title">
+              <span class="section-icon">🧠</span>
+              <h3>Multimodal Vision Studio (SAM 3.1 + Muse Spark)</h3>
+            </div>
+            <button id="trigger-snip-btn" class="btn btn-secondary btn-sm">✂️ Snip Screen</button>
+          </div>
+
+          <div class="multimodal-body">
+            <div class="preview-box">
+              <span class="box-label">SAM 3.1 Segmented Foreground</span>
+              <div id="snip-preview-container" class="snip-container">
+                <span class="placeholder-text">Press [Key 5] or "Snip Screen" to capture and isolate UI</span>
+              </div>
+            </div>
+
+            <div class="code-box">
+              <div class="code-header">
+                <span class="box-label">Muse Spark Synthesized Code</span>
+                <button id="copy-code-btn" class="btn btn-ghost btn-sm">Copy Code</button>
+              </div>
+              <pre id="spark-code-content"><code>// Synthesized React + Tailwind code will appear here...</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIVE AGENT LOG TERMINAL -->
+        <div class="card terminal-card">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <span class="terminal-title">muse-code CLI Telemetry Stream</span>
+            <button id="clear-logs-btn" class="btn btn-ghost btn-xs">Clear</button>
+          </div>
+          <div class="terminal-body" id="terminal-logs">
+            <div class="log-line log-info">[MuseDeck] Mission Control Bridge connected to 127.0.0.1:3457</div>
+            <div class="log-line log-info">[HITL] Physical approval gates active on Elgato Stream Deck MK.2</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
