@@ -28,12 +28,18 @@ export class MuseRunner extends EventEmitter {
     this.simulationMode = options.simulationMode ?? (process.env.MUSE_CODE_SIMULATION === "true");
   }
 
+  getIsRunning(): boolean {
+    return this.isRunning;
+  }
+
   /**
    * Run a prompt / task through Muse Code
    */
   async runTask(prompt: string, contextFiles: string[] = []): Promise<void> {
     if (this.isRunning) {
-      throw new Error("An agent task is already running. Please halt or wait for completion.");
+      console.warn("⚠️ [MuseRunner] An agent task is already running. Ignoring duplicate trigger.");
+      this.emit("log", "warn", "Task already in progress. Ignoring duplicate trigger.");
+      return;
     }
 
     this.isRunning = true;

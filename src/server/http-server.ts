@@ -65,8 +65,15 @@ export class MuseHttpServer {
       }
 
       try {
-        // Start running asynchronously in background
-        void museRunner.runTask(prompt, contextFiles || []);
+        if (museRunner.getIsRunning()) {
+          res.status(409).json({ ok: false, error: "An agent task is already running." });
+          return;
+        }
+
+        museRunner.runTask(prompt, contextFiles || []).catch((err) => {
+          console.error("❌ [HttpServer] Background task error:", err);
+        });
+
         res.json({ ok: true, message: "Task initiated", prompt });
       } catch (err: any) {
         res.status(500).json({ error: err.message });

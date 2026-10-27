@@ -100,58 +100,49 @@ export class StreamDeckCoreBridge {
     }
   }
 
-  // --- Stream Deck Action Commands ---
+  // --- Stream Deck Action Commands (Single Transport) ---
+
+  private async dispatch(payload: any, httpEndpoint: string, httpBody?: any): Promise<void> {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.send(payload);
+    } else {
+      try {
+        await fetch(`${this.httpUrl}/api/${httpEndpoint}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: httpBody ? JSON.stringify(httpBody) : undefined,
+        });
+      } catch (err: any) {
+        console.error(`HTTP fallback failed for ${httpEndpoint}:`, err.message);
+      }
+    }
+  }
 
   async approve(): Promise<void> {
-    this.send({ type: "approve" });
-    try {
-      await fetch(`${this.httpUrl}/api/approve`, { method: "POST" });
-    } catch {}
+    await this.dispatch({ type: "approve" }, "approve");
   }
 
   async reject(): Promise<void> {
-    this.send({ type: "reject" });
-    try {
-      await fetch(`${this.httpUrl}/api/reject`, { method: "POST" });
-    } catch {}
+    await this.dispatch({ type: "reject" }, "reject");
   }
 
   async halt(): Promise<void> {
-    this.send({ type: "halt" });
-    try {
-      await fetch(`${this.httpUrl}/api/cancel`, { method: "POST" });
-    } catch {}
+    await this.dispatch({ type: "halt" }, "cancel");
   }
 
   async reset(): Promise<void> {
-    this.send({ type: "reset" });
-    try {
-      await fetch(`${this.httpUrl}/api/reset`, { method: "POST" });
-    } catch {}
+    await this.dispatch({ type: "reset" }, "reset");
   }
 
   async snip(): Promise<void> {
-    this.send({ type: "snip" });
-    try {
-      await fetch(`${this.httpUrl}/api/snip`, { method: "POST" });
-    } catch {}
+    await this.dispatch({ type: "snip" }, "snip");
   }
 
   async spark(): Promise<void> {
-    this.send({ type: "spark" });
-    try {
-      await fetch(`${this.httpUrl}/api/spark`, { method: "POST" });
-    } catch {}
+    await this.dispatch({ type: "spark" }, "spark");
   }
 
   async runTask(prompt: string): Promise<void> {
-    this.send({ type: "runTask", prompt });
-    try {
-      await fetch(`${this.httpUrl}/api/task`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-    } catch {}
+    await this.dispatch({ type: "runTask", prompt }, "task", { prompt });
   }
 }
