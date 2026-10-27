@@ -41,13 +41,19 @@ export class TerminalAutomation {
     const appleScript = `
 tell application "Terminal"
   activate
-  do script "${this.escapeForAppleScript(command)}"
+  set newTab to (do script "${this.escapeForAppleScript(command)}")
+  try
+    set custom title of selected tab of window 1 to "MUSE_ACTIVE_SESSION"
+    set title displays custom title of selected tab of window 1 to true
+    set winId to id of window 1
+    do shell script "mkdir -p /tmp/musedeck && echo " & winId & " > /tmp/musedeck/active_terminal_window_id.txt"
+  end try
 end tell
     `.trim();
 
     try {
       await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
-      console.log(`💻 [Terminal] Opened new Terminal window with command: ${command}`);
+      console.log(`💻 [Terminal] Opened new dedicated Terminal window with command: ${command}`);
     } catch (err: any) {
       console.error("Failed to launch Terminal.app via AppleScript:", err.message);
     }
@@ -56,16 +62,38 @@ end tell
   private static async focusMuseTerminalWindow(): Promise<void> {
     const appleScript = `
 tell application "Terminal"
-  set found to false
-  repeat with w in windows
-    if name of w contains "muse" then
-      set index of w to 1
-      activate
-      set found to true
-      exit repeat
+  set targetWin to missing value
+
+  -- 1. Try reading saved active window ID
+  try
+    set savedId to (do shell script "cat /tmp/musedeck/active_terminal_window_id.txt 2>/dev/null || true")
+    if savedId is not "" then
+      set savedIdNum to (savedId as integer)
+      repeat with w in windows
+        if id of w is savedIdNum then
+          set targetWin to w
+          exit repeat
+        end if
+      end repeat
     end if
-  end repeat
-  if not found then
+  end try
+
+  -- 2. Fallback: match window with "MUSE_ACTIVE_SESSION", "muse-bin", or "musedeck" (explicitly exclude "codex")
+  if targetWin is missing value then
+    repeat with w in windows
+      set winName to name of w
+      if winName contains "MUSE_ACTIVE_SESSION" or winName contains "muse-bin" or (winName contains "musedeck" and not (winName contains "codex")) then
+        set targetWin to w
+        exit repeat
+      end if
+    end repeat
+  end if
+
+  -- 3. Bring target window to front and activate
+  if targetWin is not missing value then
+    set index of targetWin to 1
+    activate
+  else
     activate
   end if
 end tell
@@ -73,7 +101,7 @@ end tell
 
     try {
       await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 250));
     } catch (e: any) {
       console.warn("Could not focus muse window specifically:", e.message);
     }

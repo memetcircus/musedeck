@@ -61,12 +61,19 @@ export class MetaModelApiClient {
 
         if (!response.ok) {
           const errorBody = await response.text();
-          throw new Error(`Meta API error (${response.status} ${response.statusText}): ${errorBody}`);
+          const isClientError = response.status >= 400 && response.status < 500 && response.status !== 429;
+          const error = new Error(`Meta API error (${response.status} ${response.statusText}): ${errorBody}`);
+          if (isClientError) {
+            // Do not retry 4xx errors (e.g. 404, 405) - throw immediately
+            throw error;
+          }
+          throw error;
         }
 
         return (await response.json()) as T;
       } catch (err: any) {
-        if (attempt >= this.maxRetries || err.message?.includes("rate limit")) {
+        const isClientError = err.message?.includes("Meta API error (4");
+        if (attempt >= this.maxRetries || err.message?.includes("rate limit") || isClientError) {
           throw err;
         }
         attempt++;
