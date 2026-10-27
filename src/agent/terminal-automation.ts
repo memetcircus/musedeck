@@ -1,15 +1,29 @@
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
+import * as path from "node:path";
+import * as fs from "node:fs";
 
 const execAsync = promisify(exec);
 
 /**
  * macOS Terminal.app Automation Controller
- * Connects physical Stream Deck keys directly to the developer's active Terminal running muse-code.
+ * Connects physical Stream Deck keys directly to the developer's active Terminal running muse.
  */
 export class TerminalAutomation {
+  private static getMacTypeBin(): string | null {
+    const candidates = [
+      path.resolve(process.cwd(), "bin/mac-type"),
+      path.resolve("/Users/akif/Projects/musedeck/musedeck/bin/mac-type"),
+      path.resolve(__dirname, "../../bin/mac-type"),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) return c;
+    }
+    return null;
+  }
+
   /**
-   * Launch a new muse-code session in a dedicated new Terminal.app window
+   * Launch a new muse session in a dedicated new Terminal.app window
    */
   static async launchMuseCodeTerminal(rawCwd?: string, prompt?: string): Promise<void> {
     let projectDir = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
@@ -36,45 +50,113 @@ end tell
     }
   }
 
-  /**
-   * Send a physical 'y' or 'n' keypress into Terminal.app for HITL approvals
-   */
-  static async sendApprovalKeystroke(key: "y" | "n"): Promise<void> {
+  private static async focusMuseTerminalWindow(): Promise<void> {
     const appleScript = `
-tell application "Terminal" to activate
-delay 0.15
-tell application "System Events"
-  keystroke "${key}"
-  delay 0.1
-  key code 36 -- Return / Enter key
+tell application "Terminal"
+  set found to false
+  repeat with w in windows
+    if name of w contains "muse" then
+      set index of w to 1
+      activate
+      set found to true
+      exit repeat
+    end if
+  end repeat
+  if not found then
+    activate
+  end if
 end tell
     `.trim();
 
     try {
       await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
-      console.log(`⚡ [Terminal] Sent '${key}' + Enter to active terminal`);
+      await new Promise((r) => setTimeout(r, 200));
+    } catch (e: any) {
+      console.warn("Could not focus muse window specifically:", e.message);
+    }
+  }
+
+  /**
+   * Send a physical 'y' or 'n' keypress into Terminal.app for HITL approvals
+   */
+  static async sendApprovalKeystroke(key: "y" | "n"): Promise<void> {
+    // 1. Focus active Terminal window running muse
+    await this.focusMuseTerminalWindow();
+
+    // 2. Type key + Enter using native helper
+    const macTypeBin = this.getMacTypeBin();
+    if (macTypeBin) {
+      try {
+        await execAsync(`"${macTypeBin}" key "${key}"`);
+        console.log(`⚡ [Terminal] Sent '${key}' + Enter to active Terminal via native helper`);
+        return;
+      } catch (err: any) {
+        console.warn("Native mac-type keypress failed, attempting fallback:", err.message);
+      }
+    }
+
+    // Fallback: AppleScript System Events
+    const appleScript = `
+tell application "Terminal" to activate
+delay 0.1
+tell application "System Events"
+  keystroke "${key}"
+  delay 0.05
+  key code 36
+end tell
+    `.trim();
+
+    try {
+      await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      console.log(`⚡ [Terminal] Sent '${key}' + Enter to active Terminal via AppleScript`);
     } catch (err: any) {
       console.error(`Failed to send keystroke '${key}' to Terminal:`, err.message);
     }
   }
 
   /**
-   * Bring Terminal to the front and paste the snipped image file path into muse-code
+   * Bring Terminal to the front and paste the snipped image file path into muse prompt
    */
   static async pasteSnippetIntoTerminal(filePath: string): Promise<void> {
+    const cleanPath = filePath.trim();
+
+    // 1. Always copy clean file path to macOS clipboard via pbcopy
+    try {
+      await execAsync(`printf "%s " "${cleanPath}" | pbcopy`);
+      console.log(`📋 [Clipboard] Copied snippet path to macOS clipboard: ${cleanPath}`);
+    } catch (e: any) {
+      console.warn("Failed to set pbcopy:", e.message);
+    }
+
+    // 2. Bring Terminal.app to the front specifically targeting muse session
+    await this.focusMuseTerminalWindow();
+
+    // 3. Type the snippet path directly into the active prompt using native helper
+    const macTypeBin = this.getMacTypeBin();
+    if (macTypeBin) {
+      try {
+        await execAsync(`"${macTypeBin}" text "${cleanPath} "`);
+        console.log(`📋 [Terminal] Directly typed snippet path into active Terminal prompt!`);
+        return;
+      } catch (err: any) {
+        console.warn("Native mac-type typing failed, attempting fallback:", err.message);
+      }
+    }
+
+    // Fallback: AppleScript System Events keystroke
     const appleScript = `
 tell application "Terminal" to activate
-delay 0.2
+delay 0.1
 tell application "System Events"
-  keystroke " ${this.escapeForAppleScript(filePath)} "
+  keystroke " ${this.escapeForAppleScript(cleanPath)} "
 end tell
     `.trim();
 
     try {
       await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
-      console.log(`📋 [Terminal] Pasted SAM snippet path into active terminal prompt`);
+      console.log(`📋 [Terminal] Pasted SAM snippet path into active Terminal prompt via AppleScript`);
     } catch (err: any) {
-      console.error("Failed to paste snippet path into Terminal:", err.message);
+      console.warn("AppleScript keystroke failed (clipboard is ready with path):", err.message);
     }
   }
 
@@ -90,3 +172,4 @@ end tell
     return str.replace(/'/g, "'\\''");
   }
 }
+

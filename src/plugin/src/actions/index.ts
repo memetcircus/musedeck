@@ -187,16 +187,14 @@ export class SamSnipAction extends SingletonAction {
         await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("snipping"));
       }
 
-      await this.bridge.snip();
+      const result = await this.bridge.snip();
 
-      if (ev.action.isKey()) {
-        await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("copied"));
+      if (result && result.ok) {
+        if (ev.action.isKey()) {
+          await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("copied"));
+        }
+        await new Promise((r) => setTimeout(r, 1600));
       }
-
-      // Pastes the isolated image path directly into the Terminal running muse-code!
-      await TerminalAutomation.pasteSnippetIntoTerminal("/tmp/musedeck/latest_segmented.png");
-
-      await new Promise((r) => setTimeout(r, 1400));
     } catch (err: any) {
       console.error("SAM snip error:", err);
     } finally {

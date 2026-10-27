@@ -134,8 +134,17 @@ export class StreamDeckCoreBridge {
     await this.dispatch({ type: "reset" }, "reset");
   }
 
-  async snip(): Promise<void> {
-    await this.dispatch({ type: "snip" }, "snip");
+  async snip(): Promise<{ ok: boolean; segmentedImagePath?: string }> {
+    try {
+      const res = await fetch(`${this.httpUrl}/api/snip`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      return (await res.json()) as any;
+    } catch (err: any) {
+      console.error("HTTP snip request failed:", err.message);
+      return { ok: false };
+    }
   }
 
   async spark(): Promise<void> {

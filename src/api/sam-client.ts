@@ -94,29 +94,44 @@ export class SamClient {
       await fs.copyFile(rawCapturePath, segmentedPath);
     }
 
-    // 3. Copy foreground PNG to macOS clipboard via AppleScript
+    // 3. Ensure stable path /tmp/musedeck/latest_segmented.png exists
+    const stableDir = "/tmp/musedeck";
+    await fs.mkdir(stableDir, { recursive: true });
+    const stablePath = path.join(stableDir, "latest_segmented.png");
+    await fs.copyFile(segmentedPath, stablePath);
+
+    // 4. Copy both file path (for Terminal prompt) and PNG binary (for GUI paste) to clipboard
     let copiedToClipboard = false;
     try {
+      // Put file path onto clipboard for Terminal / CLI
+      await execAsync(`printf "%s " "${stablePath}" | pbcopy`);
+      copiedToClipboard = true;
+      console.log(`📋 [SAM 3.1] Snippet path copied to macOS clipboard: ${stablePath}`);
+    } catch (err: any) {
+      console.warn("Could not copy path to clipboard via pbcopy:", err.message);
+    }
+
+    try {
+      // Also copy PNG binary representation for graphics apps
       const appleScript = `
-        set theFile to POSIX file "${segmentedPath}"
+        set theFile to POSIX file "${stablePath}"
         set the clipboard to (read theFile as «class PNGf»)
       `;
       await execAsync(`osascript -e '${appleScript}'`);
-      copiedToClipboard = true;
-      console.log("📋 [SAM 3.1] Isolated foreground UI copied directly to macOS clipboard!");
-    } catch (err: any) {
-      console.warn("Could not copy directly to clipboard via osascript:", err.message);
+    } catch {
+      // Optional enhancement; ignore if failed
     }
 
-    // 4. Generate thumbnail for Stream Deck key rendering
+    // 5. Generate thumbnail for Stream Deck key rendering
     const thumbnailBase64 = `data:image/png;base64,${segmentedBuffer.toString("base64")}`;
 
     return {
       rawImagePath: rawCapturePath,
-      segmentedImagePath: segmentedPath,
+      segmentedImagePath: stablePath,
       thumbnailBase64,
       dimensions: { width: 144, height: 144 },
       copiedToClipboard,
     };
   }
 }
+

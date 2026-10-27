@@ -3,6 +3,7 @@ dotenv.config();
 
 import { AgentStateMachine } from "../agent/state-machine.js";
 import { MuseRunner } from "../agent/muse-runner.js";
+import { TerminalAutomation } from "../agent/terminal-automation.js";
 import { MetaModelApiClient } from "../api/meta-client.js";
 import { SamClient } from "../api/sam-client.js";
 import { MuseSparkClient } from "../api/spark-client.js";
@@ -81,6 +82,7 @@ async function main() {
         try {
           const res = await samClient.snipScreenRegion();
           stateMachine.setLastThumbnail(res.thumbnailBase64);
+          await TerminalAutomation.pasteSnippetIntoTerminal(res.segmentedImagePath);
         } catch (err: any) {
           console.error("Snip failed:", err.message);
         }

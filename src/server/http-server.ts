@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AgentStateMachine } from "../agent/state-machine.js";
 import type { MuseRunner } from "../agent/muse-runner.js";
+import { TerminalAutomation } from "../agent/terminal-automation.js";
 import type { SamClient } from "../api/sam-client.js";
 import type { MuseSparkClient } from "../api/spark-client.js";
 
@@ -112,14 +113,19 @@ export class MuseHttpServer {
         console.log("📸 [/api/snip] Triggering SAM 3.1 Snip...");
         const result = await samClient.snipScreenRegion();
         stateMachine.setLastThumbnail(result.thumbnailBase64);
+
+        // Directly bring Terminal to front and type image path into muse prompt
+        await TerminalAutomation.pasteSnippetIntoTerminal(result.segmentedImagePath);
+
         res.json({
           ok: true,
+          segmentedImagePath: result.segmentedImagePath,
           thumbnailBase64: result.thumbnailBase64,
           copiedToClipboard: result.copiedToClipboard,
         });
       } catch (err: any) {
         console.error("SAM Snip error:", err.message);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ ok: false, error: err.message });
       }
     });
 
