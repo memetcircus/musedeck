@@ -193,7 +193,7 @@ export class SamSnipAction extends SingletonAction {
         if (ev.action.isKey()) {
           await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("copied"));
         }
-        await new Promise((r) => setTimeout(r, 1600));
+        await new Promise((r) => setTimeout(r, 2600));
       }
     } catch (err: any) {
       console.error("SAM snip error:", err);
