@@ -9,6 +9,7 @@ export type SurfaceMessage =
   | { type: "snip" }
   | { type: "spark"; prompt?: string }
   | { type: "runTask"; prompt: string }
+  | { type: "toggle_submenu" }
   | { type: "subscribe" };
 
 export class MuseWsServer {

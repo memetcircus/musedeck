@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 import { AgentState, type TelemetryData } from "../../agent/types.js";
+import { telemetrySubmenuManager } from "./ui/telemetry-submenu.js";
 
 export class StreamDeckCoreBridge {
   private ws: WebSocket | null = null;
@@ -75,6 +76,16 @@ export class StreamDeckCoreBridge {
             for (const listener of this.telemetryListeners) {
               listener(this.telemetry);
             }
+          } else if (msg.type === "toggle_submenu") {
+            if (telemetrySubmenuManager.isActive) {
+              telemetrySubmenuManager.close();
+            } else {
+              telemetrySubmenuManager.open(this.telemetry);
+            }
+          } else if (msg.type === "open_submenu") {
+            telemetrySubmenuManager.open(this.telemetry);
+          } else if (msg.type === "close_submenu") {
+            telemetrySubmenuManager.close();
           }
         } catch (e) {
           console.error("Error parsing telemetry from core:", e);

@@ -109,6 +109,10 @@ async function main() {
         void museRunner.runTask(msg.prompt);
         break;
 
+      case "toggle_submenu":
+        wsServer.broadcast({ type: "toggle_submenu" });
+        break;
+
       case "subscribe":
         wsServer.broadcastTelemetry(stateMachine.getTelemetry());
         break;

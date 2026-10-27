@@ -446,14 +446,16 @@ export class SvgKeyRenderer {
     borderColor = "#38bdf8",
     valColor = "#ffffff"
   ): string {
+    const valSize = value.length > 7 ? 24 : 29;
+    const cleanId = label.replace(/[^a-zA-Z0-9]/g, '');
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
         <defs>
-          <linearGradient id="cyberBgCard" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="cyberBgCard_${cleanId}" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#071326"/>
-            <stop offset="100%" stop-color="#030914"/>
+            <stop offset="100%" stop-color="#020813"/>
           </linearGradient>
-          <filter id="neonGlowCard" x="-20%" y="-20%" width="140%" height="140%">
+          <filter id="neonGlowCard_${cleanId}" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="2.5" result="blur"/>
             <feMerge>
               <feMergeNode in="blur"/>
@@ -463,23 +465,23 @@ export class SvgKeyRenderer {
         </defs>
 
         <!-- Cyber Outer Frame -->
-        <rect x="5" y="5" width="134" height="134" rx="22" fill="url(#cyberBgCard)" stroke="${borderColor}" stroke-width="2.5"/>
-        <rect x="10" y="10" width="124" height="124" rx="18" fill="none" stroke="${borderColor}" stroke-width="1.2" stroke-opacity="0.4"/>
+        <rect x="5" y="5" width="134" height="134" rx="22" fill="url(#cyberBgCard_${cleanId})" stroke="${borderColor}" stroke-width="2.8"/>
+        <rect x="9" y="9" width="126" height="126" rx="18" fill="none" stroke="${borderColor}" stroke-width="1.2" stroke-opacity="0.5"/>
 
         <!-- Tech Corner Brackets -->
-        <path d="M16 28 L16 16 L28 16" fill="none" stroke="${borderColor}" stroke-width="2"/>
-        <path d="M128 28 L128 16 L116 16" fill="none" stroke="${borderColor}" stroke-width="2"/>
-        <path d="M16 116 L16 128 L28 128" fill="none" stroke="${borderColor}" stroke-width="2"/>
-        <path d="M128 116 L128 128 L116 128" fill="none" stroke="${borderColor}" stroke-width="2"/>
+        <path d="M14 26 L14 14 L26 14" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+        <path d="M130 26 L130 14 L118 14" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+        <path d="M14 118 L14 130 L26 130" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+        <path d="M130 118 L130 130 L118 130" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
 
-        <!-- Top Label -->
-        <text x="72" y="33" fill="${borderColor}" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">${label}</text>
+        <!-- Top Label: Bigger, Bolder, High-Contrast -->
+        <text x="72" y="34" fill="${borderColor}" font-size="15.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${label}</text>
 
         <!-- Center Big High-Contrast Value -->
-        <text x="72" y="78" fill="${valColor}" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" filter="url(#neonGlowCard)">${value}</text>
+        <text x="72" y="79" fill="${valColor}" font-size="${valSize}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" filter="url(#neonGlowCard_${cleanId})">${value}</text>
 
-        <!-- Bottom Subtitle -->
-        <text x="72" y="122" fill="#94a3b8" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${subtitle}</text>
+        <!-- Bottom Subtitle: Crisp Bright Silver-White & Large -->
+        <text x="72" y="123" fill="#f8fafc" font-size="14.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${subtitle}</text>
       </svg>
     `);
   }
