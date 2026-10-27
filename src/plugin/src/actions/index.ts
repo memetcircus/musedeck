@@ -1181,7 +1181,6 @@ export class ApiStatusAction extends SingletonAction {
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(ev)) return;
-    if (checkSubmenuKeyDown(ev)) return;
     if (telemetrySubmenuManager.isActive) {
       telemetrySubmenuManager.close();
       return;

@@ -97,8 +97,8 @@ class TelemetrySubmenuManager {
       return true;
     }
 
-    if (col === 4 && row === 0) {
-      exec("open https://dev.meta.ai/ || open http://localhost:3456/api/telemetry");
+    if ((col === 4 || col === 1 || col === 2) && row === 0) {
+      exec('open "https://dev.meta.ai/billing?team_id=1552171003333942&project_id=2180934752484515"');
       return true;
     }
 
