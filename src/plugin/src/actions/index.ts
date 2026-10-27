@@ -49,8 +49,7 @@ export class ActiveTaskAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
     this.bridge.onTelemetry((telemetry) => {
-      const subtitle = telemetry.activeStep.length > 20 ? `${telemetry.activeStep.substring(0, 18)}...` : telemetry.activeStep;
-      const img = SvgKeyRenderer.renderGenericActionKey("ACTIVE TASK", subtitle, "📋", "#0ea5e9");
+      const img = SvgKeyRenderer.renderTaskKey(telemetry.activeStep);
       for (const key of this.activeKeys) {
         void key.setImage(img);
       }
@@ -61,7 +60,7 @@ export class ActiveTaskAction extends SingletonAction {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
       const tel = this.bridge.getTelemetry();
-      await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("ACTIVE TASK", tel.activeStep.substring(0, 15), "📋", "#0ea5e9"));
+      await ev.action.setImage(SvgKeyRenderer.renderTaskKey(tel.activeStep));
     }
   }
 
@@ -275,7 +274,7 @@ export class PromptTaskAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("PROMPT", "CUSTOM TASK", "📝", "#3b82f6"));
+      await ev.action.setImage(SvgKeyRenderer.renderPromptKey());
     }
   }
 
@@ -293,7 +292,7 @@ export class WriteTestsAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("TESTS", "WRITE SUITE", "🧪", "#10b981"));
+      await ev.action.setImage(SvgKeyRenderer.renderTestsKey());
     }
   }
 
@@ -311,7 +310,7 @@ export class FixBugAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("FIX BUG", "AUTO DEBUG", "🛠️", "#f59e0b"));
+      await ev.action.setImage(SvgKeyRenderer.renderFixBugKey());
     }
   }
 
@@ -329,7 +328,7 @@ export class CommitPrAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("COMMIT", "META FLOW", "📦", "#8b5cf6"));
+      await ev.action.setImage(SvgKeyRenderer.renderCommitKey());
     }
   }
 
@@ -347,7 +346,7 @@ export class WebConsoleAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("CONSOLE", "OPEN WEB UI", "🌐", "#06b6d4"));
+      await ev.action.setImage(SvgKeyRenderer.renderConsoleKey());
     }
   }
 

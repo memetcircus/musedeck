@@ -1,53 +1,39 @@
 import { AgentState, type TelemetryData } from "../../../agent/types.js";
 
 /**
- * High-resolution 144x144 SVG Renderer for Elgato Stream Deck Key Images
- * Outputs standard base64 data URIs: data:image/svg+xml;base64,...
+ * High-Legibility Retina SVG Key Renderer for Elgato Stream Deck MK.2
+ *
+ * Optimized specifically for 1-inch physical key LCDs:
+ * - 44-52px prominent vector icons
+ * - Bold 20px-24px high-contrast typography
+ * - Zero cramped micro-text
  */
 
 export class SvgKeyRenderer {
   /**
-   * Generates dynamic Agent Status Badge based on state machine
+   * Key 0: Dynamic Agent Status Badge
    */
   static renderStatusKey(telemetry: TelemetryData): string {
-    const { state, iteration, maxIterations } = telemetry;
+    const { state } = telemetry;
 
     switch (state) {
       case AgentState.IDLE:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <defs>
-              <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#090d16"/>
-                <stop offset="100%" stop-color="#020408"/>
-              </linearGradient>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
-            <rect width="144" height="144" rx="28" fill="url(#bg)" stroke="#10b981" stroke-width="3" stroke-opacity="0.4"/>
-            <circle cx="72" cy="52" r="24" fill="#064e3b" stroke="#10b981" stroke-width="2.5" filter="url(#glow)"/>
-            <path d="M62 52 L69 59 L83 45" fill="none" stroke="#34d399" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="72" y="96" fill="#f8fafc" font-size="15" font-weight="700" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle" letter-spacing="1">READY</text>
-            <text x="72" y="116" fill="#34d399" font-size="11" font-weight="600" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">MUSE AGENT</text>
+            <rect width="144" height="144" rx="26" fill="#041d14" stroke="#10b981" stroke-width="4"/>
+            <circle cx="72" cy="48" r="26" fill="#065f46" stroke="#34d399" stroke-width="3"/>
+            <path d="M60 48 L68 56 L85 39" fill="none" stroke="#ecfdf5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="72" y="115" fill="#f0fdf4" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">READY</text>
           </svg>
         `);
 
       case AgentState.PLANNING:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <defs>
-              <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#082f49"/>
-                <stop offset="100%" stop-color="#030712"/>
-              </linearGradient>
-            </defs>
-            <rect width="144" height="144" rx="28" fill="url(#bg)" stroke="#38bdf8" stroke-width="3.5"/>
-            <circle cx="72" cy="52" r="22" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="8 6"/>
-            <polygon points="72,40 76,49 85,52 76,55 72,64 68,55 59,52 68,49" fill="#0284c7"/>
-            <text x="72" y="96" fill="#38bdf8" font-size="15" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle" letter-spacing="0.5">PLANNING</text>
-            <text x="72" y="116" fill="#94a3b8" font-size="11" font-weight="600" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">AST ANALYSIS</text>
+            <rect width="144" height="144" rx="26" fill="#032238" stroke="#38bdf8" stroke-width="4"/>
+            <circle cx="72" cy="48" r="24" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="12 6"/>
+            <polygon points="72,32 77,44 89,48 77,52 72,64 67,52 55,48 67,44" fill="#0ea5e9"/>
+            <text x="72" y="115" fill="#38bdf8" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PLAN</text>
           </svg>
         `);
 
@@ -55,37 +41,25 @@ export class SvgKeyRenderer {
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
             <defs>
-              <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#451a03"/>
-                <stop offset="100%" stop-color="#1c1917"/>
-              </linearGradient>
-              <filter id="warnGlow">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              <filter id="warnGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
               </filter>
             </defs>
-            <rect width="144" height="144" rx="28" fill="url(#bg)" stroke="#fbbf24" stroke-width="4" filter="url(#warnGlow)"/>
-            <path d="M72 30 L96 72 L48 72 Z" fill="#b45309" stroke="#f59e0b" stroke-width="2.5" stroke-linejoin="round"/>
-            <text x="72" y="65" fill="#fef3c7" font-size="22" font-weight="900" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">!</text>
-            <text x="72" y="96" fill="#fbbf24" font-size="13" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle" letter-spacing="0.5">HITL GATE</text>
-            <text x="72" y="116" fill="#fef08a" font-size="11" font-weight="700" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">APPROVE [Y/N]</text>
+            <rect width="144" height="144" rx="26" fill="#451a03" stroke="#fbbf24" stroke-width="5" filter="url(#warnGlow)"/>
+            <polygon points="72,20 104,66 40,66" fill="#b45309" stroke="#fef08a" stroke-width="3.5" stroke-linejoin="round"/>
+            <text x="72" y="58" fill="#ffffff" font-size="28" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">!</text>
+            <text x="72" y="115" fill="#fef08a" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REVIEW</text>
           </svg>
         `);
 
       case AgentState.EXECUTING:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <defs>
-              <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#2e1065"/>
-                <stop offset="100%" stop-color="#090514"/>
-              </linearGradient>
-            </defs>
-            <rect width="144" height="144" rx="28" fill="url(#bg)" stroke="#a855f7" stroke-width="3.5"/>
-            <circle cx="72" cy="52" r="22" fill="#3b0764" stroke="#c084fc" stroke-width="3"/>
-            <circle cx="72" cy="52" r="9" fill="#e9d5ff"/>
-            <text x="72" y="96" fill="#e9d5ff" font-size="14" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle" letter-spacing="0.5">RUNNING</text>
-            <text x="72" y="116" fill="#c084fc" font-size="11" font-weight="600" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">ITERATION ${iteration || 1}</text>
+            <rect width="144" height="144" rx="26" fill="#2e1065" stroke="#c084fc" stroke-width="4"/>
+            <circle cx="72" cy="48" r="24" fill="#581c87" stroke="#e9d5ff" stroke-width="4"/>
+            <circle cx="72" cy="48" r="10" fill="#ffffff"/>
+            <text x="72" y="115" fill="#f5f3ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">RUNNING</text>
           </svg>
         `);
 
@@ -93,57 +67,29 @@ export class SvgKeyRenderer {
       default:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <defs>
-              <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#450a0a"/>
-                <stop offset="100%" stop-color="#0f0202"/>
-              </linearGradient>
-            </defs>
-            <rect width="144" height="144" rx="28" fill="url(#bg)" stroke="#ef4444" stroke-width="4"/>
-            <circle cx="72" cy="52" r="22" fill="#7f1d1d" stroke="#f87171" stroke-width="2.5"/>
-            <line x1="58" y1="38" x2="86" y2="66" stroke="#fecaca" stroke-width="3.5" stroke-linecap="round"/>
-            <line x1="86" y1="38" x2="58" y2="66" stroke="#fecaca" stroke-width="3.5" stroke-linecap="round"/>
-            <text x="72" y="96" fill="#f87171" font-size="15" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle" letter-spacing="0.5">ERROR</text>
-            <text x="72" y="116" fill="#fca5a5" font-size="11" font-weight="600" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">PRESS RESET</text>
+            <rect width="144" height="144" rx="26" fill="#450a0a" stroke="#ef4444" stroke-width="5"/>
+            <circle cx="72" cy="48" r="26" fill="#991b1b" stroke="#fecaca" stroke-width="3"/>
+            <line x1="56" y1="32" x2="88" y2="64" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+            <line x1="88" y1="32" x2="56" y2="64" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+            <text x="72" y="115" fill="#fee2e2" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">ERROR</text>
           </svg>
         `);
     }
   }
 
   /**
-   * Key 3: Physical HITL APPROVE Key
+   * Key 1: Active Task Key
    */
-  static renderApproveKey(isAwaiting: boolean): string {
-    const strokeColor = isAwaiting ? "#22c55e" : "#15803d";
-    const fillColor = isAwaiting ? "#14532d" : "#052e16";
-    const textGlow = isAwaiting ? "#4ade80" : "#86efac";
-
+  static renderTaskKey(stepText = "Active"): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="28" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${isAwaiting ? '4' : '2'}"/>
-        <circle cx="72" cy="50" r="24" fill="#166534" stroke="${strokeColor}" stroke-width="2"/>
-        <path d="M60 50 L69 59 L84 41" fill="none" stroke="#bbf7d0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="72" y="96" fill="#f0fdf4" font-size="16" font-weight="900" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">APPROVE</text>
-        <text x="72" y="116" fill="${textGlow}" font-size="11" font-weight="700" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">[PRESS Y]</text>
-      </svg>
-    `);
-  }
-
-  /**
-   * Key 4: Physical HITL REJECT Key
-   */
-  static renderRejectKey(isAwaiting: boolean): string {
-    const strokeColor = isAwaiting ? "#ef4444" : "#991b1b";
-    const fillColor = isAwaiting ? "#450a0a" : "#1f0404";
-
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="28" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${isAwaiting ? '4' : '2'}"/>
-        <circle cx="72" cy="50" r="24" fill="#7f1d1d" stroke="${strokeColor}" stroke-width="2"/>
-        <line x1="59" y1="37" x2="85" y2="63" stroke="#fecaca" stroke-width="4" stroke-linecap="round"/>
-        <line x1="85" y1="37" x2="59" y2="63" stroke="#fecaca" stroke-width="4" stroke-linecap="round"/>
-        <text x="72" y="96" fill="#fef2f2" font-size="16" font-weight="900" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">REJECT</text>
-        <text x="72" y="116" fill="#fca5a5" font-size="11" font-weight="700" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">[PRESS N]</text>
+        <rect width="144" height="144" rx="26" fill="#082f49" stroke="#0ea5e9" stroke-width="3.5"/>
+        <rect x="50" y="24" width="44" height="50" rx="8" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="3"/>
+        <rect x="60" y="18" width="24" height="10" rx="4" fill="#38bdf8"/>
+        <line x1="58" y1="42" x2="86" y2="42" stroke="#bae6fd" stroke-width="3" stroke-linecap="round"/>
+        <line x1="58" y1="52" x2="86" y2="52" stroke="#bae6fd" stroke-width="3" stroke-linecap="round"/>
+        <line x1="58" y1="62" x2="76" y2="62" stroke="#bae6fd" stroke-width="3" stroke-linecap="round"/>
+        <text x="72" y="115" fill="#f0f9ff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TASK</text>
       </svg>
     `);
   }
@@ -155,20 +101,67 @@ export class SvgKeyRenderer {
     const { diffStats } = telemetry;
     const hasDiff = diffStats.filesChanged > 0;
 
+    if (!hasDiff) {
+      return this.svgToDataUri(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+          <rect width="144" height="144" rx="26" fill="#0b0f19" stroke="#475569" stroke-width="3.5"/>
+          <path d="M54 34 L54 64 M90 44 L90 74 M54 64 C54 78 90 60 90 74" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="54" cy="34" r="6" fill="#38bdf8"/>
+          <circle cx="90" cy="74" r="6" fill="#a855f7"/>
+          <text x="72" y="115" fill="#cbd5e1" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">NO DIFF</text>
+        </svg>
+      `);
+    }
+
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="28" fill="#0b0f19" stroke="#334155" stroke-width="2.5"/>
-        <path d="M52 40 L52 70 M92 50 L92 80 M52 70 C52 82 92 68 92 80" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="52" cy="40" r="5" fill="#38bdf8"/>
-        <circle cx="92" cy="80" r="5" fill="#a855f7"/>
-        <text x="72" y="100" fill="#f8fafc" font-size="14" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">${hasDiff ? `${diffStats.filesChanged} FILES` : 'NO DIFF'}</text>
-        <text x="72" y="120" fill="${hasDiff ? '#4ade80' : '#64748b'}" font-size="12" font-weight="700" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">+${diffStats.insertions} / -${diffStats.deletions}</text>
+        <rect width="144" height="144" rx="26" fill="#0b1329" stroke="#6366f1" stroke-width="4"/>
+        <path d="M52 28 L52 56 M92 38 L92 66 M52 56 C52 70 92 52 92 66" fill="none" stroke="#818cf8" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="52" cy="28" r="6" fill="#38bdf8"/>
+        <circle cx="92" cy="66" r="6" fill="#a855f7"/>
+        <text x="72" y="96" fill="#ffffff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${diffStats.filesChanged} FILES</text>
+        <text x="72" y="122" fill="#4ade80" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">+${diffStats.insertions} / -${diffStats.deletions}</text>
       </svg>
     `);
   }
 
   /**
-   * Key 5: SAM 3.1 Snip Key (with live thumbnail preview if available)
+   * Key 3: Physical HITL APPROVE Key
+   */
+  static renderApproveKey(isAwaiting: boolean): string {
+    const strokeColor = isAwaiting ? "#22c55e" : "#16a34a";
+    const fillColor = isAwaiting ? "#052e16" : "#022c22";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${isAwaiting ? '5' : '3.5'}"/>
+        <circle cx="72" cy="46" r="26" fill="#15803d" stroke="#86efac" stroke-width="3"/>
+        <path d="M58 46 L68 56 L86 38" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="115" fill="#f0fdf4" font-size="23" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">APPROVE</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key 4: Physical HITL REJECT Key
+   */
+  static renderRejectKey(isAwaiting: boolean): string {
+    const strokeColor = isAwaiting ? "#ef4444" : "#dc2626";
+    const fillColor = isAwaiting ? "#450a0a" : "#2a0505";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${isAwaiting ? '5' : '3.5'}"/>
+        <circle cx="72" cy="46" r="26" fill="#b91c1c" stroke="#fca5a5" stroke-width="3"/>
+        <line x1="57" y1="31" x2="87" y2="61" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="87" y1="31" x2="57" y2="61" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round"/>
+        <text x="72" y="115" fill="#fef2f2" font-size="23" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REJECT</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key 5: SAM 3.1 Snip Key
    */
   static renderSamSnipKey(thumbnailBase64?: string): string {
     if (thumbnailBase64 && thumbnailBase64.startsWith("data:image/")) {
@@ -177,17 +170,10 @@ export class SvgKeyRenderer {
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <defs>
-          <linearGradient id="samGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#1e1b4b"/>
-            <stop offset="100%" stop-color="#0f172a"/>
-          </linearGradient>
-        </defs>
-        <rect width="144" height="144" rx="28" fill="url(#samGrad)" stroke="#6366f1" stroke-width="3"/>
-        <rect x="42" y="32" width="60" height="42" rx="10" fill="#312e81" stroke="#818cf8" stroke-width="2" stroke-dasharray="6 4"/>
-        <circle cx="72" cy="53" r="10" fill="#4338ca"/>
-        <text x="72" y="96" fill="#e0e7ff" font-size="14" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">SAM 3.1</text>
-        <text x="72" y="116" fill="#818cf8" font-size="11" font-weight="700" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">UI SNIP</text>
+        <rect width="144" height="144" rx="26" fill="#1e1b4b" stroke="#6366f1" stroke-width="4"/>
+        <rect x="42" y="24" width="60" height="46" rx="10" fill="#312e81" stroke="#a5b4fc" stroke-width="3.5" stroke-dasharray="8 5"/>
+        <circle cx="72" cy="47" r="11" fill="#818cf8"/>
+        <text x="72" y="115" fill="#e0e7ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SAM 3.1</text>
       </svg>
     `);
   }
@@ -198,16 +184,9 @@ export class SvgKeyRenderer {
   static renderSparkKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <defs>
-          <linearGradient id="spkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#3b0764"/>
-            <stop offset="100%" stop-color="#111827"/>
-          </linearGradient>
-        </defs>
-        <rect width="144" height="144" rx="28" fill="url(#spkGrad)" stroke="#c084fc" stroke-width="3"/>
-        <path d="M50 44 L38 56 L50 68 M94 44 L106 56 L94 68 M78 38 L66 74" fill="none" stroke="#e9d5ff" stroke-width="3" stroke-linecap="round"/>
-        <text x="72" y="96" fill="#faf5ff" font-size="13" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">IMG-TO-CODE</text>
-        <text x="72" y="116" fill="#c084fc" font-size="11" font-weight="700" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">MUSE SPARK</text>
+        <rect width="144" height="144" rx="26" fill="#3b0764" stroke="#c084fc" stroke-width="4"/>
+        <path d="M50 36 L36 48 L50 60 M94 36 L108 48 L94 60 M78 30 L66 66" fill="none" stroke="#f3e8ff" stroke-width="4" stroke-linecap="round"/>
+        <text x="72" y="115" fill="#faf5ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SPARK</text>
       </svg>
     `);
   }
@@ -218,10 +197,9 @@ export class SvgKeyRenderer {
   static renderRunMuseKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="28" fill="#042f2e" stroke="#14b8a6" stroke-width="3"/>
-        <polygon points="62,38 92,54 62,70" fill="#2dd4bf"/>
-        <text x="72" y="96" fill="#f0fdfa" font-size="15" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">RUN MUSE</text>
-        <text x="72" y="116" fill="#5eead4" font-size="11" font-weight="700" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">START TASK</text>
+        <rect width="144" height="144" rx="26" fill="#042f2e" stroke="#14b8a6" stroke-width="4"/>
+        <polygon points="58,26 98,48 58,70" fill="#2dd4bf" stroke="#99f6e4" stroke-width="2" stroke-linejoin="round"/>
+        <text x="72" y="115" fill="#f0fdfa" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">RUN</text>
       </svg>
     `);
   }
@@ -232,10 +210,10 @@ export class SvgKeyRenderer {
   static renderHaltKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="28" fill="#450a0a" stroke="#dc2626" stroke-width="3"/>
-        <polygon points="54,34 90,34 104,48 104,84 90,98 54,98 40,84 40,48" fill="#991b1b" stroke="#f87171" stroke-width="2"/>
-        <rect x="62" y="56" width="20" height="20" rx="4" fill="#fef2f2"/>
-        <text x="72" y="118" fill="#fca5a5" font-size="12" font-weight="900" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">HALT</text>
+        <rect width="144" height="144" rx="26" fill="#450a0a" stroke="#dc2626" stroke-width="4"/>
+        <polygon points="56,22 88,22 106,40 106,62 88,80 56,80 38,62 38,40" fill="#dc2626" stroke="#fecaca" stroke-width="3"/>
+        <rect x="58" y="38" width="28" height="26" rx="4" fill="#ffffff"/>
+        <text x="72" y="118" fill="#fef2f2" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">HALT</text>
       </svg>
     `);
   }
@@ -246,11 +224,90 @@ export class SvgKeyRenderer {
   static renderResetKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="28" fill="#0f172a" stroke="#475569" stroke-width="2.5"/>
-        <path d="M54 54 A20 20 0 1 1 54 74" fill="none" stroke="#94a3b8" stroke-width="3.5" stroke-linecap="round"/>
-        <polygon points="46,54 56,44 58,58" fill="#94a3b8"/>
-        <text x="72" y="98" fill="#f1f5f9" font-size="14" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">RESET</text>
-        <text x="72" y="118" fill="#94a3b8" font-size="11" font-weight="600" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">CLEAR STATE</text>
+        <rect width="144" height="144" rx="26" fill="#0f172a" stroke="#64748b" stroke-width="4"/>
+        <path d="M50 48 A22 22 0 1 1 52 70" fill="none" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round"/>
+        <polygon points="40,46 54,34 56,52" fill="#cbd5e1"/>
+        <text x="72" y="115" fill="#f8fafc" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">RESET</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key 10: Prompt Task
+   */
+  static renderPromptKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#172554" stroke="#3b82f6" stroke-width="3.5"/>
+        <rect x="52" y="24" width="40" height="48" rx="6" fill="#1d4ed8" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="60" y1="38" x2="84" y2="38" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <line x1="60" y1="48" x2="84" y2="48" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <line x1="60" y1="58" x2="74" y2="58" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <text x="72" y="115" fill="#eff6ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PROMPT</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key 11: Write Tests Key
+   */
+  static renderTestsKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#064e3b" stroke="#10b981" stroke-width="3.5"/>
+        <path d="M64 22 L80 22 M72 22 L72 40 L88 64 C90 68 88 74 80 74 L64 74 C56 74 54 68 56 64 L72 40" fill="#047857" stroke="#6ee7b7" stroke-width="3.5" stroke-linejoin="round"/>
+        <circle cx="70" cy="62" r="3" fill="#a7f3d0"/>
+        <circle cx="76" cy="56" r="2" fill="#a7f3d0"/>
+        <text x="72" y="115" fill="#ecfdf5" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TESTS</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key 12: Fix Bug Key
+   */
+  static renderFixBugKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#451a03" stroke="#f59e0b" stroke-width="3.5"/>
+        <ellipse cx="72" cy="50" rx="16" ry="18" fill="#b45309" stroke="#fde68a" stroke-width="3"/>
+        <circle cx="72" cy="30" r="10" fill="#d97706" stroke="#fde68a" stroke-width="2.5"/>
+        <line x1="44" y1="42" x2="100" y2="42" stroke="#fde68a" stroke-width="3" stroke-linecap="round"/>
+        <line x1="42" y1="56" x2="102" y2="56" stroke="#fde68a" stroke-width="3" stroke-linecap="round"/>
+        <text x="72" y="115" fill="#fffbeb" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">FIX BUG</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key 13: Commit Key
+   */
+  static renderCommitKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#2e1065" stroke="#8b5cf6" stroke-width="3.5"/>
+        <circle cx="72" cy="48" r="18" fill="#581c87" stroke="#c4b5fd" stroke-width="4"/>
+        <line x1="32" y1="48" x2="54" y2="48" stroke="#c4b5fd" stroke-width="4" stroke-linecap="round"/>
+        <line x1="90" y1="48" x2="112" y2="48" stroke="#c4b5fd" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="72" cy="48" r="7" fill="#ffffff"/>
+        <text x="72" y="115" fill="#f5f3ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">COMMIT</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key 14: Web Console Key
+   */
+  static renderConsoleKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#083344" stroke="#06b6d4" stroke-width="3.5"/>
+        <rect x="42" y="24" width="60" height="46" rx="8" fill="#0e7490" stroke="#a5f3fc" stroke-width="3"/>
+        <line x1="42" y1="36" x2="102" y2="36" stroke="#a5f3fc" stroke-width="2"/>
+        <circle cx="50" cy="30" r="2.5" fill="#ffffff"/>
+        <circle cx="58" cy="30" r="2.5" fill="#ffffff"/>
+        <text x="72" y="58" fill="#a5f3fc" font-size="16" font-weight="900" font-family="monospace" text-anchor="middle">&gt;_</text>
+        <text x="72" y="115" fill="#ecfeff" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">CONSOLE</text>
       </svg>
     `);
   }
@@ -261,10 +318,9 @@ export class SvgKeyRenderer {
   static renderGenericActionKey(title: string, subtitle: string, icon = "⚡", borderColor = "#3b82f6"): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="28" fill="#0b0f19" stroke="${borderColor}" stroke-width="2.5"/>
-        <text x="72" y="58" font-size="28" text-anchor="middle">${icon}</text>
-        <text x="72" y="96" fill="#f8fafc" font-size="13" font-weight="800" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">${title}</text>
-        <text x="72" y="116" fill="#94a3b8" font-size="10.5" font-weight="600" font-family="-apple-system, system-ui, sans-serif" text-anchor="middle">${subtitle}</text>
+        <rect width="144" height="144" rx="26" fill="#0b0f19" stroke="${borderColor}" stroke-width="3.5"/>
+        <text x="72" y="54" font-size="40" text-anchor="middle">${icon}</text>
+        <text x="72" y="115" fill="#f8fafc" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${title}</text>
       </svg>
     `);
   }
