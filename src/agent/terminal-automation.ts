@@ -2,8 +2,11 @@ import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import * as path from "node:path";
 import * as fs from "node:fs";
+import { fileURLToPath } from "node:url";
 
 const execAsync = promisify(exec);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * macOS Terminal.app Automation Controller
@@ -12,9 +15,9 @@ const execAsync = promisify(exec);
 export class TerminalAutomation {
   private static getMacTypeBin(): string | null {
     const candidates = [
-      path.resolve(process.cwd(), "bin/mac-type"),
-      path.resolve("/Users/akif/Projects/musedeck/musedeck/bin/mac-type"),
       path.resolve(__dirname, "../../bin/mac-type"),
+      path.resolve("/Users/akif/Projects/musedeck/musedeck/bin/mac-type"),
+      path.resolve(process.cwd(), "bin/mac-type"),
     ];
     for (const c of candidates) {
       if (fs.existsSync(c)) return c;
