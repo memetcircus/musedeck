@@ -9,35 +9,28 @@ const execAsync = promisify(exec);
  */
 export class TerminalAutomation {
   /**
-   * Launch a new muse-code session in Terminal.app, or bring it to the front
+   * Launch a new muse-code session in a dedicated new Terminal.app window
    */
-  static async launchMuseCodeTerminal(cwd: string, prompt?: string): Promise<void> {
+  static async launchMuseCodeTerminal(rawCwd?: string, prompt?: string): Promise<void> {
+    let projectDir = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
+    if (projectDir.includes(".sdPlugin")) {
+      projectDir = projectDir.split(/[\/\\]com\.memetcircus\.musedeck\.sdPlugin/)[0] || "/Users/akif/Projects/musedeck/musedeck";
+    }
+
     const command = prompt
-      ? `cd ${this.escapeForShell(cwd)} && muse-code run --prompt ${this.escapeForShell(prompt)}`
-      : `cd ${this.escapeForShell(cwd)} && muse-code`;
+      ? `cd ${this.escapeForShell(projectDir)} && muse-code run --prompt ${this.escapeForShell(prompt)}`
+      : `cd ${this.escapeForShell(projectDir)} && muse-code`;
 
     const appleScript = `
 tell application "Terminal"
   activate
-  set isIdle to false
-  try
-    -- If there's an existing window with no busy process, reuse it
-    if (count of windows) > 0 then
-      set w to front window
-      if not (busy of selected tab of w) then
-        do script "${this.escapeForAppleScript(command)}" in w
-        return
-      end if
-    end if
-  end try
-  -- Otherwise open a clean new terminal window
   do script "${this.escapeForAppleScript(command)}"
 end tell
     `.trim();
 
     try {
       await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
-      console.log(`💻 [Terminal] Launched muse-code in Terminal.app`);
+      console.log(`💻 [Terminal] Opened new Terminal window with command: ${command}`);
     } catch (err: any) {
       console.error("Failed to launch Terminal.app via AppleScript:", err.message);
     }
