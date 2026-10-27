@@ -146,6 +146,38 @@ end tell
   }
 
   /**
+   * Send physical interrupt (Esc / Ctrl+C) into active Terminal running muse
+   */
+  static async sendInterruptEscape(): Promise<void> {
+    await this.focusMuseTerminalWindow();
+    const macTypeBin = this.getMacTypeBin();
+    if (macTypeBin) {
+      try {
+        await execAsync(`"${macTypeBin}" ctrl-c`);
+        console.log(`🛑 [Terminal] Sent physical interrupt (Ctrl+C) to active Muse session`);
+        return;
+      } catch (err: any) {
+        console.warn("Native mac-type interrupt failed:", err.message);
+      }
+    }
+
+    // Fallback: send Escape via System Events
+    try {
+      const appleScript = `
+tell application "Terminal" to activate
+delay 0.05
+tell application "System Events"
+  key code 53 -- Escape key
+end tell
+      `.trim();
+      await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      console.log(`🛑 [Terminal] Sent Escape via AppleScript`);
+    } catch (e: any) {
+      console.warn("Failed to send escape via AppleScript:", e.message);
+    }
+  }
+
+  /**
    * Bring Terminal to the front and paste the snipped image file path into muse prompt
    */
   static async pasteSnippetIntoTerminal(
@@ -192,6 +224,46 @@ end tell
       console.log(`📋 [Terminal] Pasted SAM snippet path into active Terminal prompt via AppleScript`);
     } catch (err: any) {
       console.warn("AppleScript keystroke failed (clipboard is ready with path):", err.message);
+    }
+  }
+
+  /**
+   * Check if the active Terminal window running Muse is currently in the "Thinking..." state
+   */
+  static async checkTerminalThinkingState(): Promise<"THINKING" | "IDLE" | "UNKNOWN"> {
+    const appleScript = `
+tell application "Terminal"
+  repeat with w in windows
+    set winName to name of w
+    if winName contains "MUSE_ACTIVE_SESSION" or winName contains "muse-bin" or (winName contains "musedeck" and not (winName contains "codex")) then
+      set tabContent to contents of selected tab of w
+      set paras to paragraphs of tabContent
+      set recentText to ""
+      set pCount to count of paras
+      set startIdx to pCount - 12
+      if startIdx < 1 then set startIdx to 1
+      repeat with i from startIdx to pCount
+        set recentText to recentText & (item i of paras) & linefeed
+      end repeat
+      if recentText contains "Thinking (" or recentText contains "Working (" or recentText contains "esc to interrupt" then
+        return "THINKING"
+      else
+        return "IDLE"
+      end if
+    end if
+  end repeat
+  return "UNKNOWN"
+end tell
+    `.trim();
+
+    try {
+      const { stdout } = await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      const res = stdout.trim();
+      if (res === "THINKING") return "THINKING";
+      if (res === "IDLE") return "IDLE";
+      return "UNKNOWN";
+    } catch {
+      return "UNKNOWN";
     }
   }
 

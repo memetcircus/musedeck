@@ -40,7 +40,7 @@ streamDeck.actions.registerAction(new WriteTestsAction(bridge));
 streamDeck.actions.registerAction(new FixBugAction(bridge));
 streamDeck.actions.registerAction(new CommitPrAction(bridge));
 streamDeck.actions.registerAction(new WebConsoleAction());
-streamDeck.actions.registerAction(new PageNextAction());
+streamDeck.actions.registerAction(new PageNextAction(bridge));
 streamDeck.actions.registerAction(new RecordToFixAction(bridge));
 streamDeck.actions.registerAction(new PagePrevAction());
 

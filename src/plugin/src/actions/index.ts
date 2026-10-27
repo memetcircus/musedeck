@@ -3,6 +3,7 @@ import {
   SingletonAction,
   type KeyDownEvent,
   type WillAppearEvent,
+  type WillDisappearEvent,
   type KeyAction,
 } from "@elgato/streamdeck";
 import streamDeck from "@elgato/streamdeck";
@@ -11,6 +12,55 @@ import { AgentState, type TelemetryData } from "../../../agent/types.js";
 import { TerminalAutomation } from "../../../agent/terminal-automation.js";
 import type { StreamDeckCoreBridge } from "../core-bridge.js";
 import { SvgKeyRenderer } from "../ui/svg-renderer.js";
+import { keyRegistry } from "../ui/key-registry.js";
+import { museBeamAnimator } from "../ui/muse-beam-animator.js";
+
+// Global Thinking Listener across Stream Deck
+let isThinkingListenerAttached = false;
+function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
+  if (isThinkingListenerAttached) return;
+  isThinkingListenerAttached = true;
+
+  bridge.onTelemetry((telemetry) => {
+    const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
+    if (isThinking && !museBeamAnimator.isRunning) {
+      console.log("🌊 [StreamDeck] Meta Muse Code Thinking -> Starting 5x3 Quantum Beam Matrix Animation");
+      museBeamAnimator.start();
+    } else if (!isThinking && museBeamAnimator.isRunning) {
+      console.log("✨ [StreamDeck] Meta Muse Code Finished -> Restoring key grid");
+      museBeamAnimator.stop();
+    }
+  });
+}
+
+function registerDeckKey(
+  ev: WillAppearEvent,
+  restore: () => void,
+  excludeFromAnimation = false,
+  fallbackCol = 0,
+  fallbackRow = 0
+): void {
+  if (!ev.action.isKey()) return;
+  const payload = ev.payload as any;
+  const col = payload?.coordinates?.column ?? fallbackCol;
+  const row = payload?.coordinates?.row ?? fallbackRow;
+
+  keyRegistry.add(ev.action.id, {
+    action: ev.action,
+    column: col,
+    row: row,
+    excludeFromAnimation,
+    restore,
+  });
+
+  if (!museBeamAnimator.isRunning || excludeFromAnimation) {
+    restore();
+  }
+}
+
+function unregisterDeckKey(ev: WillDisappearEvent): void {
+  keyRegistry.remove(ev.action.id);
+}
 
 // --- KEY 0: AGENT STATUS BADGE ---
 @action({ UUID: "com.memetcircus.musedeck.status" })
@@ -22,8 +72,10 @@ export class AgentStatusAction extends SingletonAction {
     this.bridge.onTelemetry((telemetry) => {
       const img = SvgKeyRenderer.renderStatusKey(telemetry);
       for (const key of this.activeKeys) {
-        void key.setImage(img);
-        void key.setTitle("");
+        if (!museBeamAnimator.isRunning) {
+          void key.setImage(img);
+          void key.setTitle("");
+        }
       }
     });
   }
@@ -31,8 +83,24 @@ export class AgentStatusAction extends SingletonAction {
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
-      await ev.action.setImage(SvgKeyRenderer.renderStatusKey(this.bridge.getTelemetry()));
-      await ev.action.setTitle("");
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderStatusKey(this.bridge.getTelemetry()));
+          void ev.action.setTitle("");
+        },
+        false,
+        0,
+        0
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
     }
   }
 
@@ -52,7 +120,9 @@ export class ActiveTaskAction extends SingletonAction {
     this.bridge.onTelemetry((telemetry) => {
       const img = SvgKeyRenderer.renderTaskKey(telemetry.activeStep);
       for (const key of this.activeKeys) {
-        void key.setImage(img);
+        if (!museBeamAnimator.isRunning) {
+          void key.setImage(img);
+        }
       }
     });
   }
@@ -60,8 +130,24 @@ export class ActiveTaskAction extends SingletonAction {
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
-      const tel = this.bridge.getTelemetry();
-      await ev.action.setImage(SvgKeyRenderer.renderTaskKey(tel.activeStep));
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          const tel = this.bridge.getTelemetry();
+          void ev.action.setImage(SvgKeyRenderer.renderTaskKey(tel.activeStep));
+        },
+        false,
+        1,
+        0
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
     }
   }
 
@@ -80,7 +166,9 @@ export class DiffSummaryAction extends SingletonAction {
     this.bridge.onTelemetry((telemetry) => {
       const img = SvgKeyRenderer.renderDiffKey(telemetry);
       for (const key of this.activeKeys) {
-        void key.setImage(img);
+        if (!museBeamAnimator.isRunning) {
+          void key.setImage(img);
+        }
       }
     });
   }
@@ -88,7 +176,23 @@ export class DiffSummaryAction extends SingletonAction {
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
-      await ev.action.setImage(SvgKeyRenderer.renderDiffKey(this.bridge.getTelemetry()));
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderDiffKey(this.bridge.getTelemetry()));
+        },
+        false,
+        2,
+        0
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
     }
   }
 
@@ -108,7 +212,9 @@ export class ApproveAction extends SingletonAction {
       const isAwaiting = telemetry.state === AgentState.WAITING_APPROVAL;
       const img = SvgKeyRenderer.renderApproveKey(isAwaiting);
       for (const key of this.activeKeys) {
-        void key.setImage(img);
+        if (!museBeamAnimator.isRunning) {
+          void key.setImage(img);
+        }
       }
     });
   }
@@ -116,13 +222,28 @@ export class ApproveAction extends SingletonAction {
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
-      const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
-      await ev.action.setImage(SvgKeyRenderer.renderApproveKey(isAwaiting));
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
+          void ev.action.setImage(SvgKeyRenderer.renderApproveKey(isAwaiting));
+        },
+        false,
+        3,
+        0
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
     }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    // Send physical 'y' + Enter straight to active Terminal window
     await TerminalAutomation.sendApprovalKeystroke("y");
     await this.bridge.approve();
   }
@@ -139,7 +260,9 @@ export class RejectAction extends SingletonAction {
       const isAwaiting = telemetry.state === AgentState.WAITING_APPROVAL;
       const img = SvgKeyRenderer.renderRejectKey(isAwaiting);
       for (const key of this.activeKeys) {
-        void key.setImage(img);
+        if (!museBeamAnimator.isRunning) {
+          void key.setImage(img);
+        }
       }
     });
   }
@@ -147,13 +270,28 @@ export class RejectAction extends SingletonAction {
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
-      const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
-      await ev.action.setImage(SvgKeyRenderer.renderRejectKey(isAwaiting));
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
+          void ev.action.setImage(SvgKeyRenderer.renderRejectKey(isAwaiting));
+        },
+        false,
+        4,
+        0
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
     }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    // Send physical 'n' + Enter straight to active Terminal window
     await TerminalAutomation.sendApprovalKeystroke("n");
     await this.bridge.reject();
   }
@@ -169,7 +307,9 @@ export class SamSnipAction extends SingletonAction {
     this.bridge.onTelemetry(() => {
       const img = SvgKeyRenderer.renderSamSnipKey("idle");
       for (const key of this.activeKeys) {
-        void key.setImage(img);
+        if (!museBeamAnimator.isRunning) {
+          void key.setImage(img);
+        }
       }
     });
   }
@@ -177,7 +317,23 @@ export class SamSnipAction extends SingletonAction {
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
-      await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("idle"));
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("idle"));
+        },
+        false,
+        0,
+        1
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
     }
   }
 
@@ -214,8 +370,21 @@ export class SparkCodeAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderSparkKey());
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderSparkKey());
+        },
+        false,
+        1,
+        1
+      );
     }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
@@ -243,32 +412,71 @@ export class RunMuseAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderRunMuseKey());
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderRunMuseKey());
+        },
+        false,
+        2,
+        1
+      );
     }
   }
 
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    // 1. Launch / Focus Terminal.app with muse-code in workspace
     await TerminalAutomation.launchMuseCodeTerminal(process.cwd());
-    // 2. Start bridge runner
     await this.bridge.runTask("Optimize performance and add comprehensive test suite for agent state machine");
   }
 }
 
-// --- KEY 8: HALT / CANCEL KEY ---
+// --- KEY 8: HALT / CANCEL KEY (EXCLUDED FROM ANIMATION) ---
 @action({ UUID: "com.memetcircus.musedeck.halt" })
 export class HaltAction extends SingletonAction {
+  private activeKeys = new Set<KeyAction>();
+
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
+    this.bridge.onTelemetry((telemetry) => {
+      const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
+      const img = SvgKeyRenderer.renderHaltKey(isThinking);
+      for (const key of this.activeKeys) {
+        void key.setImage(img);
+      }
+    });
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderHaltKey());
+      this.activeKeys.add(ev.action);
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          const isThinking = this.bridge.getTelemetry().state === AgentState.PLANNING || this.bridge.getTelemetry().state === AgentState.EXECUTING;
+          void ev.action.setImage(SvgKeyRenderer.renderHaltKey(isThinking));
+        },
+        true, // ALWAYS EXCLUDE from animation so developer can emergency stop anytime!
+        3,
+        1
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
     }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await TerminalAutomation.sendInterruptEscape();
     await this.bridge.halt();
   }
 }
@@ -282,8 +490,21 @@ export class ResetAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderResetKey());
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderResetKey());
+        },
+        false,
+        4,
+        1
+      );
     }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
@@ -300,8 +521,21 @@ export class PromptTaskAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderPromptKey());
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderPromptKey());
+        },
+        false,
+        0,
+        2
+      );
     }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
@@ -318,8 +552,21 @@ export class WriteTestsAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderTestsKey());
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderTestsKey());
+        },
+        false,
+        1,
+        2
+      );
     }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
@@ -336,8 +583,21 @@ export class FixBugAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderFixBugKey());
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderFixBugKey());
+        },
+        false,
+        2,
+        2
+      );
     }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
@@ -354,8 +614,21 @@ export class CommitPrAction extends SingletonAction {
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderCommitKey());
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderCommitKey());
+        },
+        false,
+        3,
+        2
+      );
     }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
@@ -366,14 +639,27 @@ export class CommitPrAction extends SingletonAction {
 // --- KEY 14 (PAGE 1): NAVIGATION TO PAGE 2 ---
 @action({ UUID: "com.memetcircus.musedeck.page-next" })
 export class PageNextAction extends SingletonAction {
-  constructor() {
+  constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      await ev.action.setImage(SvgKeyRenderer.renderNextPageKey());
+      attachGlobalThinkingListener(this.bridge);
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderNextPageKey());
+        },
+        false,
+        4,
+        2
+      );
     }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
@@ -381,7 +667,6 @@ export class PageNextAction extends SingletonAction {
     try {
       await streamDeck.profiles.switchToProfile(ev.action.device.id, "MuseDeckPage2");
     } catch {
-      // Fallback: visual indication
       if (ev.action.isKey()) {
         await ev.action.setImage(SvgKeyRenderer.renderPrevPageKey());
       }
@@ -411,7 +696,6 @@ export class RecordToFixAction extends SingletonAction {
     }
 
     if (!this.isRecording) {
-      // Recording stopped: trigger Meta Files API upload & paste prompt to Terminal
       console.log("Recording completed, uploading to Meta Files API...");
       await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Diagnose and fix the frontend bug from recent screen+audio recording (Meta Responses + Files API)");
     }

@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { AgentStateMachine } from "../agent/state-machine.js";
+import { AgentState } from "../agent/types.js";
 import { MuseRunner } from "../agent/muse-runner.js";
 import { TerminalAutomation } from "../agent/terminal-automation.js";
 import { MetaModelApiClient } from "../api/meta-client.js";
@@ -118,6 +119,27 @@ async function main() {
   setInterval(() => {
     stateMachine.setConnectedSurfaces(wsServer.getClientCount());
   }, 2000);
+
+  // Live Terminal TUI Observer for Muse "Thinking..." state
+  let lastObservedState = "IDLE";
+  setInterval(async () => {
+    try {
+      const thinkingState = await TerminalAutomation.checkTerminalThinkingState();
+      const curState = stateMachine.getState();
+
+      if (thinkingState === "THINKING") {
+        if (curState !== AgentState.EXECUTING) {
+          lastObservedState = "THINKING";
+          stateMachine.transition(AgentState.EXECUTING, "Muse Thinking...");
+        }
+      } else if (thinkingState === "IDLE") {
+        if (curState === AgentState.EXECUTING && lastObservedState === "THINKING") {
+          lastObservedState = "IDLE";
+          stateMachine.transition(AgentState.IDLE, "Ready for instructions");
+        }
+      }
+    } catch {}
+  }, 750);
 
   // Graceful shutdown handling
   const shutdown = () => {

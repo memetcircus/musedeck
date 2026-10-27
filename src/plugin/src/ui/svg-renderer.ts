@@ -277,15 +277,20 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 8: Emergency Halt Key
+   * Key 8: Emergency Halt Key (Always visible & excluded from animation)
    */
-  static renderHaltKey(): string {
+  static renderHaltKey(isPulsing = false): string {
+    const strokeColor = isPulsing ? "#ef4444" : "#dc2626";
+    const fillColor = isPulsing ? "#5f0a0a" : "#450a0a";
+    const strokeWidth = isPulsing ? "5.5" : "4";
+
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#450a0a" stroke="#dc2626" stroke-width="4"/>
-        <polygon points="56,22 88,22 106,40 106,62 88,80 56,80 38,62 38,40" fill="#dc2626" stroke="#fecaca" stroke-width="3"/>
-        <rect x="58" y="38" width="28" height="26" rx="4" fill="#ffffff"/>
-        <text x="72" y="118" fill="#fef2f2" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">HALT</text>
+        <rect width="144" height="144" rx="26" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>
+        <polygon points="56,18 88,18 108,38 108,62 88,82 56,82 36,62 36,38" fill="#dc2626" stroke="#fecaca" stroke-width="3"/>
+        <rect x="58" y="36" width="28" height="28" rx="4" fill="#ffffff"/>
+        <text x="72" y="110" fill="#ffffff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">HALT</text>
+        <text x="72" y="128" fill="#fca5a5" font-size="14" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">(ESC)</text>
       </svg>
     `);
   }
@@ -395,6 +400,96 @@ export class SvgKeyRenderer {
         <text x="72" y="115" fill="#f8fafc" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${title}</text>
       </svg>
     `);
+  }
+
+  /**
+   * Render tile slice for the 5x3 Meta Muse Code Quantum Beam animation (Inspired by Meta Muse Code / Spark visual identity)
+   * Spans across 5 columns (0..4) and 3 rows (0..2), each 144x144 px (total 720x432 px).
+   */
+  static renderMuseBeamTile(col: number, row: number, frame: number): string {
+    const vx = col * 144;
+    const vy = row * 144;
+    const targetX = 620;
+    const targetY = 216;
+
+    const phase = (frame % 20) * (Math.PI / 10);
+
+    // Dynamic radiating pulse rings at the focal target (column 4, row 1)
+    const ring1R = 14 + ((frame * 4) % 60);
+    const ring1Op = Math.max(0, 1 - ((frame * 4) % 60) / 60).toFixed(2);
+    const ring2R = 14 + (((frame * 4) + 30) % 60);
+    const ring2Op = Math.max(0, 1 - (((frame * 4) + 30) % 60) / 60).toFixed(2);
+
+    // 15 convergent laser streamlines
+    const beams: string[] = [];
+    for (let i = 0; i < 15; i++) {
+      const startY = 25 + i * 27.5;
+      const cp1X = 220;
+      const cp1Y = 216 + (startY - 216) * 0.72;
+      const cp2X = 460;
+      const cp2Y = 216 + (startY - 216) * 0.16;
+      const strokeWidth = (i % 3 === 0) ? 3.5 : 2;
+      const color = (i % 2 === 0) ? "#38bdf8" : "#2563eb";
+      const dashOffset = -((frame * 18 + i * 22) % 240);
+
+      beams.push(`
+        <path d="M 0 ${startY.toFixed(1)} C ${cp1X} ${cp1Y.toFixed(1)}, ${cp2X} ${cp2Y.toFixed(1)}, ${targetX} ${targetY}"
+              fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-opacity="0.4"/>
+        <path d="M 0 ${startY.toFixed(1)} C ${cp1X} ${cp1Y.toFixed(1)}, ${cp2X} ${cp2Y.toFixed(1)}, ${targetX} ${targetY}"
+              fill="none" stroke="#67e8f9" stroke-width="${strokeWidth + 1}" stroke-linecap="round"
+              stroke-dasharray="28 212" stroke-dashoffset="${dashOffset}"/>
+      `);
+    }
+
+    // Synaptic energy particles
+    const particles: string[] = [];
+    for (let p = 0; p < 18; p++) {
+      const baseX = 120 + ((p * 37) % 460);
+      const baseY = 80 + ((p * 29) % 272);
+      const curX = baseX + Math.sin(phase + p) * 16;
+      const curY = baseY + Math.cos(phase + p * 0.7) * 12;
+      const r = (p % 3 === 0) ? 3 : 1.8;
+      particles.push(`<circle cx="${curX.toFixed(1)}" cy="${curY.toFixed(1)}" r="${r}" fill="#a5f3fc" opacity="0.75"/>`);
+    }
+
+    // Status pill on col 2, row 0
+    let centerBanner = "";
+    if (col === 2 && row === 0) {
+      centerBanner = `
+        <rect x="306" y="52" width="108" height="40" rx="20" fill="#0c2340" stroke="#38bdf8" stroke-width="2.5" opacity="0.95"/>
+        <text x="360" y="77" fill="#e0f2fe" font-size="15" font-weight="900" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="1.5">THINKING</text>
+      `;
+    }
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="${vx} ${vy} 144 144">
+        <defs>
+          <radialGradient id="bgGlow" cx="85%" cy="50%" r="80%">
+            <stop offset="0%" stop-color="#0f2b5c"/>
+            <stop offset="45%" stop-color="#06122c"/>
+            <stop offset="100%" stop-color="#020617"/>
+          </radialGradient>
+        </defs>
+        <rect x="0" y="0" width="720" height="432" fill="url(#bgGlow)"/>
+
+        ${beams.join("")}
+        ${particles.join("")}
+
+        <!-- Focal Quantum Aperture (col 4, row 1) -->
+        <circle cx="${targetX}" cy="${targetY}" r="${ring1R}" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="${ring1Op}"/>
+        <circle cx="${targetX}" cy="${targetY}" r="${ring2R}" fill="none" stroke="#60a5fa" stroke-width="2" opacity="${ring2Op}"/>
+        <circle cx="${targetX}" cy="${targetY}" r="32" fill="none" stroke="#0284c7" stroke-width="4" stroke-dasharray="8 6"/>
+        <circle cx="${targetX}" cy="${targetY}" r="14" fill="#38bdf8"/>
+        <circle cx="${targetX}" cy="${targetY}" r="5" fill="#ffffff"/>
+
+        ${centerBanner}
+
+        <!-- Key bezel border highlight -->
+        <rect x="${vx + 2}" y="${vy + 2}" width="140" height="140" rx="24" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.4"/>
+      </svg>
+    `;
+
+    return this.svgToDataUri(svg);
   }
 
   private static svgToDataUri(svg: string): string {
