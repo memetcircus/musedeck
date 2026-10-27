@@ -1,6 +1,5 @@
 import { keyRegistry } from "./key-registry.js";
 import { SvgKeyRenderer } from "./svg-renderer.js";
-import { pageManager } from "./page-manager.js";
 
 const COLS = 5;
 const ROWS = 3;
@@ -38,14 +37,9 @@ export class MuseBeamAnimator {
       clearInterval(this.timer);
       this.timer = null;
     }
-    // Restore resting state respecting active page
-    if (pageManager.getActivePage() === 2) {
-      pageManager.renderPage2();
-      setTimeout(() => pageManager.renderPage2(), 150);
-    } else {
-      keyRegistry.restoreAll();
-      setTimeout(() => keyRegistry.restoreAll(), 150);
-    }
+    // Restore resting state for each currently active key
+    keyRegistry.restoreAll();
+    setTimeout(() => keyRegistry.restoreAll(), 150);
   }
 
   private tick(): void {

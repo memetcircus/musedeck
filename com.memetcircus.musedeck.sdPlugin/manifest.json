@@ -164,18 +164,122 @@
     {
       "Name": "Record to Fix",
       "UUID": "com.memetcircus.musedeck.record-to-fix",
-      "Icon": "imgs/actions/status/icon",
+      "Icon": "imgs/actions/record-to-fix/icon",
       "Tooltip": "Record screen + voiceover MP4, upload via Meta Responses & Files API, and diagnose bug in Muse Code.",
       "Controllers": ["Keypad"],
-      "States": [{ "Image": "imgs/actions/status/key" }]
+      "States": [{ "Image": "imgs/actions/record-to-fix/key" }]
+    },
+    {
+      "Name": "Video to Code",
+      "UUID": "com.memetcircus.musedeck.vid-to-code",
+      "Icon": "imgs/actions/vid-to-code/icon",
+      "Tooltip": "Convert multimodal screen recording into React & Tailwind component with Meta Files API.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/vid-to-code/key" }]
+    },
+    {
+      "Name": "Upload File",
+      "UUID": "com.memetcircus.musedeck.upload-file",
+      "Icon": "imgs/actions/upload-file/icon",
+      "Tooltip": "Upload media assets to Meta Files API, retrieve file_id, and attach to current coding context.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/upload-file/key" }]
+    },
+    {
+      "Name": "Audio Transcription",
+      "UUID": "com.memetcircus.musedeck.audio-trans",
+      "Icon": "imgs/actions/audio-trans/icon",
+      "Tooltip": "Transcribe developer speech prompt into formal technical specifications.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/audio-trans/key" }]
+    },
+    {
+      "Name": "Re-Inspect Diff",
+      "UUID": "com.memetcircus.musedeck.re-inspect",
+      "Icon": "imgs/actions/re-inspect/icon",
+      "Tooltip": "Re-inspect git diff and verify code quality against spec in web inspector.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/re-inspect/key" }]
+    },
+    {
+      "Name": "Phone Recording",
+      "UUID": "com.memetcircus.musedeck.phone-rec",
+      "Icon": "imgs/actions/phone-rec/icon",
+      "Tooltip": "Inspect mobile viewport recording and synthesize mobile UI fixes.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/phone-rec/key" }]
+    },
+    {
+      "Name": "Style Transfer",
+      "UUID": "com.memetcircus.musedeck.style-trans",
+      "Icon": "imgs/actions/style-trans/icon",
+      "Tooltip": "Perform complete UI style transfer and theme polish on active components.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/style-trans/key" }]
+    },
+    {
+      "Name": "Workspace Tree",
+      "UUID": "com.memetcircus.musedeck.workspace",
+      "Icon": "imgs/actions/workspace/icon",
+      "Tooltip": "Analyze full workspace architecture, dependencies, and git worktrees.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/workspace/key" }]
+    },
+    {
+      "Name": "Terminal Log",
+      "UUID": "com.memetcircus.musedeck.terminal-log",
+      "Icon": "imgs/actions/terminal-log/icon",
+      "Tooltip": "Bring active Muse Terminal session to front to view live streaming logs.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/terminal-log/key" }]
+    },
+    {
+      "Name": "Rewind Work",
+      "UUID": "com.memetcircus.musedeck.rewind-work",
+      "Icon": "imgs/actions/rewind-work/icon",
+      "Tooltip": "Inspect git status and discard uncommitted test changes.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/rewind-work/key" }]
+    },
+    {
+      "Name": "Clear Media",
+      "UUID": "com.memetcircus.musedeck.clear-media",
+      "Icon": "imgs/actions/clear-media/icon",
+      "Tooltip": "Purge temporary recording cache in /tmp/musedeck.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/clear-media/key" }]
+    },
+    {
+      "Name": "API Status",
+      "UUID": "com.memetcircus.musedeck.api-status",
+      "Icon": "imgs/actions/api-status/icon",
+      "Tooltip": "Check Meta API health and telemetry latency metrics.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/api-status/key" }]
+    },
+    {
+      "Name": "Spark Chat",
+      "UUID": "com.memetcircus.musedeck.spark-chat",
+      "Icon": "imgs/actions/spark-chat/icon",
+      "Tooltip": "Start creative architectural design conversation with Meta Muse Spark.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/spark-chat/key" }]
+    },
+    {
+      "Name": "Open Work",
+      "UUID": "com.memetcircus.musedeck.open-work",
+      "Icon": "imgs/actions/open-work/icon",
+      "Tooltip": "Open workspace folder in Finder or VS Code.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/open-work/key" }]
     },
     {
       "Name": "← Page 1",
       "UUID": "com.memetcircus.musedeck.page-prev",
-      "Icon": "imgs/actions/web-console/icon",
+      "Icon": "imgs/actions/page-prev/icon",
       "Tooltip": "Navigate back to Page 1.",
       "Controllers": ["Keypad"],
-      "States": [{ "Image": "imgs/actions/web-console/key" }]
+      "States": [{ "Image": "imgs/actions/page-prev/key" }]
     }
   ]
 }

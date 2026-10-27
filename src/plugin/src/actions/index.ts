@@ -14,7 +14,6 @@ import type { StreamDeckCoreBridge } from "../core-bridge.js";
 import { SvgKeyRenderer } from "../ui/svg-renderer.js";
 import { keyRegistry } from "../ui/key-registry.js";
 import { museBeamAnimator } from "../ui/muse-beam-animator.js";
-import { pageManager } from "../ui/page-manager.js";
 
 // Global Thinking Listener across Stream Deck
 let isThinkingListenerAttached = false;
@@ -46,43 +45,21 @@ function registerDeckKey(
   const col = payload?.coordinates?.column ?? fallbackCol;
   const row = payload?.coordinates?.row ?? fallbackRow;
 
-  const keyObj = {
+  keyRegistry.add(ev.action.id, {
     action: ev.action,
     column: col,
     row: row,
     excludeFromAnimation,
-    restore: () => {
-      if (pageManager.getActivePage() === 2) {
-        const slot = row * 5 + col;
-        void ev.action.setImage(SvgKeyRenderer.renderPage2Key(slot));
-        void ev.action.setTitle("");
-      } else {
-        restore();
-      }
-    },
-  };
-
-  keyRegistry.add(ev.action.id, keyObj);
+    restore,
+  });
 
   if (!museBeamAnimator.isRunning || excludeFromAnimation) {
-    keyObj.restore();
+    restore();
   }
 }
 
 function unregisterDeckKey(ev: WillDisappearEvent): void {
   keyRegistry.remove(ev.action.id);
-}
-
-async function handleActionKeyDown(
-  ev: KeyDownEvent,
-  fallbackCol: number,
-  fallbackRow: number,
-  page1Handler: () => Promise<void>
-): Promise<void> {
-  const payload = ev.payload as any;
-  const col = payload?.coordinates?.column ?? fallbackCol;
-  const row = payload?.coordinates?.row ?? fallbackRow;
-  await pageManager.handleKeyDown(col, row, page1Handler);
 }
 
 // --- KEY 0: AGENT STATUS BADGE ---
@@ -127,11 +104,9 @@ export class AgentStatusAction extends SingletonAction {
     }
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 0, 0, async () => {
-      const telemetry = this.bridge.getTelemetry();
-      console.log(`[StatusKey] Current state: ${telemetry.state}`);
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    const telemetry = this.bridge.getTelemetry();
+    console.log(`[StatusKey] Current state: ${telemetry.state}`);
   }
 }
 
@@ -176,10 +151,8 @@ export class ActiveTaskAction extends SingletonAction {
     }
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 1, 0, async () => {
-      console.log("Current Task:", this.bridge.getTelemetry().activeTask);
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("Current Task:", this.bridge.getTelemetry().activeTask);
   }
 }
 
@@ -223,10 +196,8 @@ export class DiffSummaryAction extends SingletonAction {
     }
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 2, 0, async () => {
-      exec("open http://localhost:3456/api/diff");
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    exec("open http://localhost:3456/api/diff");
   }
 }
 
@@ -272,11 +243,9 @@ export class ApproveAction extends SingletonAction {
     }
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 3, 0, async () => {
-      await TerminalAutomation.sendApprovalKeystroke("y");
-      await this.bridge.approve();
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await TerminalAutomation.sendApprovalKeystroke("y");
+    await this.bridge.approve();
   }
 }
 
@@ -322,11 +291,9 @@ export class RejectAction extends SingletonAction {
     }
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 4, 0, async () => {
-      await TerminalAutomation.sendApprovalKeystroke("n");
-      await this.bridge.reject();
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await TerminalAutomation.sendApprovalKeystroke("n");
+    await this.bridge.reject();
   }
 }
 
@@ -371,28 +338,26 @@ export class SamSnipAction extends SingletonAction {
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 0, 1, async () => {
-      try {
-        if (ev.action.isKey()) {
-          await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("snipping"));
-        }
-
-        const result = await this.bridge.snip();
-
-        if (result && result.ok) {
-          if (ev.action.isKey()) {
-            await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("copied"));
-          }
-          await new Promise((r) => setTimeout(r, 2600));
-        }
-      } catch (err: any) {
-        console.error("SAM snip error:", err);
-      } finally {
-        if (ev.action.isKey()) {
-          await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("idle"));
-        }
+    try {
+      if (ev.action.isKey()) {
+        await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("snipping"));
       }
-    });
+
+      const result = await this.bridge.snip();
+
+      if (result && result.ok) {
+        if (ev.action.isKey()) {
+          await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("copied"));
+        }
+        await new Promise((r) => setTimeout(r, 2600));
+      }
+    } catch (err: any) {
+      console.error("SAM snip error:", err);
+    } finally {
+      if (ev.action.isKey()) {
+        await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("idle"));
+      }
+    }
   }
 }
 
@@ -423,20 +388,18 @@ export class SparkCodeAction extends SingletonAction {
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 1, 1, async () => {
-      try {
-        if (ev.action.isKey()) {
-          await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("SPARK...", "", "✨", "#c084fc"));
-        }
-        await this.bridge.spark();
-      } catch (err: any) {
-        console.error("Spark synthesis error:", err);
-      } finally {
-        if (ev.action.isKey()) {
-          await ev.action.setImage(SvgKeyRenderer.renderSparkKey());
-        }
+    try {
+      if (ev.action.isKey()) {
+        await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("SPARK...", "", "✨", "#c084fc"));
       }
-    });
+      await this.bridge.spark();
+    } catch (err: any) {
+      console.error("Spark synthesis error:", err);
+    } finally {
+      if (ev.action.isKey()) {
+        await ev.action.setImage(SvgKeyRenderer.renderSparkKey());
+      }
+    }
   }
 }
 
@@ -466,11 +429,9 @@ export class RunMuseAction extends SingletonAction {
     unregisterDeckKey(ev);
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 2, 1, async () => {
-      await TerminalAutomation.launchMuseCodeTerminal(process.cwd());
-      await this.bridge.runTask("Optimize performance and add comprehensive test suite for agent state machine");
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await TerminalAutomation.launchMuseCodeTerminal(process.cwd());
+    await this.bridge.runTask("Optimize performance and add comprehensive test suite for agent state machine");
   }
 }
 
@@ -514,11 +475,9 @@ export class HaltAction extends SingletonAction {
     }
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 3, 1, async () => {
-      await TerminalAutomation.sendInterruptEscape();
-      await this.bridge.halt();
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await TerminalAutomation.sendInterruptEscape();
+    await this.bridge.halt();
   }
 }
 
@@ -548,10 +507,8 @@ export class ResetAction extends SingletonAction {
     unregisterDeckKey(ev);
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 4, 1, async () => {
-      await this.bridge.reset();
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await this.bridge.reset();
   }
 }
 
@@ -581,10 +538,8 @@ export class PromptTaskAction extends SingletonAction {
     unregisterDeckKey(ev);
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 0, 2, async () => {
-      await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Refactor agent communication bridge to use zero-copy buffers");
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Refactor agent communication bridge to use zero-copy buffers");
   }
 }
 
@@ -614,10 +569,8 @@ export class WriteTestsAction extends SingletonAction {
     unregisterDeckKey(ev);
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 1, 2, async () => {
-      await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Generate complete unit tests for all state machine transitions");
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Generate complete unit tests for all state machine transitions");
   }
 }
 
@@ -647,10 +600,8 @@ export class FixBugAction extends SingletonAction {
     unregisterDeckKey(ev);
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 2, 2, async () => {
-      await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Analyze recent runtime errors and generate automated patch");
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Analyze recent runtime errors and generate automated patch");
   }
 }
 
@@ -680,30 +631,25 @@ export class CommitPrAction extends SingletonAction {
     unregisterDeckKey(ev);
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    await handleActionKeyDown(ev, 3, 2, async () => {
-      await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Stage all verified changes, create a git commit, and generate a pull request summary");
-    });
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Stage all verified changes, create a git commit, and generate a pull request summary");
   }
 }
 
 // --- KEY 14 (PAGE 1): NAVIGATION TO PAGE 2 ---
 @action({ UUID: "com.memetcircus.musedeck.page-next" })
 export class PageNextAction extends SingletonAction {
-  constructor(private readonly bridge: StreamDeckCoreBridge) {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      attachGlobalThinkingListener(this.bridge);
+      if (this.bridge) attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          const img = pageManager.getActivePage() === 2
-            ? SvgKeyRenderer.renderPrevPageKey()
-            : SvgKeyRenderer.renderNextPageKey();
-          void ev.action.setImage(img);
+          void ev.action.setImage(SvgKeyRenderer.renderNextPageKey());
           void ev.action.setTitle("");
         },
         false,
@@ -718,16 +664,51 @@ export class PageNextAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    pageManager.togglePage();
+    console.log("Navigating to Page 2 profile...");
   }
 }
 
-// --- PAGE 2 KEY 0: RECORD TO FIX (SCREEN + AUDIO MULTIMODAL) ---
+// --- KEY 14 (LEGACY COMPANION): REPLACED CONSOLE KEY WITH PAGE 2 NAVIGATION ---
+@action({ UUID: "com.memetcircus.musedeck.web-console" })
+export class WebConsoleAction extends SingletonAction {
+  constructor() {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderNextPageKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        4,
+        2
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("Navigating to Page 2...");
+  }
+}
+
+// =====================================================================
+// ==================== PAGE 2 DEDICATED ACTIONS =======================
+// =====================================================================
+
+// --- PAGE 2 KEY 0: RECORD TO FIX ---
 @action({ UUID: "com.memetcircus.musedeck.record-to-fix" })
 export class RecordToFixAction extends SingletonAction {
   private isRecording = false;
 
-  constructor(private readonly bridge: StreamDeckCoreBridge) {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
   }
 
@@ -737,6 +718,7 @@ export class RecordToFixAction extends SingletonAction {
         ev,
         () => {
           void ev.action.setImage(SvgKeyRenderer.renderRecordToFixKey(this.isRecording));
+          void ev.action.setTitle("");
         },
         false,
         0,
@@ -756,9 +738,452 @@ export class RecordToFixAction extends SingletonAction {
     }
 
     if (!this.isRecording) {
-      console.log("Recording completed, uploading to Meta Files API...");
-      await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Diagnose and fix the frontend bug from recent screen+audio recording (Meta Responses + Files API)");
+      console.log("🎬 [Page 2] REC TO FIX triggered");
+      await TerminalAutomation.launchMuseCodeTerminal(
+        process.cwd(),
+        "Diagnose and fix the frontend bug from recent screen+audio recording (Meta Responses + Files API)"
+      );
     }
+  }
+}
+
+// --- PAGE 2 KEY 1: VIDEO TO CODE ---
+@action({ UUID: "com.memetcircus.musedeck.vid-to-code" })
+export class VidToCodeAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderVidToCodeKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        1,
+        0
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("🎥 [Page 2] VID-TO-CODE triggered");
+    await TerminalAutomation.launchMuseCodeTerminal(
+      process.cwd(),
+      "Convert latest multimodal video recording into a complete React Tailwind component using Meta Files API"
+    );
+  }
+}
+
+// --- PAGE 2 KEY 2: UPLOAD FILE ---
+@action({ UUID: "com.memetcircus.musedeck.upload-file" })
+export class UploadFileAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderUploadFileKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        2,
+        0
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("☁️ [Page 2] UPLOAD FILE triggered");
+    await TerminalAutomation.launchMuseCodeTerminal(
+      process.cwd(),
+      "Upload media assets to Meta Files API, retrieve file_id, and attach to current coding context"
+    );
+  }
+}
+
+// --- PAGE 2 KEY 3: AUDIO TRANSCRIPTION ---
+@action({ UUID: "com.memetcircus.musedeck.audio-trans" })
+export class AudioTransAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderAudioTransKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        3,
+        0
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("🎙️ [Page 2] AUDIO TRANS triggered");
+    await TerminalAutomation.launchMuseCodeTerminal(
+      process.cwd(),
+      "Transcribe latest audio recording and convert speech instructions into formal product specifications"
+    );
+  }
+}
+
+// --- PAGE 2 KEY 4: RE-INSPECT DIFF ---
+@action({ UUID: "com.memetcircus.musedeck.re-inspect" })
+export class ReInspectAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderReInspectKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        4,
+        0
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("🔍 [Page 2] RE-INSPECT triggered");
+    exec("open http://localhost:3456/api/diff");
+  }
+}
+
+// --- PAGE 2 KEY 5: PHONE RECORDING ---
+@action({ UUID: "com.memetcircus.musedeck.phone-rec" })
+export class PhoneRecAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderPhoneRecKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        0,
+        1
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("📱 [Page 2] PHONE REC triggered");
+    await TerminalAutomation.launchMuseCodeTerminal(
+      process.cwd(),
+      "Inspect mobile viewport recording and fix responsive design bugs"
+    );
+  }
+}
+
+// --- PAGE 2 KEY 6: STYLE TRANSFER ---
+@action({ UUID: "com.memetcircus.musedeck.style-trans" })
+export class StyleTransAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderStyleTransKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        1,
+        1
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("🎨 [Page 2] STYLE TRANS triggered");
+    await TerminalAutomation.launchMuseCodeTerminal(
+      process.cwd(),
+      "Perform UI style transfer and modernize theme aesthetic using Tailwind CSS"
+    );
+  }
+}
+
+// --- PAGE 2 KEY 7: WORKSPACE TREE ---
+@action({ UUID: "com.memetcircus.musedeck.workspace" })
+export class WorkspaceAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderWorkspaceKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        2,
+        1
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("🌳 [Page 2] WORKSPACE triggered");
+    await TerminalAutomation.launchMuseCodeTerminal(
+      process.cwd(),
+      "Analyze workspace directory tree and dependency graph"
+    );
+  }
+}
+
+// --- PAGE 2 KEY 8: TERMINAL LOG ---
+@action({ UUID: "com.memetcircus.musedeck.terminal-log" })
+export class TerminalLogAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderTerminalLogKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        3,
+        1
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("💻 [Page 2] TERMINAL LOG triggered");
+    await TerminalAutomation.bringTerminalToFront();
+  }
+}
+
+// --- PAGE 2 KEY 9: REWIND WORK ---
+@action({ UUID: "com.memetcircus.musedeck.rewind-work" })
+export class RewindWorkAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderRewindWorkKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        4,
+        1
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("⏪ [Page 2] REWIND WORK triggered");
+    await TerminalAutomation.launchMuseCodeTerminal(
+      process.cwd(),
+      "git status && git diff --stat"
+    );
+  }
+}
+
+// --- PAGE 2 KEY 10: CLEAR MEDIA ---
+@action({ UUID: "com.memetcircus.musedeck.clear-media" })
+export class ClearMediaAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderClearMediaKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        0,
+        2
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("🧹 [Page 2] CLEAR MEDIA triggered");
+    exec("rm -rf /tmp/musedeck/*");
+  }
+}
+
+// --- PAGE 2 KEY 11: API STATUS ---
+@action({ UUID: "com.memetcircus.musedeck.api-status" })
+export class ApiStatusAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderApiStatusKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        1,
+        2
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("🩺 [Page 2] API STATUS triggered");
+    exec("open http://localhost:3456/api/telemetry");
+  }
+}
+
+// --- PAGE 2 KEY 12: SPARK CHAT ---
+@action({ UUID: "com.memetcircus.musedeck.spark-chat" })
+export class SparkChatAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderSparkChatKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        2,
+        2
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("✨ [Page 2] SPARK CHAT triggered");
+    await TerminalAutomation.launchMuseCodeTerminal(
+      process.cwd(),
+      "Start interactive creative coding session with Meta Muse Spark"
+    );
+  }
+}
+
+// --- PAGE 2 KEY 13: OPEN WORK ---
+@action({ UUID: "com.memetcircus.musedeck.open-work" })
+export class OpenWorkAction extends SingletonAction {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
+    super();
+  }
+
+  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+    if (ev.action.isKey()) {
+      registerDeckKey(
+        ev,
+        () => {
+          void ev.action.setImage(SvgKeyRenderer.renderOpenWorkKey());
+          void ev.action.setTitle("");
+        },
+        false,
+        3,
+        2
+      );
+    }
+  }
+
+  override onWillDisappear(ev: WillDisappearEvent): void {
+    unregisterDeckKey(ev);
+  }
+
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    console.log("📂 [Page 2] OPEN WORK triggered");
+    exec("open .");
   }
 }
 
@@ -789,40 +1214,6 @@ export class PagePrevAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    pageManager.switchToPage(1);
-  }
-}
-
-// --- KEY 14 (REPLACED CONSOLE KEY): NAVIGATION COMPANION ---
-@action({ UUID: "com.memetcircus.musedeck.web-console" })
-export class WebConsoleAction extends SingletonAction {
-  constructor() {
-    super();
-  }
-
-  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
-    if (ev.action.isKey()) {
-      registerDeckKey(
-        ev,
-        () => {
-          const img = pageManager.getActivePage() === 2
-            ? SvgKeyRenderer.renderPrevPageKey()
-            : SvgKeyRenderer.renderNextPageKey();
-          void ev.action.setImage(img);
-          void ev.action.setTitle("");
-        },
-        false,
-        4,
-        2
-      );
-    }
-  }
-
-  override onWillDisappear(ev: WillDisappearEvent): void {
-    unregisterDeckKey(ev);
-  }
-
-  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    pageManager.togglePage();
+    console.log("Navigating back to Page 1...");
   }
 }

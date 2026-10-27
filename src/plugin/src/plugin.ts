@@ -18,13 +18,26 @@ import {
   WebConsoleAction,
   PageNextAction,
   RecordToFixAction,
+  VidToCodeAction,
+  UploadFileAction,
+  AudioTransAction,
+  ReInspectAction,
+  PhoneRecAction,
+  StyleTransAction,
+  WorkspaceAction,
+  TerminalLogAction,
+  RewindWorkAction,
+  ClearMediaAction,
+  ApiStatusAction,
+  SparkChatAction,
+  OpenWorkAction,
   PagePrevAction,
 } from "./actions/index.js";
 
 // Initialize local bridge to MuseDeck core server
 const bridge = new StreamDeckCoreBridge();
 
-// Register all Stream Deck actions
+// Register all Stream Deck Page 1 & Page 2 actions
 streamDeck.actions.registerAction(new AgentStatusAction(bridge));
 streamDeck.actions.registerAction(new ActiveTaskAction(bridge));
 streamDeck.actions.registerAction(new DiffSummaryAction(bridge));
@@ -41,7 +54,22 @@ streamDeck.actions.registerAction(new FixBugAction(bridge));
 streamDeck.actions.registerAction(new CommitPrAction(bridge));
 streamDeck.actions.registerAction(new WebConsoleAction());
 streamDeck.actions.registerAction(new PageNextAction(bridge));
+
+// Page 2 Actions
 streamDeck.actions.registerAction(new RecordToFixAction(bridge));
+streamDeck.actions.registerAction(new VidToCodeAction(bridge));
+streamDeck.actions.registerAction(new UploadFileAction(bridge));
+streamDeck.actions.registerAction(new AudioTransAction(bridge));
+streamDeck.actions.registerAction(new ReInspectAction(bridge));
+streamDeck.actions.registerAction(new PhoneRecAction(bridge));
+streamDeck.actions.registerAction(new StyleTransAction(bridge));
+streamDeck.actions.registerAction(new WorkspaceAction(bridge));
+streamDeck.actions.registerAction(new TerminalLogAction(bridge));
+streamDeck.actions.registerAction(new RewindWorkAction(bridge));
+streamDeck.actions.registerAction(new ClearMediaAction(bridge));
+streamDeck.actions.registerAction(new ApiStatusAction(bridge));
+streamDeck.actions.registerAction(new SparkChatAction(bridge));
+streamDeck.actions.registerAction(new OpenWorkAction(bridge));
 streamDeck.actions.registerAction(new PagePrevAction());
 
 // Start local bridge client and connect to Stream Deck host
