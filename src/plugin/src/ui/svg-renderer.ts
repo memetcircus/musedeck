@@ -161,11 +161,29 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 5: SAM 3.1 Snip Key
+   * Key 5: SAM 3.1 Snip Key (High-legibility vector design, never replaces icon with raw screenshot)
    */
-  static renderSamSnipKey(thumbnailBase64?: string): string {
-    if (thumbnailBase64 && thumbnailBase64.startsWith("data:image/")) {
-      return thumbnailBase64;
+  static renderSamSnipKey(status: "idle" | "snipping" | "copied" = "idle"): string {
+    if (status === "copied") {
+      return this.svgToDataUri(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+          <rect width="144" height="144" rx="26" fill="#052e16" stroke="#22c55e" stroke-width="4"/>
+          <circle cx="72" cy="46" r="26" fill="#15803d" stroke="#86efac" stroke-width="3"/>
+          <path d="M58 46 L68 56 L86 38" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="72" y="115" fill="#f0fdf4" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">COPIED!</text>
+        </svg>
+      `);
+    }
+
+    if (status === "snipping") {
+      return this.svgToDataUri(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+          <rect width="144" height="144" rx="26" fill="#1e1b4b" stroke="#f59e0b" stroke-width="4"/>
+          <rect x="42" y="24" width="60" height="46" rx="10" fill="#312e81" stroke="#fbbf24" stroke-width="3.5" stroke-dasharray="6 4"/>
+          <circle cx="72" cy="47" r="11" fill="#f59e0b"/>
+          <text x="72" y="115" fill="#fef08a" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SNIP...</text>
+        </svg>
+      `);
     }
 
     return this.svgToDataUri(`
@@ -174,6 +192,60 @@ export class SvgKeyRenderer {
         <rect x="42" y="24" width="60" height="46" rx="10" fill="#312e81" stroke="#a5b4fc" stroke-width="3.5" stroke-dasharray="8 5"/>
         <circle cx="72" cy="47" r="11" fill="#818cf8"/>
         <text x="72" y="115" fill="#e0e7ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SAM 3.1</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key: Record-to-Fix (Video frames + mic audio with Meta Responses & Files API)
+   */
+  static renderRecordToFixKey(isRecording = false): string {
+    if (isRecording) {
+      return this.svgToDataUri(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+          <rect width="144" height="144" rx="26" fill="#450a0a" stroke="#ef4444" stroke-width="5"/>
+          <circle cx="72" cy="46" r="24" fill="#ef4444" stroke="#fecaca" stroke-width="3"/>
+          <rect x="62" y="36" width="20" height="20" rx="4" fill="#ffffff"/>
+          <text x="72" y="115" fill="#fee2e2" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">STOP REC</text>
+        </svg>
+      `);
+    }
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#311042" stroke="#e11d48" stroke-width="4"/>
+        <rect x="42" y="26" width="46" height="38" rx="8" fill="#881337" stroke="#fda4af" stroke-width="3"/>
+        <polygon points="90,34 108,24 108,66 90,56" fill="#e11d48" stroke="#fda4af" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="56" cy="45" r="4" fill="#f43f5e"/>
+        <text x="72" y="115" fill="#fff1f2" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REC FIX</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Navigation: Next Page (Page 1 -> Page 2)
+   */
+  static renderNextPageKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#1e1b4b" stroke="#818cf8" stroke-width="3.5"/>
+        <circle cx="72" cy="46" r="24" fill="#312e81" stroke="#c7d2fe" stroke-width="3"/>
+        <path d="M62 46 L82 46 M74 36 L84 46 L74 56" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="115" fill="#e0e7ff" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PAGE 2 →</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Navigation: Prev Page (Page 2 -> Page 1)
+   */
+  static renderPrevPageKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#0f172a" stroke="#94a3b8" stroke-width="3.5"/>
+        <circle cx="72" cy="46" r="24" fill="#1e293b" stroke="#cbd5e1" stroke-width="3"/>
+        <path d="M82 46 L62 46 M70 36 L60 46 L70 56" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="115" fill="#f8fafc" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">← PAGE 1</text>
       </svg>
     `);
   }

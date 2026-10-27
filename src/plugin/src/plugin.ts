@@ -16,12 +16,15 @@ import {
   FixBugAction,
   CommitPrAction,
   WebConsoleAction,
+  PageNextAction,
+  RecordToFixAction,
+  PagePrevAction,
 } from "./actions/index.js";
 
 // Initialize local bridge to MuseDeck core server
 const bridge = new StreamDeckCoreBridge();
 
-// Register all 15 Stream Deck actions
+// Register all Stream Deck actions
 streamDeck.actions.registerAction(new AgentStatusAction(bridge));
 streamDeck.actions.registerAction(new ActiveTaskAction(bridge));
 streamDeck.actions.registerAction(new DiffSummaryAction(bridge));
@@ -36,7 +39,10 @@ streamDeck.actions.registerAction(new PromptTaskAction(bridge));
 streamDeck.actions.registerAction(new WriteTestsAction(bridge));
 streamDeck.actions.registerAction(new FixBugAction(bridge));
 streamDeck.actions.registerAction(new CommitPrAction(bridge));
-streamDeck.actions.registerAction(new WebConsoleAction(bridge));
+streamDeck.actions.registerAction(new WebConsoleAction());
+streamDeck.actions.registerAction(new PageNextAction());
+streamDeck.actions.registerAction(new RecordToFixAction(bridge));
+streamDeck.actions.registerAction(new PagePrevAction());
 
 // Start local bridge client and connect to Stream Deck host
 await bridge.start();

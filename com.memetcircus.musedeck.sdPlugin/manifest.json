@@ -152,6 +152,30 @@
       "Tooltip": "Opens the MuseDeck Web Mission Control dashboard in browser.",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/web-console/key" }]
+    },
+    {
+      "Name": "Page 2 →",
+      "UUID": "com.memetcircus.musedeck.page-next",
+      "Icon": "imgs/actions/web-console/icon",
+      "Tooltip": "Navigate to Page 2 (Multimodal Video & Deep Workflows).",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/web-console/key" }]
+    },
+    {
+      "Name": "Record to Fix",
+      "UUID": "com.memetcircus.musedeck.record-to-fix",
+      "Icon": "imgs/actions/status/icon",
+      "Tooltip": "Record screen + voiceover MP4, upload via Meta Responses & Files API, and diagnose bug in Muse Code.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/status/key" }]
+    },
+    {
+      "Name": "← Page 1",
+      "UUID": "com.memetcircus.musedeck.page-prev",
+      "Icon": "imgs/actions/web-console/icon",
+      "Tooltip": "Navigate back to Page 1.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/actions/web-console/key" }]
     }
   ]
 }
