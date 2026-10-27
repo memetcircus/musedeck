@@ -1,3 +1,4 @@
+import { telemetrySubmenuManager } from "../ui/telemetry-submenu.js";
 import {
   action,
   SingletonAction,
@@ -17,11 +18,24 @@ import { museBeamAnimator } from "../ui/muse-beam-animator.js";
 
 // Global Thinking Listener across Stream Deck
 let isThinkingListenerAttached = false;
+function checkSubmenuKeyDown(ev: any): boolean {
+  if (telemetrySubmenuManager.isActive) {
+    const payload = ev.payload as any;
+    const col = payload?.coordinates?.column ?? 0;
+    const row = payload?.coordinates?.row ?? 0;
+    return telemetrySubmenuManager.handleKeyDown(col, row);
+  }
+  return false;
+}
+
 function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
   if (isThinkingListenerAttached) return;
   isThinkingListenerAttached = true;
 
   bridge.onTelemetry((telemetry) => {
+    if (telemetrySubmenuManager.isActive) {
+      telemetrySubmenuManager.render(telemetry);
+    }
     const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
     if (isThinking && !museBeamAnimator.isRunning) {
       console.log("🌊 [StreamDeck] Meta Muse Code Thinking -> Starting 5x3 Quantum Beam Matrix Animation");
@@ -105,6 +119,7 @@ export class AgentStatusAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     const telemetry = this.bridge.getTelemetry();
     console.log(`[StatusKey] Current state: ${telemetry.state}`);
   }
@@ -152,6 +167,7 @@ export class ActiveTaskAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("Current Task:", this.bridge.getTelemetry().activeTask);
   }
 }
@@ -197,6 +213,7 @@ export class DiffSummaryAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     exec("open http://localhost:3456/api/diff");
   }
 }
@@ -244,6 +261,7 @@ export class ApproveAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     await TerminalAutomation.sendApprovalKeystroke("y");
     await this.bridge.approve();
   }
@@ -292,6 +310,7 @@ export class RejectAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     await TerminalAutomation.sendApprovalKeystroke("n");
     await this.bridge.reject();
   }
@@ -338,6 +357,7 @@ export class SamSnipAction extends SingletonAction {
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(ev)) return;
     try {
       if (ev.action.isKey()) {
         await ev.action.setImage(SvgKeyRenderer.renderSamSnipKey("snipping"));
@@ -388,6 +408,7 @@ export class SparkCodeAction extends SingletonAction {
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(ev)) return;
     try {
       if (ev.action.isKey()) {
         await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("SPARK...", "", "✨", "#c084fc"));
@@ -430,6 +451,7 @@ export class RunMuseAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     await TerminalAutomation.launchMuseCodeTerminal(process.cwd());
     await this.bridge.runTask("Optimize performance and add comprehensive test suite for agent state machine");
   }
@@ -476,6 +498,7 @@ export class HaltAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     await TerminalAutomation.sendInterruptEscape();
     await this.bridge.halt();
   }
@@ -508,6 +531,7 @@ export class ResetAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     await this.bridge.reset();
   }
 }
@@ -539,6 +563,7 @@ export class PromptTaskAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Refactor agent communication bridge to use zero-copy buffers");
   }
 }
@@ -570,6 +595,7 @@ export class WriteTestsAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Generate complete unit tests for all state machine transitions");
   }
 }
@@ -601,6 +627,7 @@ export class FixBugAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Analyze recent runtime errors and generate automated patch");
   }
 }
@@ -632,6 +659,7 @@ export class CommitPrAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Stage all verified changes, create a git commit, and generate a pull request summary");
   }
 }
@@ -664,6 +692,7 @@ export class PageNextAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("Navigating to Page 2 profile...");
   }
 }
@@ -695,6 +724,7 @@ export class WebConsoleAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("Navigating to Page 2...");
   }
 }
@@ -732,6 +762,7 @@ export class RecordToFixAction extends SingletonAction {
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(ev)) return;
     this.isRecording = !this.isRecording;
     if (ev.action.isKey()) {
       await ev.action.setImage(SvgKeyRenderer.renderRecordToFixKey(this.isRecording));
@@ -774,6 +805,7 @@ export class VidToCodeAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("🎥 [Page 2] VID-TO-CODE triggered");
     await TerminalAutomation.launchMuseCodeTerminal(
       process.cwd(),
@@ -809,6 +841,7 @@ export class UploadFileAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("☁️ [Page 2] UPLOAD FILE triggered");
     await TerminalAutomation.launchMuseCodeTerminal(
       process.cwd(),
@@ -844,6 +877,7 @@ export class AudioTransAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("🎙️ [Page 2] AUDIO TRANS triggered");
     await TerminalAutomation.launchMuseCodeTerminal(
       process.cwd(),
@@ -879,6 +913,7 @@ export class ReInspectAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("🔍 [Page 2] RE-INSPECT triggered");
     exec("open http://localhost:3456/api/diff");
   }
@@ -911,6 +946,7 @@ export class PhoneRecAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("📱 [Page 2] PHONE REC triggered");
     await TerminalAutomation.launchMuseCodeTerminal(
       process.cwd(),
@@ -946,6 +982,7 @@ export class StyleTransAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("🎨 [Page 2] STYLE TRANS triggered");
     await TerminalAutomation.launchMuseCodeTerminal(
       process.cwd(),
@@ -981,6 +1018,7 @@ export class WorkspaceAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("🌳 [Page 2] WORKSPACE triggered");
     await TerminalAutomation.launchMuseCodeTerminal(
       process.cwd(),
@@ -1016,6 +1054,7 @@ export class TerminalLogAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("💻 [Page 2] TERMINAL LOG triggered");
     await TerminalAutomation.bringTerminalToFront();
   }
@@ -1048,6 +1087,7 @@ export class RewindWorkAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("⏪ [Page 2] REWIND WORK triggered");
     await TerminalAutomation.launchMuseCodeTerminal(
       process.cwd(),
@@ -1083,6 +1123,7 @@ export class ClearMediaAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("🧹 [Page 2] CLEAR MEDIA triggered");
     exec("rm -rf /tmp/musedeck/*");
   }
@@ -1091,7 +1132,6 @@ export class ClearMediaAction extends SingletonAction {
 // --- PAGE 2 KEY 11: API STATUS (AI Credits & Session HUD) ---
 @action({ UUID: "com.memetcircus.musedeck.api-status" })
 export class ApiStatusAction extends SingletonAction {
-  private isDetailed = false;
   private activeKeys = new Set<KeyAction>();
 
   constructor(private readonly bridge?: StreamDeckCoreBridge) {
@@ -1099,21 +1139,9 @@ export class ApiStatusAction extends SingletonAction {
     if (this.bridge) {
       this.bridge.onTelemetry((telemetry) => {
         const usage = telemetry.apiUsage;
-        const img = this.isDetailed
-          ? SvgKeyRenderer.renderApiDetailsKey(
-              usage?.inputTokens ?? "433.9k",
-              usage?.outputTokens ?? "19.4k",
-              usage?.cacheHitRate ?? "57.7%",
-              `${usage?.totalRequests ?? 21} REQ`
-            )
-          : SvgKeyRenderer.renderApiStatusKey(
-              usage?.creditsRemaining ?? "$149.97",
-              usage?.model ?? "SPARK 1.3",
-              usage?.spent ?? "$0.00",
-              `${usage?.inputTokens ?? "453k"} TKN`
-            );
+        const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
         for (const key of this.activeKeys) {
-          if (!museBeamAnimator.isRunning) {
+          if (!museBeamAnimator.isRunning && !telemetrySubmenuManager.isActive) {
             void key.setImage(img);
             void key.setTitle("");
           }
@@ -1124,19 +1152,7 @@ export class ApiStatusAction extends SingletonAction {
 
   private renderKeyImage(key: KeyAction): void {
     const usage = this.bridge?.getTelemetry()?.apiUsage;
-    const img = this.isDetailed
-      ? SvgKeyRenderer.renderApiDetailsKey(
-          usage?.inputTokens ?? "433.9k",
-          usage?.outputTokens ?? "19.4k",
-          usage?.cacheHitRate ?? "57.7%",
-          `${usage?.totalRequests ?? 21} REQ`
-        )
-      : SvgKeyRenderer.renderApiStatusKey(
-          usage?.creditsRemaining ?? "$149.97",
-          usage?.model ?? "SPARK 1.3",
-          usage?.spent ?? "$0.00",
-          `${usage?.inputTokens ?? "453k"} TKN`
-        );
+    const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
     void key.setImage(img);
     void key.setTitle("");
   }
@@ -1164,12 +1180,13 @@ export class ApiStatusAction extends SingletonAction {
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    console.log("💳 [Page 2] API CREDITS HUD toggled view & opened billing");
-    this.isDetailed = !this.isDetailed;
-    if (ev.action.isKey()) {
-      this.renderKeyImage(ev.action as KeyAction);
+    if (checkSubmenuKeyDown(ev)) return;
+    if (checkSubmenuKeyDown(ev)) return;
+    if (telemetrySubmenuManager.isActive) {
+      telemetrySubmenuManager.close();
+      return;
     }
-    exec("open https://dev.meta.ai/ || open http://localhost:3456/api/telemetry");
+    telemetrySubmenuManager.open(this.bridge?.getTelemetry());
   }
 }
 
@@ -1200,6 +1217,7 @@ export class SparkChatAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("✨ [Page 2] SPARK CHAT triggered");
     await TerminalAutomation.launchMuseCodeTerminal(
       process.cwd(),
@@ -1235,6 +1253,7 @@ export class OpenWorkAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("📂 [Page 2] OPEN WORK triggered");
     exec("open .");
   }
@@ -1267,6 +1286,7 @@ export class PagePrevAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
     console.log("Navigating back to Page 1...");
   }
 }

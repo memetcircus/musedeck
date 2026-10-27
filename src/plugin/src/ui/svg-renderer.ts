@@ -394,20 +394,16 @@ export class SvgKeyRenderer {
    * Page 2 Key 11: API STATUS (Meta Health)
    */
     /**
-   * Page 2 Key 11: Dynamic AI Credits & Session HUD Key
+   * Page 2 Key 11: Main Clean High-Legibility AI Credits HUD Key
+   * Shows only big, crisp, readable numbers - no tiny micro-text!
    */
-  static renderApiStatusKey(
-    credits = "$149.97",
-    model = "SPARK 1.3",
-    spent = "$0.00",
-    tokens = "453k TKN"
-  ): string {
+  static renderApiStatusKey(credits = "$149.97"): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
         <defs>
           <linearGradient id="cyberBg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#041812"/>
-            <stop offset="100%" stop-color="#020d0a"/>
+            <stop offset="0%" stop-color="#041a14"/>
+            <stop offset="100%" stop-color="#020e0a"/>
           </linearGradient>
           <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="2.5" result="blur"/>
@@ -420,7 +416,7 @@ export class SvgKeyRenderer {
 
         <!-- Cyber Bezel & Tech Frame -->
         <rect x="5" y="5" width="134" height="134" rx="22" fill="url(#cyberBg)" stroke="#059669" stroke-width="2.5"/>
-        <rect x="10" y="10" width="124" height="124" rx="18" fill="none" stroke="#10b981" stroke-width="1.2" stroke-opacity="0.6"/>
+        <rect x="10" y="10" width="124" height="124" rx="18" fill="none" stroke="#10b981" stroke-width="1.2" stroke-opacity="0.5"/>
 
         <!-- Tech Corner Notches -->
         <path d="M16 28 L16 16 L28 16" fill="none" stroke="#34d399" stroke-width="2"/>
@@ -428,41 +424,36 @@ export class SvgKeyRenderer {
         <path d="M16 116 L16 128 L28 128" fill="none" stroke="#34d399" stroke-width="2"/>
         <path d="M128 116 L128 128 L116 128" fill="none" stroke="#34d399" stroke-width="2"/>
 
-        <!-- Top Header: Pulse Dot + Model Name -->
-        <circle cx="28" cy="27" r="3.5" fill="#10b981" filter="url(#neonGlow)"/>
-        <text x="38" y="31" fill="#6ee7b7" font-size="10.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" letter-spacing="1">${model}</text>
+        <!-- Top Header: High-Visibility Cyan Label -->
+        <text x="72" y="34" fill="#38bdf8" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">CREDITS</text>
 
-        <!-- Center: Big High-Contrast Neon Credit Balance -->
-        <text x="72" y="67" fill="#34d399" font-size="23" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" filter="url(#neonGlow)">${credits}</text>
-        <text x="72" y="82" fill="#10b981" font-size="9.5" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">CREDITS REMAINING</text>
+        <!-- Center: Big Neon Green Balance -->
+        <text x="72" y="78" fill="#10b981" font-size="26" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" filter="url(#neonGlow)">${credits}</text>
 
-        <!-- Divider Line -->
-        <line x1="22" y1="92" x2="122" y2="92" stroke="#064e3b" stroke-width="1.2" stroke-dasharray="3,3"/>
-
-        <!-- Bottom Stats: Spent + Tokens -->
-        <text x="72" y="108" fill="#a7f3d0" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">SPENT: ${spent}</text>
-        <text x="72" y="123" fill="#6ee7b7" font-size="10" font-weight="700" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.6">${tokens} · 21 REQ</text>
+        <!-- Bottom: High-Visibility Details Callout -->
+        <text x="72" y="122" fill="#34d399" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STATS ↗</text>
       </svg>
     `);
   }
 
   /**
-   * Page 2 Key 11 (Toggled): Detailed Token Breakdown HUD
+   * Render individual large telemetry card for the 15-key Sub-Menu
    */
-  static renderApiDetailsKey(
-    inputTokens = "433.9k",
-    outputTokens = "19.4k",
-    cacheHit = "57.7%",
-    requests = "21 REQ"
+  static renderTelemetryCard(
+    label: string,
+    value: string,
+    subtitle: string,
+    borderColor = "#38bdf8",
+    valColor = "#ffffff"
   ): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
         <defs>
-          <linearGradient id="cyberBg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#041812"/>
-            <stop offset="100%" stop-color="#020d0a"/>
+          <linearGradient id="cyberBgCard" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#071326"/>
+            <stop offset="100%" stop-color="#030914"/>
           </linearGradient>
-          <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <filter id="neonGlowCard" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="2.5" result="blur"/>
             <feMerge>
               <feMergeNode in="blur"/>
@@ -471,22 +462,24 @@ export class SvgKeyRenderer {
           </filter>
         </defs>
 
-        <rect x="5" y="5" width="134" height="134" rx="22" fill="url(#cyberBg)" stroke="#059669" stroke-width="2.5"/>
-        <path d="M16 28 L16 16 L28 16" fill="none" stroke="#34d399" stroke-width="2"/>
-        <path d="M128 28 L128 16 L116 16" fill="none" stroke="#34d399" stroke-width="2"/>
-        <path d="M16 116 L16 128 L28 128" fill="none" stroke="#34d399" stroke-width="2"/>
-        <path d="M128 116 L128 128 L116 128" fill="none" stroke="#34d399" stroke-width="2"/>
+        <!-- Cyber Outer Frame -->
+        <rect x="5" y="5" width="134" height="134" rx="22" fill="url(#cyberBgCard)" stroke="${borderColor}" stroke-width="2.5"/>
+        <rect x="10" y="10" width="124" height="124" rx="18" fill="none" stroke="${borderColor}" stroke-width="1.2" stroke-opacity="0.4"/>
 
-        <circle cx="28" cy="27" r="3.5" fill="#38bdf8" filter="url(#neonGlow)"/>
-        <text x="38" y="31" fill="#7dd3fc" font-size="10.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" letter-spacing="1">USAGE STATS</text>
+        <!-- Tech Corner Brackets -->
+        <path d="M16 28 L16 16 L28 16" fill="none" stroke="${borderColor}" stroke-width="2"/>
+        <path d="M128 28 L128 16 L116 16" fill="none" stroke="${borderColor}" stroke-width="2"/>
+        <path d="M16 116 L16 128 L28 128" fill="none" stroke="${borderColor}" stroke-width="2"/>
+        <path d="M128 116 L128 128 L116 128" fill="none" stroke="${borderColor}" stroke-width="2"/>
 
-        <text x="72" y="56" fill="#a7f3d0" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">IN: <tspan fill="#ffffff" font-weight="900">${inputTokens}</tspan></text>
-        <text x="72" y="74" fill="#a7f3d0" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">OUT: <tspan fill="#ffffff" font-weight="900">${outputTokens}</tspan></text>
+        <!-- Top Label -->
+        <text x="72" y="33" fill="${borderColor}" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">${label}</text>
 
-        <line x1="22" y1="84" x2="122" y2="84" stroke="#064e3b" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <!-- Center Big High-Contrast Value -->
+        <text x="72" y="78" fill="${valColor}" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" filter="url(#neonGlowCard)">${value}</text>
 
-        <text x="72" y="103" fill="#38bdf8" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">CACHE: ${cacheHit}</text>
-        <text x="72" y="121" fill="#34d399" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${requests}</text>
+        <!-- Bottom Subtitle -->
+        <text x="72" y="122" fill="#94a3b8" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${subtitle}</text>
       </svg>
     `);
   }
