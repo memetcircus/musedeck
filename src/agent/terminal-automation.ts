@@ -148,12 +148,16 @@ end tell
   /**
    * Bring Terminal to the front and paste the snipped image file path into muse prompt
    */
-  static async pasteSnippetIntoTerminal(filePath: string): Promise<void> {
+  static async pasteSnippetIntoTerminal(
+    filePath: string,
+    promptPrefix = "Turn this into a React Tailwind component: "
+  ): Promise<void> {
     const cleanPath = filePath.trim();
+    const fullPrompt = `${promptPrefix}${cleanPath}`;
 
     // 1. Always copy clean file path to macOS clipboard via pbcopy
     try {
-      await execAsync(`printf "%s " "${cleanPath}" | pbcopy`);
+      await execAsync(`printf "%s" "${cleanPath}" | pbcopy`);
       console.log(`📋 [Clipboard] Copied snippet path to macOS clipboard: ${cleanPath}`);
     } catch (e: any) {
       console.warn("Failed to set pbcopy:", e.message);
@@ -162,12 +166,12 @@ end tell
     // 2. Bring Terminal.app to the front specifically targeting muse session
     await this.focusMuseTerminalWindow();
 
-    // 3. Type the snippet path directly into the active prompt using native helper
+    // 3. Clear any dirty line draft (Ctrl+C) and type clean prompt using native helper
     const macTypeBin = this.getMacTypeBin();
     if (macTypeBin) {
       try {
-        await execAsync(`"${macTypeBin}" text "${cleanPath} "`);
-        console.log(`📋 [Terminal] Directly typed snippet path into active Terminal prompt!`);
+        await execAsync(`"${macTypeBin}" clear-and-type "${fullPrompt}"`);
+        console.log(`📋 [Terminal] Directly typed prompt into active Terminal: ${fullPrompt}`);
         return;
       } catch (err: any) {
         console.warn("Native mac-type typing failed, attempting fallback:", err.message);
@@ -179,7 +183,7 @@ end tell
 tell application "Terminal" to activate
 delay 0.1
 tell application "System Events"
-  keystroke " ${this.escapeForAppleScript(cleanPath)} "
+  keystroke "${this.escapeForAppleScript(fullPrompt)}"
 end tell
     `.trim();
 

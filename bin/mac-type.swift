@@ -3,7 +3,7 @@ import ApplicationServices
 
 guard CommandLine.arguments.count > 1 else {
     print("Usage: mac-type <command> [argument]")
-    print("Commands: text <string>, key <single-char-with-enter>, enter")
+    print("Commands: text <string>, key <single-char-with-enter>, ctrl-c, enter")
     exit(1)
 }
 
@@ -22,7 +22,7 @@ func typeString(_ text: String) {
             keyUp.keyboardSetUnicodeString(stringLength: 1, unicodeString: &unichar)
             keyUp.post(tap: .cghidEventTap)
         }
-        usleep(2000)
+        usleep(1500)
     }
 }
 
@@ -37,8 +37,27 @@ func pressReturn() {
     }
 }
 
+func pressCtrlC() {
+    let cKeyCode: CGKeyCode = 0x08 // 'c'
+    if let keyDown = CGEvent(keyboardEventSource: source, virtualKey: cKeyCode, keyDown: true) {
+        keyDown.flags = .maskControl
+        keyDown.post(tap: .cghidEventTap)
+    }
+    usleep(30000)
+    if let keyUp = CGEvent(keyboardEventSource: source, virtualKey: cKeyCode, keyDown: false) {
+        keyUp.flags = []
+        keyUp.post(tap: .cghidEventTap)
+    }
+    usleep(80000)
+}
+
 switch mode {
 case "text":
+    if CommandLine.arguments.count > 2 {
+        typeString(CommandLine.arguments[2])
+    }
+case "clear-and-type":
+    pressCtrlC()
     if CommandLine.arguments.count > 2 {
         typeString(CommandLine.arguments[2])
     }
@@ -48,6 +67,8 @@ case "key":
         usleep(50000)
         pressReturn()
     }
+case "ctrl-c":
+    pressCtrlC()
 case "enter":
     pressReturn()
 default:
