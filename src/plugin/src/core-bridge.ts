@@ -15,6 +15,15 @@ export class StreamDeckCoreBridge {
     connectedSurfaces: 1,
     uptimeSeconds: 0,
     timestamp: new Date().toISOString(),
+    apiUsage: {
+      creditsRemaining: "$149.97",
+      spent: "$0.00",
+      model: "SPARK 1.3",
+      inputTokens: "433.9k",
+      outputTokens: "19.4k",
+      cacheHitRate: "57.7%",
+      totalRequests: 21,
+    },
   };
 
   private telemetryListeners = new Set<(telemetry: TelemetryData) => void>();

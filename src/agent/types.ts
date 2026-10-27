@@ -21,6 +21,16 @@ export interface DiffStats {
   }>;
 }
 
+export interface ApiUsageStats {
+  creditsRemaining: string; // e.g. "$149.97"
+  spent: string; // e.g. "$0.00"
+  model: string; // e.g. "SPARK 1.3"
+  inputTokens: string; // e.g. "433.9k"
+  outputTokens: string; // e.g. "19.4k"
+  cacheHitRate: string; // e.g. "57.7%"
+  totalRequests: number; // e.g. 21
+}
+
 export interface TelemetryData {
   state: AgentState;
   activeTask: string;
@@ -36,6 +46,7 @@ export interface TelemetryData {
   connectedSurfaces: number;
   uptimeSeconds: number;
   timestamp: string;
+  apiUsage?: ApiUsageStats;
 }
 
 export interface TaskRequest {

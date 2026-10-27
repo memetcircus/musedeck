@@ -156,10 +156,10 @@
     {
       "Name": "Page 2 →",
       "UUID": "com.memetcircus.musedeck.page-next",
-      "Icon": "imgs/actions/web-console/icon",
+      "Icon": "imgs/actions/page-next/icon",
       "Tooltip": "Navigate to Page 2 (Multimodal Video & Deep Workflows).",
       "Controllers": ["Keypad"],
-      "States": [{ "Image": "imgs/actions/web-console/key" }]
+      "States": [{ "Image": "imgs/actions/page-next/key" }]
     },
     {
       "Name": "Record to Fix",

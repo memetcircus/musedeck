@@ -1,3 +1,4 @@
+import { CyberIcons } from "./cyber-icons.js";
 import { AgentState, type TelemetryData } from "../../../agent/types.js";
 
 /**
@@ -18,14 +19,15 @@ export class SvgKeyRenderer {
 
     switch (state) {
       case AgentState.IDLE:
-        return this.svgToDataUri(`
+        return CyberIcons["p1_status"];
+        /* return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
             <rect width="144" height="144" rx="26" fill="#041d14" stroke="#10b981" stroke-width="4"/>
             <circle cx="72" cy="48" r="26" fill="#065f46" stroke="#34d399" stroke-width="3"/>
             <path d="M60 48 L68 56 L85 39" fill="none" stroke="#ecfdf5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
             <text x="72" y="115" fill="#f0fdf4" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">READY</text>
           </svg>
-        `);
+        `); */
 
       case AgentState.PLANNING:
         return this.svgToDataUri(`
@@ -81,7 +83,8 @@ export class SvgKeyRenderer {
    * Key 1: Active Task Key
    */
   static renderTaskKey(stepText = "Active"): string {
-    return this.svgToDataUri(`
+    return CyberIcons["p1_task"];
+    /* return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
         <rect width="144" height="144" rx="26" fill="#082f49" stroke="#0ea5e9" stroke-width="3.5"/>
         <rect x="50" y="24" width="44" height="50" rx="8" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="3"/>
@@ -91,7 +94,7 @@ export class SvgKeyRenderer {
         <line x1="58" y1="62" x2="76" y2="62" stroke="#bae6fd" stroke-width="3" stroke-linecap="round"/>
         <text x="72" y="115" fill="#f0f9ff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TASK</text>
       </svg>
-    `);
+    `); */
   }
 
   /**
@@ -102,7 +105,8 @@ export class SvgKeyRenderer {
     const hasDiff = diffStats.filesChanged > 0;
 
     if (!hasDiff) {
-      return this.svgToDataUri(`
+      return CyberIcons["p1_diff"];
+      /* return this.svgToDataUri(`
         <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
           <rect width="144" height="144" rx="26" fill="#0b0f19" stroke="#475569" stroke-width="3.5"/>
           <path d="M54 34 L54 64 M90 44 L90 74 M54 64 C54 78 90 60 90 74" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
@@ -110,7 +114,7 @@ export class SvgKeyRenderer {
           <circle cx="90" cy="74" r="6" fill="#a855f7"/>
           <text x="72" y="115" fill="#cbd5e1" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">NO DIFF</text>
         </svg>
-      `);
+      `); */
     }
 
     return this.svgToDataUri(`
@@ -129,6 +133,7 @@ export class SvgKeyRenderer {
    * Key 3: Physical HITL APPROVE Key
    */
   static renderApproveKey(isAwaiting: boolean): string {
+    if (!isAwaiting) return CyberIcons["p1_approve"];
     const strokeColor = isAwaiting ? "#22c55e" : "#16a34a";
     const fillColor = isAwaiting ? "#052e16" : "#022c22";
 
@@ -146,6 +151,7 @@ export class SvgKeyRenderer {
    * Key 4: Physical HITL REJECT Key
    */
   static renderRejectKey(isAwaiting: boolean): string {
+    if (!isAwaiting) return CyberIcons["p1_reject"];
     const strokeColor = isAwaiting ? "#ef4444" : "#dc2626";
     const fillColor = isAwaiting ? "#450a0a" : "#2a0505";
 
@@ -164,6 +170,7 @@ export class SvgKeyRenderer {
    * Key 5: SAM 3.1 Snip Key (High-legibility vector design, never replaces icon with raw screenshot)
    */
   static renderSamSnipKey(status: "idle" | "snipping" | "copied" = "idle"): string {
+    if (status === "idle") return CyberIcons["p1_sam-snip"];
     if (status === "copied") {
       return this.svgToDataUri(`
         <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
@@ -200,6 +207,7 @@ export class SvgKeyRenderer {
    * Key: Record-to-Fix (Video frames + mic audio with Meta Responses & Files API)
    */
   static renderRecordToFixKey(isRecording = false): string {
+    if (!isRecording) return CyberIcons["p2_record-to-fix"];
     if (isRecording) {
       return this.svgToDataUri(`
         <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
@@ -226,60 +234,35 @@ export class SvgKeyRenderer {
    * Navigation: Next Page (Page 1 -> Page 2)
    */
   static renderNextPageKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#1e1b4b" stroke="#818cf8" stroke-width="3.5"/>
-        <circle cx="72" cy="46" r="24" fill="#312e81" stroke="#c7d2fe" stroke-width="3"/>
-        <path d="M62 46 L82 46 M74 36 L84 46 L74 56" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="72" y="115" fill="#e0e7ff" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PAGE 2 →</text>
-      </svg>
-    `);
+    return CyberIcons["p1_page-next"];
   }
 
   /**
    * Navigation: Prev Page (Page 2 -> Page 1)
    */
   static renderPrevPageKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#0f172a" stroke="#94a3b8" stroke-width="3.5"/>
-        <circle cx="72" cy="46" r="24" fill="#1e293b" stroke="#cbd5e1" stroke-width="3"/>
-        <path d="M82 46 L62 46 M70 36 L60 46 L70 56" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="72" y="115" fill="#f8fafc" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">← PAGE 1</text>
-      </svg>
-    `);
+    return CyberIcons["p2_page-prev"];
   }
 
   /**
    * Key 6: Muse Spark Image-to-Code Key
    */
   static renderSparkKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#3b0764" stroke="#c084fc" stroke-width="4"/>
-        <path d="M50 36 L36 48 L50 60 M94 36 L108 48 L94 60 M78 30 L66 66" fill="none" stroke="#f3e8ff" stroke-width="4" stroke-linecap="round"/>
-        <text x="72" y="115" fill="#faf5ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SPARK</text>
-      </svg>
-    `);
+    return CyberIcons["p1_spark-code"];
   }
 
   /**
    * Key 7: Run Muse Task Key
    */
   static renderRunMuseKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#042f2e" stroke="#14b8a6" stroke-width="4"/>
-        <polygon points="58,26 98,48 58,70" fill="#2dd4bf" stroke="#99f6e4" stroke-width="2" stroke-linejoin="round"/>
-        <text x="72" y="115" fill="#f0fdfa" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">RUN</text>
-      </svg>
-    `);
+    return CyberIcons["p1_run-muse"];
   }
 
   /**
    * Key 8: Emergency Halt Key (Always visible & excluded from animation)
    */
   static renderHaltKey(isPulsing = false): string {
+    if (!isPulsing) return CyberIcons["p1_halt"];
     const strokeColor = isPulsing ? "#ef4444" : "#dc2626";
     const fillColor = isPulsing ? "#5f0a0a" : "#450a0a";
     const strokeWidth = isPulsing ? "5.5" : "4";
@@ -299,77 +282,35 @@ export class SvgKeyRenderer {
    * Key 9: Reset Key
    */
   static renderResetKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#0f172a" stroke="#64748b" stroke-width="4"/>
-        <path d="M50 48 A22 22 0 1 1 52 70" fill="none" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round"/>
-        <polygon points="40,46 54,34 56,52" fill="#cbd5e1"/>
-        <text x="72" y="115" fill="#f8fafc" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">RESET</text>
-      </svg>
-    `);
+    return CyberIcons["p1_reset"];
   }
 
   /**
    * Key 10: Prompt Task
    */
   static renderPromptKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#172554" stroke="#3b82f6" stroke-width="3.5"/>
-        <rect x="52" y="24" width="40" height="48" rx="6" fill="#1d4ed8" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="60" y1="38" x2="84" y2="38" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        <line x1="60" y1="48" x2="84" y2="48" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        <line x1="60" y1="58" x2="74" y2="58" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        <text x="72" y="115" fill="#eff6ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PROMPT</text>
-      </svg>
-    `);
+    return CyberIcons["p1_prompt-task"];
   }
 
   /**
    * Key 11: Write Tests Key
    */
   static renderTestsKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#064e3b" stroke="#10b981" stroke-width="3.5"/>
-        <path d="M64 22 L80 22 M72 22 L72 40 L88 64 C90 68 88 74 80 74 L64 74 C56 74 54 68 56 64 L72 40" fill="#047857" stroke="#6ee7b7" stroke-width="3.5" stroke-linejoin="round"/>
-        <circle cx="70" cy="62" r="3" fill="#a7f3d0"/>
-        <circle cx="76" cy="56" r="2" fill="#a7f3d0"/>
-        <text x="72" y="115" fill="#ecfdf5" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TESTS</text>
-      </svg>
-    `);
+    return CyberIcons["p1_write-tests"];
   }
 
   /**
    * Key 12: Fix Bug Key
    */
   static renderFixBugKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#451a03" stroke="#f59e0b" stroke-width="3.5"/>
-        <ellipse cx="72" cy="50" rx="16" ry="18" fill="#b45309" stroke="#fde68a" stroke-width="3"/>
-        <circle cx="72" cy="30" r="10" fill="#d97706" stroke="#fde68a" stroke-width="2.5"/>
-        <line x1="44" y1="42" x2="100" y2="42" stroke="#fde68a" stroke-width="3" stroke-linecap="round"/>
-        <line x1="42" y1="56" x2="102" y2="56" stroke="#fde68a" stroke-width="3" stroke-linecap="round"/>
-        <text x="72" y="115" fill="#fffbeb" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">FIX BUG</text>
-      </svg>
-    `);
+    return CyberIcons["p1_fix-bug"];
   }
 
   /**
    * Key 13: Commit Key
    */
   static renderCommitKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#2e1065" stroke="#8b5cf6" stroke-width="3.5"/>
-        <circle cx="72" cy="48" r="18" fill="#581c87" stroke="#c4b5fd" stroke-width="4"/>
-        <line x1="32" y1="48" x2="54" y2="48" stroke="#c4b5fd" stroke-width="4" stroke-linecap="round"/>
-        <line x1="90" y1="48" x2="112" y2="48" stroke="#c4b5fd" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="72" cy="48" r="7" fill="#ffffff"/>
-        <text x="72" y="115" fill="#f5f3ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">COMMIT</text>
-      </svg>
-    `);
+    return CyberIcons["p1_commit-pr"];
   }
 
   /**
@@ -383,175 +324,169 @@ export class SvgKeyRenderer {
    * Page 2 Key 1: VID-TO-CODE (Meta Files API)
    */
   static renderVidToCodeKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#082f49" stroke="#0ea5e9" stroke-width="3.5"/>
-        <rect x="40" y="24" width="64" height="46" rx="8" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2.5"/>
-        <polygon points="56,36 56,58 74,47" fill="#38bdf8"/>
-        <path d="M78 40 L88 47 L78 54" fill="none" stroke="#e0f2fe" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="72" y="104" fill="#f0f9ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">VID-TO-CODE</text>
-        <text x="72" y="124" fill="#38bdf8" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">META FILES API</text>
-      </svg>
-    `);
+    return CyberIcons["p2_vid-to-code"];
   }
 
   /**
    * Page 2 Key 2: UPLOAD FILE (file_id)
    */
   static renderUploadFileKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#052e16" stroke="#10b981" stroke-width="3.5"/>
-        <path d="M46 62 A18 18 0 0 1 76 34 A22 22 0 0 1 102 52 A16 16 0 0 1 96 68 L48 68" fill="#065f46" stroke="#34d399" stroke-width="2.5"/>
-        <path d="M72 68 L72 44 M62 52 L72 42 L82 52" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="72" y="104" fill="#ecfdf5" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">UPLOAD FILE</text>
-        <text x="72" y="124" fill="#6ee7b7" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">(file_id)</text>
-      </svg>
-    `);
+    return CyberIcons["p2_upload-file"];
   }
 
   /**
    * Page 2 Key 3: AUDIO TRANS (Speech to Spec)
    */
   static renderAudioTransKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#2e1065" stroke="#a855f7" stroke-width="3.5"/>
-        <rect x="64" y="22" width="16" height="30" rx="8" fill="#7e22ce" stroke="#d8b4fe" stroke-width="2.5"/>
-        <path d="M54 38 A18 18 0 0 0 90 38 M72 56 L72 68 M60 68 L84 68" fill="none" stroke="#d8b4fe" stroke-width="3" stroke-linecap="round"/>
-        <text x="72" y="104" fill="#faf5ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">AUDIO TRANS</text>
-        <text x="72" y="124" fill="#c084fc" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SPEECH TO SPEC</text>
-      </svg>
-    `);
+    return CyberIcons["p2_audio-trans"];
   }
 
   /**
    * Page 2 Key 4: RE-INSPECT (Diff Inspector)
    */
   static renderReInspectKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#451a03" stroke="#f59e0b" stroke-width="3.5"/>
-        <circle cx="66" cy="46" r="18" fill="#78350f" stroke="#fde68a" stroke-width="3"/>
-        <line x1="80" y1="58" x2="98" y2="74" stroke="#fde68a" stroke-width="4.5" stroke-linecap="round"/>
-        <path d="M60 46 L64 50 L74 40" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="72" y="104" fill="#fffbeb" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">RE-INSPECT</text>
-        <text x="72" y="124" fill="#fbbf24" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">DIFF INSPECTOR</text>
-      </svg>
-    `);
+    return CyberIcons["p2_re-inspect"];
   }
 
   /**
    * Page 2 Key 5: PHONE REC (Mobile UI)
    */
   static renderPhoneRecKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#042f2e" stroke="#14b8a6" stroke-width="3.5"/>
-        <rect x="52" y="20" width="40" height="54" rx="8" fill="#115e59" stroke="#5eead4" stroke-width="2.5"/>
-        <circle cx="72" cy="66" r="3" fill="#5eead4"/>
-        <circle cx="72" cy="42" r="9" fill="#ef4444"/>
-        <text x="72" y="104" fill="#f0fdfa" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">PHONE REC</text>
-        <text x="72" y="124" fill="#2dd4bf" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">MOBILE UI</text>
-      </svg>
-    `);
+    return CyberIcons["p2_phone-rec"];
   }
 
   /**
    * Page 2 Key 6: STYLE TRANS (Theme / CSS)
    */
   static renderStyleTransKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#3b0764" stroke="#d946ef" stroke-width="3.5"/>
-        <path d="M48 68 L78 38 M72 32 L84 44" stroke="#f0abfc" stroke-width="3.5" stroke-linecap="round"/>
-        <polygon points="86,24 88,30 94,32 88,34 86,40 84,34 78,32 84,30" fill="#ffffff"/>
-        <polygon points="56,26 57,30 61,31 57,32 56,36 55,32 51,31 55,30" fill="#fdf4ff"/>
-        <text x="72" y="104" fill="#fdf4ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">STYLE TRANS</text>
-        <text x="72" y="124" fill="#e879f9" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">THEME / CSS</text>
-      </svg>
-    `);
+    return CyberIcons["p2_style-trans"];
   }
 
   /**
    * Page 2 Key 7: WORKSPACE (Tree / Worktrees)
    */
   static renderWorkspaceKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#172554" stroke="#3b82f6" stroke-width="3.5"/>
-        <rect x="42" y="28" width="26" height="18" rx="4" fill="#1d4ed8" stroke="#93c5fd" stroke-width="2"/>
-        <rect x="76" y="28" width="26" height="18" rx="4" fill="#1d4ed8" stroke="#93c5fd" stroke-width="2"/>
-        <rect x="59" y="52" width="26" height="18" rx="4" fill="#2563eb" stroke="#bfdbfe" stroke-width="2"/>
-        <path d="M55 46 L55 50 L72 50 L72 52 M89 46 L89 50" fill="none" stroke="#93c5fd" stroke-width="2"/>
-        <text x="72" y="104" fill="#eff6ff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">WORKSPACE</text>
-        <text x="72" y="124" fill="#60a5fa" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TREE / WORKTREES</text>
-      </svg>
-    `);
+    return CyberIcons["p2_workspace"];
   }
 
   /**
    * Page 2 Key 8: TERMINAL LOG (Muse Stream)
    */
   static renderTerminalLogKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#1e1b4b" stroke="#6366f1" stroke-width="3.5"/>
-        <rect x="40" y="24" width="64" height="46" rx="8" fill="#312e81" stroke="#a5b4fc" stroke-width="2.5"/>
-        <line x1="40" y1="36" x2="104" y2="36" stroke="#818cf8" stroke-width="2"/>
-        <circle cx="48" cy="30" r="2.5" fill="#f43f5e"/>
-        <circle cx="56" cy="30" r="2.5" fill="#eab308"/>
-        <circle cx="64" cy="30" r="2.5" fill="#22c55e"/>
-        <text x="72" y="57" fill="#a5b4fc" font-size="15" font-weight="900" font-family="monospace" text-anchor="middle">&gt; MUSE_</text>
-        <text x="72" y="104" fill="#eef2ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">TERM LOG</text>
-        <text x="72" y="124" fill="#818cf8" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">MUSE STREAM</text>
-      </svg>
-    `);
+    return CyberIcons["p2_terminal-log"];
   }
 
   /**
    * Page 2 Key 9: REWIND WORK (Git Undo)
    */
   static renderRewindWorkKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#431407" stroke="#ea580c" stroke-width="3.5"/>
-        <path d="M52 48 A22 22 0 1 1 54 68" fill="none" stroke="#fdba74" stroke-width="4.5" stroke-linecap="round"/>
-        <polygon points="42,46 56,36 58,54" fill="#fdba74"/>
-        <text x="72" y="104" fill="#fff7ed" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">REWIND WORK</text>
-        <text x="72" y="124" fill="#fb923c" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">GIT UNDO</text>
-      </svg>
-    `);
+    return CyberIcons["p2_rewind-work"];
   }
 
   /**
    * Page 2 Key 10: CLEAR MEDIA (/tmp clean)
    */
   static renderClearMediaKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#3f1d24" stroke="#e11d48" stroke-width="3.5"/>
-        <path d="M52 38 L92 38 M60 38 L62 70 A4 4 0 0 0 66 74 L78 74 A4 4 0 0 0 82 70 L84 38 M64 38 L66 30 L78 30 L80 38"
-              fill="none" stroke="#fda4af" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <line x1="68" y1="46" x2="68" y2="64" stroke="#fda4af" stroke-width="2"/>
-        <line x1="76" y1="46" x2="76" y2="64" stroke="#fda4af" stroke-width="2"/>
-        <text x="72" y="104" fill="#fff1f2" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">CLEAR MEDIA</text>
-        <text x="72" y="124" fill="#fb7185" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">/TMP CLEAN</text>
-      </svg>
-    `);
+    return CyberIcons["p2_clear-media"];
   }
 
   /**
    * Page 2 Key 11: API STATUS (Meta Health)
    */
-  static renderApiStatusKey(): string {
+    /**
+   * Page 2 Key 11: Dynamic AI Credits & Session HUD Key
+   */
+  static renderApiStatusKey(
+    credits = "$149.97",
+    model = "SPARK 1.3",
+    spent = "$0.00",
+    tokens = "453k TKN"
+  ): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#064e3b" stroke="#22c55e" stroke-width="3.5"/>
-        <path d="M38 48 L56 48 L64 26 L76 68 L84 38 L92 48 L106 48" fill="none" stroke="#86efac" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="106" cy="48" r="4" fill="#22c55e"/>
-        <text x="72" y="104" fill="#f0fdf4" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">API STATUS</text>
-        <text x="72" y="124" fill="#4ade80" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">META HEALTH</text>
+        <defs>
+          <linearGradient id="cyberBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#041812"/>
+            <stop offset="100%" stop-color="#020d0a"/>
+          </linearGradient>
+          <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2.5" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Cyber Bezel & Tech Frame -->
+        <rect x="5" y="5" width="134" height="134" rx="22" fill="url(#cyberBg)" stroke="#059669" stroke-width="2.5"/>
+        <rect x="10" y="10" width="124" height="124" rx="18" fill="none" stroke="#10b981" stroke-width="1.2" stroke-opacity="0.6"/>
+
+        <!-- Tech Corner Notches -->
+        <path d="M16 28 L16 16 L28 16" fill="none" stroke="#34d399" stroke-width="2"/>
+        <path d="M128 28 L128 16 L116 16" fill="none" stroke="#34d399" stroke-width="2"/>
+        <path d="M16 116 L16 128 L28 128" fill="none" stroke="#34d399" stroke-width="2"/>
+        <path d="M128 116 L128 128 L116 128" fill="none" stroke="#34d399" stroke-width="2"/>
+
+        <!-- Top Header: Pulse Dot + Model Name -->
+        <circle cx="28" cy="27" r="3.5" fill="#10b981" filter="url(#neonGlow)"/>
+        <text x="38" y="31" fill="#6ee7b7" font-size="10.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" letter-spacing="1">${model}</text>
+
+        <!-- Center: Big High-Contrast Neon Credit Balance -->
+        <text x="72" y="67" fill="#34d399" font-size="23" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" filter="url(#neonGlow)">${credits}</text>
+        <text x="72" y="82" fill="#10b981" font-size="9.5" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">CREDITS REMAINING</text>
+
+        <!-- Divider Line -->
+        <line x1="22" y1="92" x2="122" y2="92" stroke="#064e3b" stroke-width="1.2" stroke-dasharray="3,3"/>
+
+        <!-- Bottom Stats: Spent + Tokens -->
+        <text x="72" y="108" fill="#a7f3d0" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">SPENT: ${spent}</text>
+        <text x="72" y="123" fill="#6ee7b7" font-size="10" font-weight="700" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.6">${tokens} · 21 REQ</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Page 2 Key 11 (Toggled): Detailed Token Breakdown HUD
+   */
+  static renderApiDetailsKey(
+    inputTokens = "433.9k",
+    outputTokens = "19.4k",
+    cacheHit = "57.7%",
+    requests = "21 REQ"
+  ): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <defs>
+          <linearGradient id="cyberBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#041812"/>
+            <stop offset="100%" stop-color="#020d0a"/>
+          </linearGradient>
+          <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2.5" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <rect x="5" y="5" width="134" height="134" rx="22" fill="url(#cyberBg)" stroke="#059669" stroke-width="2.5"/>
+        <path d="M16 28 L16 16 L28 16" fill="none" stroke="#34d399" stroke-width="2"/>
+        <path d="M128 28 L128 16 L116 16" fill="none" stroke="#34d399" stroke-width="2"/>
+        <path d="M16 116 L16 128 L28 128" fill="none" stroke="#34d399" stroke-width="2"/>
+        <path d="M128 116 L128 128 L116 128" fill="none" stroke="#34d399" stroke-width="2"/>
+
+        <circle cx="28" cy="27" r="3.5" fill="#38bdf8" filter="url(#neonGlow)"/>
+        <text x="38" y="31" fill="#7dd3fc" font-size="10.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" letter-spacing="1">USAGE STATS</text>
+
+        <text x="72" y="56" fill="#a7f3d0" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">IN: <tspan fill="#ffffff" font-weight="900">${inputTokens}</tspan></text>
+        <text x="72" y="74" fill="#a7f3d0" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">OUT: <tspan fill="#ffffff" font-weight="900">${outputTokens}</tspan></text>
+
+        <line x1="22" y1="84" x2="122" y2="84" stroke="#064e3b" stroke-width="1.2" stroke-dasharray="3,3"/>
+
+        <text x="72" y="103" fill="#38bdf8" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">CACHE: ${cacheHit}</text>
+        <text x="72" y="121" fill="#34d399" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${requests}</text>
       </svg>
     `);
   }
@@ -560,30 +495,14 @@ export class SvgKeyRenderer {
    * Page 2 Key 12: SPARK CHAT (Meta LLM)
    */
   static renderSparkChatKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#24124d" stroke="#8b5cf6" stroke-width="3.5"/>
-        <path d="M42 30 C42 24, 102 24, 102 30 L102 56 C102 62, 70 62, 62 68 L54 74 L56 62 L42 62 Z" fill="#5b21b6" stroke="#c4b5fd" stroke-width="2.5"/>
-        <polygon points="72,36 74,42 80,44 74,46 72,52 70,46 64,44 70,42" fill="#ffffff"/>
-        <text x="72" y="104" fill="#f5f3ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">SPARK CHAT</text>
-        <text x="72" y="124" fill="#a78bfa" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">META LLM</text>
-      </svg>
-    `);
+    return CyberIcons["p2_spark-chat"];
   }
 
   /**
    * Page 2 Key 13: OPEN WORK (VS Code / Finder)
    */
   static renderOpenWorkKey(): string {
-    return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#0c2a4d" stroke="#38bdf8" stroke-width="3.5"/>
-        <path d="M44 32 L62 32 L68 40 L100 40 L100 68 L44 68 Z" fill="#0369a1" stroke="#7dd3fc" stroke-width="2.5"/>
-        <path d="M78 48 L94 32 M82 32 L94 32 L94 44" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="72" y="104" fill="#f0f9ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">OPEN WORK</text>
-        <text x="72" y="124" fill="#38bdf8" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">VS CODE / DIR</text>
-      </svg>
-    `);
+    return CyberIcons["p2_open-work"];
   }
 
   /**

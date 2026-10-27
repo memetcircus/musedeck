@@ -40,6 +40,15 @@ export class AgentStateMachine extends EventEmitter {
       connectedSurfaces: this.connectedSurfaces,
       uptimeSeconds: Math.floor((Date.now() - this.startTime) / 1000),
       timestamp: new Date().toISOString(),
+      apiUsage: {
+        creditsRemaining: "$149.97",
+        spent: "$0.00",
+        model: "SPARK 1.3",
+        inputTokens: "433.9k",
+        outputTokens: "19.4k",
+        cacheHitRate: "57.7%",
+        totalRequests: 21,
+      },
     };
   }
 

@@ -1088,20 +1088,66 @@ export class ClearMediaAction extends SingletonAction {
   }
 }
 
-// --- PAGE 2 KEY 11: API STATUS ---
+// --- PAGE 2 KEY 11: API STATUS (AI Credits & Session HUD) ---
 @action({ UUID: "com.memetcircus.musedeck.api-status" })
 export class ApiStatusAction extends SingletonAction {
+  private isDetailed = false;
+  private activeKeys = new Set<KeyAction>();
+
   constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
+    if (this.bridge) {
+      this.bridge.onTelemetry((telemetry) => {
+        const usage = telemetry.apiUsage;
+        const img = this.isDetailed
+          ? SvgKeyRenderer.renderApiDetailsKey(
+              usage?.inputTokens ?? "433.9k",
+              usage?.outputTokens ?? "19.4k",
+              usage?.cacheHitRate ?? "57.7%",
+              `${usage?.totalRequests ?? 21} REQ`
+            )
+          : SvgKeyRenderer.renderApiStatusKey(
+              usage?.creditsRemaining ?? "$149.97",
+              usage?.model ?? "SPARK 1.3",
+              usage?.spent ?? "$0.00",
+              `${usage?.inputTokens ?? "453k"} TKN`
+            );
+        for (const key of this.activeKeys) {
+          if (!museBeamAnimator.isRunning) {
+            void key.setImage(img);
+            void key.setTitle("");
+          }
+        }
+      });
+    }
+  }
+
+  private renderKeyImage(key: KeyAction): void {
+    const usage = this.bridge?.getTelemetry()?.apiUsage;
+    const img = this.isDetailed
+      ? SvgKeyRenderer.renderApiDetailsKey(
+          usage?.inputTokens ?? "433.9k",
+          usage?.outputTokens ?? "19.4k",
+          usage?.cacheHitRate ?? "57.7%",
+          `${usage?.totalRequests ?? 21} REQ`
+        )
+      : SvgKeyRenderer.renderApiStatusKey(
+          usage?.creditsRemaining ?? "$149.97",
+          usage?.model ?? "SPARK 1.3",
+          usage?.spent ?? "$0.00",
+          `${usage?.inputTokens ?? "453k"} TKN`
+        );
+    void key.setImage(img);
+    void key.setTitle("");
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderApiStatusKey());
-          void ev.action.setTitle("");
+          this.renderKeyImage(ev.action as KeyAction);
         },
         false,
         1,
@@ -1112,11 +1158,18 @@ export class ApiStatusAction extends SingletonAction {
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
   }
 
-  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    console.log("🩺 [Page 2] API STATUS triggered");
-    exec("open http://localhost:3456/api/telemetry");
+  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+    console.log("💳 [Page 2] API CREDITS HUD toggled view & opened billing");
+    this.isDetailed = !this.isDetailed;
+    if (ev.action.isKey()) {
+      this.renderKeyImage(ev.action as KeyAction);
+    }
+    exec("open https://dev.meta.ai/ || open http://localhost:3456/api/telemetry");
   }
 }
 
