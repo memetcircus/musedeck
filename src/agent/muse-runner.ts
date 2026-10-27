@@ -23,7 +23,7 @@ export class MuseRunner extends EventEmitter {
     options: MuseRunnerOptions = {}
   ) {
     super();
-    this.binaryPath = options.binaryPath || process.env.MUSE_CODE_BIN || "muse-code";
+    this.binaryPath = options.binaryPath || process.env.MUSE_CODE_BIN || "muse";
     this.timeoutMs = options.timeoutMs || Number(process.env.CLI_TIMEOUT_MS) || 180000;
     this.simulationMode = options.simulationMode ?? (process.env.MUSE_CODE_SIMULATION === "true");
   }
@@ -53,7 +53,7 @@ export class MuseRunner extends EventEmitter {
 
     return new Promise<void>((resolve, reject) => {
       try {
-        const args = ["run", "--prompt", prompt];
+        const args = prompt ? [prompt] : [];
         if (contextFiles.length > 0) {
           args.push("--context", contextFiles.join(","));
         }

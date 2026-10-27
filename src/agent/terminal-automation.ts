@@ -18,8 +18,8 @@ export class TerminalAutomation {
     }
 
     const command = prompt
-      ? `cd ${this.escapeForShell(projectDir)} && muse-code run --prompt ${this.escapeForShell(prompt)}`
-      : `cd ${this.escapeForShell(projectDir)} && muse-code`;
+      ? `cd ${this.escapeForShell(projectDir)} && muse ${this.escapeForShell(prompt)}`
+      : `cd ${this.escapeForShell(projectDir)} && muse`;
 
     const appleScript = `
 tell application "Terminal"
