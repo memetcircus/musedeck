@@ -691,9 +691,20 @@ export class PageNextAction extends SingletonAction {
     unregisterDeckKey(ev);
   }
 
-  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    if (checkSubmenuKeyDown(_ev)) return;
-    console.log("Navigating to Page 2 profile...");
+  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(ev)) return;
+    const deviceId = ev.action.device.id;
+    console.log(`[PageNext] Switching to Page 2 on device ${deviceId}...`);
+    try {
+      await streamDeck.profiles.switchToProfile(deviceId, "MuseDeck", 1);
+    } catch (e: any) {
+      console.warn("[PageNext] switchToProfile with name failed:", e?.message);
+    }
+    try {
+      await streamDeck.profiles.switchToProfile(deviceId, undefined, 1);
+    } catch (e: any) {
+      console.warn("[PageNext] switchToProfile without name failed:", e?.message);
+    }
   }
 }
 
@@ -723,9 +734,20 @@ export class WebConsoleAction extends SingletonAction {
     unregisterDeckKey(ev);
   }
 
-  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    if (checkSubmenuKeyDown(_ev)) return;
-    console.log("Navigating to Page 2...");
+  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(ev)) return;
+    const deviceId = ev.action.device.id;
+    console.log(`[WebConsole/PageNext] Switching to Page 2 on device ${deviceId}...`);
+    try {
+      await streamDeck.profiles.switchToProfile(deviceId, "MuseDeck", 1);
+    } catch (e: any) {
+      console.warn("[WebConsole/PageNext] switchToProfile with name failed:", e?.message);
+    }
+    try {
+      await streamDeck.profiles.switchToProfile(deviceId, undefined, 1);
+    } catch (e: any) {
+      console.warn("[WebConsole/PageNext] switchToProfile without name failed:", e?.message);
+    }
   }
 }
 
@@ -1284,8 +1306,19 @@ export class PagePrevAction extends SingletonAction {
     unregisterDeckKey(ev);
   }
 
-  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    if (checkSubmenuKeyDown(_ev)) return;
-    console.log("Navigating back to Page 1...");
+  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(ev)) return;
+    const deviceId = ev.action.device.id;
+    console.log(`[PagePrev] Switching back to Page 1 (page 0 index) on device ${deviceId}...`);
+    try {
+      await streamDeck.profiles.switchToProfile(deviceId, "MuseDeck", 0);
+    } catch (e: any) {
+      console.warn("[PagePrev] switchToProfile with name failed:", e?.message);
+    }
+    try {
+      await streamDeck.profiles.switchToProfile(deviceId, undefined, 0);
+    } catch (e: any) {
+      console.warn("[PagePrev] switchToProfile without name failed:", e?.message);
+    }
   }
 }
