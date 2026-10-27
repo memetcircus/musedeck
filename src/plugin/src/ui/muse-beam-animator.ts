@@ -1,5 +1,6 @@
 import { keyRegistry } from "./key-registry.js";
 import { SvgKeyRenderer } from "./svg-renderer.js";
+import { pageManager } from "./page-manager.js";
 
 const COLS = 5;
 const ROWS = 3;
@@ -8,10 +9,10 @@ const ROWS = 3;
  * MuseBeamAnimator
  * Coordinates the full 5x3 multi-key kinetic quantum wave across the physical Stream Deck.
  * When Meta Muse Code is Thinking, the entire 15-key grid displays an integrated
- * neural beam converging to the focal aperture on column 4, while keeping the HALT key active.
+ * neural beam converging to the left focal aperture on column 0, while keeping the HALT key active.
  */
 export class MuseBeamAnimator {
-  private static readonly FRAME_INTERVAL_MS = 80; // Smooth 12.5 fps
+  private static readonly FRAME_INTERVAL_MS = 75; // Smooth ~13.3 fps
   private timer: NodeJS.Timeout | null = null;
   private frame = 0;
 
@@ -37,9 +38,14 @@ export class MuseBeamAnimator {
       clearInterval(this.timer);
       this.timer = null;
     }
-    // Restore resting state
-    keyRegistry.restoreAll();
-    setTimeout(() => keyRegistry.restoreAll(), 150);
+    // Restore resting state respecting active page
+    if (pageManager.getActivePage() === 2) {
+      pageManager.renderPage2();
+      setTimeout(() => pageManager.renderPage2(), 150);
+    } else {
+      keyRegistry.restoreAll();
+      setTimeout(() => keyRegistry.restoreAll(), 150);
+    }
   }
 
   private tick(): void {
@@ -50,7 +56,7 @@ export class MuseBeamAnimator {
         void key.action.setImage(svg);
       }
     }
-    this.frame++;
+    this.frame = (this.frame + 1) % 44;
   }
 }
 

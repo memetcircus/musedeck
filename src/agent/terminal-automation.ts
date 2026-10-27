@@ -59,6 +59,10 @@ end tell
     }
   }
 
+  static async bringTerminalToFront(): Promise<void> {
+    await this.focusMuseTerminalWindow();
+  }
+
   private static async focusMuseTerminalWindow(): Promise<void> {
     const appleScript = `
 tell application "Terminal"
