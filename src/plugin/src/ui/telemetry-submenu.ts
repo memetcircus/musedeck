@@ -24,6 +24,12 @@ class TelemetrySubmenuManager {
     keyRegistry.restoreAll();
   }
 
+  forceClose(): void {
+    if (!this.active) return;
+    console.log("🔙 [Submenu] Force closing AI Telemetry Sub-Dashboard");
+    this.active = false;
+  }
+
   render(telemetry?: TelemetryData): void {
     if (!this.active) return;
     const usage = telemetry?.apiUsage;
@@ -34,6 +40,14 @@ class TelemetrySubmenuManager {
     const outTokens = usage?.outputTokens ?? "19.4k";
     const cacheHit = usage?.cacheHitRate ?? "57.7%";
     const reqs = usage?.totalRequests ? `${usage.totalRequests}` : "21";
+
+    const uptimeSec = telemetry?.uptimeSeconds ?? Math.floor(process.uptime());
+    const hours = Math.floor(uptimeSec / 3600);
+    const mins = Math.floor((uptimeSec % 3600) / 60);
+    const secs = uptimeSec % 60;
+    const uptimeStr = hours > 0
+      ? `${hours}h ${mins.toString().padStart(2, "0")}m`
+      : `${mins}m ${secs.toString().padStart(2, "0")}s`;
 
     const allKeys = keyRegistry.all();
     for (const key of allKeys) {
@@ -77,8 +91,8 @@ class TelemetrySubmenuManager {
         } else if (col === 3) {
           image = SvgKeyRenderer.renderTelemetryCard("BRIDGE", "ONLINE", "SOCKET", "#38bdf8", "#7dd3fc");
         } else if (col === 4) {
-          // Bottom-right cyber brand
-          image = SvgKeyRenderer.renderTelemetryCard("MUSEDECK", "MK.2", "COCKPIT", "#64748b", "#cbd5e1");
+          // Bottom-right: Live Session Uptime (pure telemetry display card)
+          image = SvgKeyRenderer.renderTelemetryCard("UPTIME", uptimeStr, "SESSION", "#a855f7", "#c084fc");
         }
       }
 
@@ -92,16 +106,19 @@ class TelemetrySubmenuManager {
   handleKeyDown(col: number, row: number): boolean {
     if (!this.active) return false;
 
+    // 1. En sol üstteki UP Arrow (col 0, row 0): Page 2'ye geri döndürür
     if (col === 0 && row === 0) {
       this.close();
       return true;
     }
 
-    if ((col === 4 || col === 1 || col === 2) && row === 0) {
+    // 2. En sağ üstteki CONSOLE BILLING (col 4, row 0): Billing sayfasını açar
+    if (col === 4 && row === 0) {
       exec('open "https://dev.meta.ai/billing?team_id=1552171003333942&project_id=2180934752484515"');
       return true;
     }
 
+    // Geriye kalan 13 butonun HİÇBİRİ basınca tepki vermez (salt bilgi/telemetri kartları)
     return true;
   }
 }

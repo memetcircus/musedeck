@@ -93,7 +93,6 @@ export class StreamDeckCoreBridge {
             for (const device of streamDeck.devices) {
               console.log(`[Bridge] Switching device ${device.id} to profile MuseDeck page ${page}`);
               void streamDeck.profiles.switchToProfile(device.id, "MuseDeck", page);
-              void streamDeck.profiles.switchToProfile(device.id, undefined, page);
             }
           }
         } catch (e) {

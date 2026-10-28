@@ -74,6 +74,10 @@ function registerDeckKey(
 
 function unregisterDeckKey(ev: WillDisappearEvent): void {
   keyRegistry.remove(ev.action.id);
+  if (telemetrySubmenuManager.isActive) {
+    console.log("⚠️ [Submenu] Key disappearing while submenu active -> force-closing submenu to prevent stuck state");
+    telemetrySubmenuManager.forceClose();
+  }
 }
 
 // --- KEY 0: AGENT STATUS BADGE ---
@@ -700,11 +704,6 @@ export class PageNextAction extends SingletonAction {
     } catch (e: any) {
       console.warn("[PageNext] switchToProfile with name failed:", e?.message);
     }
-    try {
-      await streamDeck.profiles.switchToProfile(deviceId, undefined, 1);
-    } catch (e: any) {
-      console.warn("[PageNext] switchToProfile without name failed:", e?.message);
-    }
   }
 }
 
@@ -1314,11 +1313,6 @@ export class PagePrevAction extends SingletonAction {
       await streamDeck.profiles.switchToProfile(deviceId, "MuseDeck", 0);
     } catch (e: any) {
       console.warn("[PagePrev] switchToProfile with name failed:", e?.message);
-    }
-    try {
-      await streamDeck.profiles.switchToProfile(deviceId, undefined, 0);
-    } catch (e: any) {
-      console.warn("[PagePrev] switchToProfile without name failed:", e?.message);
     }
   }
 }
