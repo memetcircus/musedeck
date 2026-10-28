@@ -19,49 +19,44 @@ export class SvgKeyRenderer {
 
     switch (state) {
       case AgentState.IDLE:
-        return CyberIcons["p1_status"];
-        /* return this.svgToDataUri(`
+        return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <rect width="144" height="144" rx="26" fill="#041d14" stroke="#10b981" stroke-width="4"/>
-            <circle cx="72" cy="48" r="26" fill="#065f46" stroke="#34d399" stroke-width="3"/>
-            <path d="M60 48 L68 56 L85 39" fill="none" stroke="#ecfdf5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="72" y="115" fill="#f0fdf4" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">READY</text>
+            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#10b981" stroke-width="3"/>
+            <circle cx="72" cy="72" r="44" fill="#064e3b" fill-opacity="0.3" stroke="#34d399" stroke-width="3.5" stroke-dasharray="10, 8"/>
+            <circle cx="72" cy="72" r="30" fill="#065f46" stroke="#10b981" stroke-width="2"/>
+            <path d="M56 72 L67 83 L89 57" fill="none" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-        `); */
+        `);
 
       case AgentState.PLANNING:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <rect width="144" height="144" rx="26" fill="#032238" stroke="#38bdf8" stroke-width="4"/>
-            <circle cx="72" cy="48" r="24" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="12 6"/>
-            <polygon points="72,32 77,44 89,48 77,52 72,64 67,52 55,48 67,44" fill="#0ea5e9"/>
-            <text x="72" y="115" fill="#38bdf8" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PLAN</text>
-          </svg>
-        `);
-
-      case AgentState.WAITING_APPROVAL:
-        return this.svgToDataUri(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <defs>
-              <filter id="warnGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3" result="blur"/>
-                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-              </filter>
-            </defs>
-            <rect width="144" height="144" rx="26" fill="#451a03" stroke="#fbbf24" stroke-width="5" filter="url(#warnGlow)"/>
-            <polygon points="72,20 104,66 40,66" fill="#b45309" stroke="#fef08a" stroke-width="3.5" stroke-linejoin="round"/>
-            <text x="72" y="58" fill="#ffffff" font-size="28" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">!</text>
-            <text x="72" y="115" fill="#fef08a" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REVIEW</text>
+            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#0ea5e9" stroke-width="3"/>
+            <circle cx="72" cy="72" r="44" fill="#0c4a6e" fill-opacity="0.3" stroke="#38bdf8" stroke-width="3.5" stroke-dasharray="8, 6"/>
+            <circle cx="72" cy="72" r="28" fill="#0369a1" fill-opacity="0.4" stroke="#7dd3fc" stroke-width="2"/>
+            <path d="M72 44 L77 65 L98 72 L77 79 L72 100 L67 79 L46 72 L67 65 Z" fill="#38bdf8"/>
+            <circle cx="72" cy="72" r="6" fill="#ffffff"/>
           </svg>
         `);
 
       case AgentState.EXECUTING:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <rect width="144" height="144" rx="26" fill="#2e1065" stroke="#c084fc" stroke-width="4"/>
-            <circle cx="72" cy="48" r="24" fill="#581c87" stroke="#e9d5ff" stroke-width="4"/>
-            <circle cx="72" cy="48" r="10" fill="#ffffff"/>
-            <text x="72" y="115" fill="#f5f3ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">RUNNING</text>
+            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#a855f7" stroke-width="3"/>
+            <circle cx="72" cy="72" r="44" fill="#581c87" fill-opacity="0.3" stroke="#c084fc" stroke-width="3.5" stroke-dasharray="14, 8"/>
+            <circle cx="72" cy="72" r="30" fill="#6b21a8" fill-opacity="0.4" stroke="#a855f7" stroke-width="2"/>
+            <path d="M76 44 L56 74 L73 74 L68 100 L90 68 L73 68 Z" fill="#ffffff" stroke="#c084fc" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        `);
+
+      case AgentState.WAITING_APPROVAL:
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#f59e0b" stroke-width="3"/>
+            <circle cx="72" cy="72" r="44" fill="#78350f" fill-opacity="0.3" stroke="#fbbf24" stroke-width="3.5" stroke-dasharray="10, 8"/>
+            <polygon points="72,40 102,96 42,96" fill="#92400e" fill-opacity="0.6" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
+            <line x1="72" y1="58" x2="72" y2="76" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round"/>
+            <circle cx="72" cy="87" r="3.5" fill="#ffffff"/>
           </svg>
         `);
 
@@ -69,11 +64,11 @@ export class SvgKeyRenderer {
       default:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <rect width="144" height="144" rx="26" fill="#450a0a" stroke="#ef4444" stroke-width="5"/>
-            <circle cx="72" cy="48" r="26" fill="#991b1b" stroke="#fecaca" stroke-width="3"/>
-            <line x1="56" y1="32" x2="88" y2="64" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
-            <line x1="88" y1="32" x2="56" y2="64" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
-            <text x="72" y="115" fill="#fee2e2" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">ERROR</text>
+            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#ef4444" stroke-width="3"/>
+            <circle cx="72" cy="72" r="44" fill="#7f1d1d" fill-opacity="0.3" stroke="#f87171" stroke-width="3.5" stroke-dasharray="10, 8"/>
+            <circle cx="72" cy="72" r="30" fill="#991b1b" fill-opacity="0.5" stroke="#ef4444" stroke-width="2"/>
+            <line x1="56" y1="56" x2="88" y2="88" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round"/>
+            <line x1="88" y1="56" x2="56" y2="88" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round"/>
           </svg>
         `);
     }
@@ -169,15 +164,17 @@ export class SvgKeyRenderer {
   /**
    * Key 5: SAM 3.1 Snip Key (High-legibility vector design, never replaces icon with raw screenshot)
    */
+  /**
+   * Key 5: Screenshot Snip Key (Clean Cyber HUD reticle, SCREENSHOT label)
+   */
   static renderSamSnipKey(status: "idle" | "snipping" | "copied" = "idle"): string {
-    if (status === "idle") return CyberIcons["p1_sam-snip"];
     if (status === "copied") {
       return this.svgToDataUri(`
         <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-          <rect width="144" height="144" rx="26" fill="#052e16" stroke="#22c55e" stroke-width="4"/>
-          <circle cx="72" cy="46" r="26" fill="#15803d" stroke="#86efac" stroke-width="3"/>
-          <path d="M58 46 L68 56 L86 38" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <text x="72" y="115" fill="#f0fdf4" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">COPIED!</text>
+          <rect width="144" height="144" rx="26" fill="#041d14" stroke="#10b981" stroke-width="3"/>
+          <circle cx="72" cy="48" r="28" fill="#065f46" stroke="#34d399" stroke-width="2.5"/>
+          <path d="M58 48 L68 58 L87 39" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="72" y="116" fill="#f0fdf4" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">COPIED!</text>
         </svg>
       `);
     }
@@ -185,20 +182,41 @@ export class SvgKeyRenderer {
     if (status === "snipping") {
       return this.svgToDataUri(`
         <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-          <rect width="144" height="144" rx="26" fill="#1e1b4b" stroke="#f59e0b" stroke-width="4"/>
-          <rect x="42" y="24" width="60" height="46" rx="10" fill="#312e81" stroke="#fbbf24" stroke-width="3.5" stroke-dasharray="6 4"/>
-          <circle cx="72" cy="47" r="11" fill="#f59e0b"/>
-          <text x="72" y="115" fill="#fef08a" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SNIP...</text>
+          <rect width="144" height="144" rx="26" fill="#1c1203" stroke="#f59e0b" stroke-width="3"/>
+          <path d="M 46 36 L 46 26 L 56 26" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 98 36 L 98 26 L 88 26" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 46 62 L 46 72 L 56 72" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 98 62 L 98 72 L 88 72" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="72" cy="49" r="14" fill="#78350f" fill-opacity="0.5" stroke="#fde047" stroke-width="2" stroke-dasharray="4 3"/>
+          <circle cx="72" cy="49" r="4.5" fill="#ffffff"/>
+          <text x="72" y="116" fill="#fef08a" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SNIP...</text>
         </svg>
       `);
     }
 
+    // Default: IDLE -> SCREENSHOT with sleek Photo Camera icon
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#1e1b4b" stroke="#6366f1" stroke-width="4"/>
-        <rect x="42" y="24" width="60" height="46" rx="10" fill="#312e81" stroke="#a5b4fc" stroke-width="3.5" stroke-dasharray="8 5"/>
-        <circle cx="72" cy="47" r="11" fill="#818cf8"/>
-        <text x="72" y="115" fill="#e0e7ff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SAM 3.1</text>
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#0ea5e9" stroke-width="3"/>
+
+        <!-- Camera Top Hardware Details (Shutter & Pentaprism) -->
+        <rect x="43" y="27" width="9" height="5" rx="2" fill="#0284c7"/>
+        <path d="M 54 32 L 60 23 L 84 23 L 90 32 Z" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2" stroke-linejoin="round"/>
+
+        <!-- Camera Body -->
+        <rect x="33" y="32" width="78" height="48" rx="10" fill="#082f49" fill-opacity="0.5" stroke="#38bdf8" stroke-width="3"/>
+
+        <!-- Top Right Sensor / Mini Flash -->
+        <circle cx="96" cy="40" r="3.5" fill="#38bdf8"/>
+
+        <!-- Big Camera Lens Assembly -->
+        <circle cx="72" cy="56" r="17" fill="#0369a1" fill-opacity="0.4" stroke="#38bdf8" stroke-width="2.5"/>
+        <circle cx="72" cy="56" r="11" fill="#075985" fill-opacity="0.6" stroke="#7dd3fc" stroke-width="2"/>
+        <circle cx="72" cy="56" r="6" fill="#38bdf8"/>
+        <circle cx="75" cy="53" r="2.2" fill="#ffffff"/>
+
+        <!-- Clean SCREENSHOT Label -->
+        <text x="72" y="116" fill="#e0f2fe" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.3">SCREENSHOT</text>
       </svg>
     `);
   }
@@ -541,12 +559,13 @@ export class SvgKeyRenderer {
    * Render tile slice for the 5x3 Meta Muse Code Quantum Beam animation
    * Inspired by Meta Muse Code / Spark visual identity.
    *
-   * 2-PHASE LOOP SPECIFICATION:
-   * Phase 1 (frames 0..17): Luminous leftward wave surges across column 0 into the focal node at (84, 216).
-   *                         On impact, concentric circular ripples spread outward across the matrix.
-   * Phase 2 (frames 18..43): Conical laser streamlines and directional chevrons (<) gather from the right edge (720px)
-   *                          into the left node, concentrate into the aperture, and detonate expanding shockwaves across the grid.
-   * NO TEXT OVERLAYS.
+   * EXACT SEQUENCE SPECIFICATION (User Verified):
+   * 1. INFLOW: Laser streamlines and directional arrows (<) stream in from the RIGHT edge (x=720)
+   *    and converge/gather into the left focal aperture node at (84, 216).
+   * 2. CONCENTRATION & FLASH: Energy accumulates at the focal node, pulsating and flashing.
+   * 3. OUTWARD RIPPLES: Concentric circular waves burst out from the focal node,
+   *    propagating outwards across the entire 5x3 grid towards the edges.
+   * 4. Seamless loop.
    */
   static renderMuseBeamTile(col: number, row: number, frame: number): string {
     const vx = col * 144;
@@ -554,172 +573,112 @@ export class SvgKeyRenderer {
     const nodeX = 84;
     const nodeY = 216;
 
-    const totalFrames = 44;
+    const totalFrames = 40;
     const loopFrame = frame % totalFrames;
 
     let elements = "";
 
-    if (loopFrame < 18) {
-      // ===== PHASE 1: Leftward Wave -> Node Impact -> Concentric Ripples =====
-      const p1Frame = loopFrame; // 0..17
+    // Core laser beam along horizontal center line (always softly pulsing)
+    elements += `
+      <line x1="${nodeX}" y1="${nodeY}" x2="720" y2="${nodeY}" stroke="#0369a1" stroke-width="3" stroke-opacity="0.4"/>
+      <line x1="${nodeX}" y1="${nodeY}" x2="720" y2="${nodeY}" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.75"/>
+      <line x1="${nodeX}" y1="${nodeY}" x2="720" y2="${nodeY}" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.9"/>
+    `;
 
-      // Wave sweeping in from left edge (x = -40 to 84) during frames 0..7
-      if (p1Frame <= 8) {
-        const waveProgress = Math.min(1, p1Frame / 7);
-        const waveX = -40 + waveProgress * 124; // reaches 84 at frame 7
-        const waveOpacity = (0.35 + waveProgress * 0.65).toFixed(2);
+    // ===== 1. INFLOW: Streamlines and Arrows flowing from RIGHT (720) to LEFT (nodeX=84) =====
+    // Inflow is strongest during frames 0..24
+    const inflowAlpha = loopFrame < 24 ? 1 : Math.max(0, 1 - (loopFrame - 24) / 8);
 
-        // Curved energetic wavefront surging eastward
-        elements += `
-          <path d="M ${waveX - 30} 30 Q ${waveX + 30} 216 ${waveX - 30} 402"
-                fill="none" stroke="#0284c7" stroke-width="9" stroke-opacity="${(parseFloat(waveOpacity) * 0.45).toFixed(2)}"/>
-          <path d="M ${waveX} 40 Q ${waveX + 42} 216 ${waveX} 392"
-                fill="none" stroke="#38bdf8" stroke-width="5" stroke-opacity="${waveOpacity}"/>
-          <path d="M ${waveX + 8} 60 Q ${waveX + 48} 216 ${waveX + 8} 372"
-                fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="${waveOpacity}"/>
-        `;
-
-        // Particles riding the crest
-        for (let i = 0; i < 8; i++) {
-          const py = 60 + i * 44;
-          const px = waveX + Math.sin(py + p1Frame) * 14;
-          elements += `<circle cx="${px.toFixed(1)}" cy="${py}" r="${i % 2 === 0 ? 3.5 : 2}" fill="#e0f2fe" opacity="${waveOpacity}"/>`;
-        }
-      }
-
-      // Flash at impact (frames 7..9)
-      if (p1Frame >= 7 && p1Frame <= 9) {
-        const flashOp = (1 - (p1Frame - 7) * 0.45).toFixed(2);
-        elements += `
-          <circle cx="${nodeX}" cy="${nodeY}" r="32" fill="#ffffff" opacity="${flashOp}"/>
-          <circle cx="${nodeX}" cy="${nodeY}" r="56" fill="#38bdf8" opacity="${(parseFloat(flashOp) * 0.6).toFixed(2)}"/>
-        `;
-      }
-
-      // Expanding concentric ripple rings from node (frames 7..17)
-      if (p1Frame >= 7) {
-        const t = p1Frame - 7; // 0..10
-        // Ring 1
-        const r1 = 14 + t * 28;
-        const op1 = Math.max(0, 1 - t / 11).toFixed(2);
-        elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r1}" fill="none" stroke="#38bdf8" stroke-width="3.5" opacity="${op1}"/>`;
-
-        // Ring 2
-        if (t >= 3) {
-          const t2 = t - 3;
-          const r2 = 12 + t2 * 26;
-          const op2 = Math.max(0, 1 - t2 / 8).toFixed(2);
-          elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r2}" fill="none" stroke="#67e8f9" stroke-width="2.5" opacity="${op2}"/>`;
-        }
-
-        // Ring 3
-        if (t >= 6) {
-          const t3 = t - 6;
-          const r3 = 10 + t3 * 24;
-          const op3 = Math.max(0, 1 - t3 / 5).toFixed(2);
-          elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r3}" fill="none" stroke="#93c5fd" stroke-width="2" opacity="${op3}"/>`;
-        }
-      }
-
-    } else {
-      // ===== PHASE 2: Converging Right Streamlines with Arrows -> Concentration -> Shockwave Outburst =====
-      const p2Frame = loopFrame - 18; // 0..25
-
-      // Core quantum laser tether connecting node across the canvas
-      elements += `
-        <line x1="${nodeX}" y1="${nodeY}" x2="720" y2="${nodeY}" stroke="#0284c7" stroke-width="4" stroke-opacity="0.4"/>
-        <line x1="${nodeX}" y1="${nodeY}" x2="720" y2="${nodeY}" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.8"/>
-        <line x1="${nodeX}" y1="${nodeY}" x2="720" y2="${nodeY}" stroke="#ffffff" stroke-width="1" stroke-opacity="0.9"/>
-      `;
-
-      // 14 Convergent laser curved streamlines funnelling into node
+    if (inflowAlpha > 0.05) {
       const numLines = 14;
       for (let i = 0; i < numLines; i++) {
         const startY = 32 + i * 28.3; // 32..400
         const cp1X = 540;
         const cp1Y = nodeY + (startY - nodeY) * 0.76;
-        const cp2X = 300;
+        const cp2X = 280;
         const cp2Y = nodeY + (startY - nodeY) * 0.18;
-        const dashOffset = (p2Frame * 22 + i * 18);
+        const dashOffset = loopFrame * 26 + i * 22;
 
+        // Curved guide path
         elements += `
           <path d="M 720 ${startY.toFixed(1)} C ${cp1X} ${cp1Y.toFixed(1)}, ${cp2X} ${cp2Y.toFixed(1)}, ${nodeX} ${nodeY}"
-                fill="none" stroke="#0369a1" stroke-width="2" stroke-opacity="0.45"/>
+                fill="none" stroke="#0369a1" stroke-width="1.8" stroke-opacity="${(0.35 * inflowAlpha).toFixed(2)}"/>
           <path d="M 720 ${startY.toFixed(1)} C ${cp1X} ${cp1Y.toFixed(1)}, ${cp2X} ${cp2Y.toFixed(1)}, ${nodeX} ${nodeY}"
-                fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"
-                stroke-dasharray="26 180" stroke-dashoffset="${dashOffset}"/>
+                fill="none" stroke="#38bdf8" stroke-width="2.8" stroke-linecap="round"
+                stroke-dasharray="28 160" stroke-dashoffset="${dashOffset}" stroke-opacity="${inflowAlpha.toFixed(2)}"/>
         `;
 
-        // Inward-moving Directional Arrows / Chevrons (<) along streamlines gathering towards node
-        if (p2Frame < 15) {
-          const arrowProgress = ((p2Frame * 0.07 + i * 0.15) % 1.0);
-          const t = arrowProgress;
-          const u = 1 - t;
-          const ax = u * u * u * 720 + 3 * u * u * t * cp1X + 3 * u * t * t * cp2X + t * t * t * nodeX;
-          const ay = u * u * u * startY + 3 * u * u * t * cp1Y + 3 * u * t * t * cp2Y + t * t * t * nodeY;
+        // Leftward Directional Arrows / Chevrons (<) streaming towards the left node
+        const arrowProgress = ((loopFrame * 0.055 + i * 0.14) % 1.0);
+        const t = arrowProgress;
+        const u = 1 - t;
+        const ax = u * u * u * 720 + 3 * u * u * t * cp1X + 3 * u * t * t * cp2X + t * t * t * nodeX;
+        const ay = u * u * u * startY + 3 * u * u * t * cp1Y + 3 * u * t * t * cp2Y + t * t * t * nodeY;
 
-          if (ax > nodeX + 15 && ax < 710) {
-            elements += `
-              <polygon points="${ax.toFixed(1)},${ay.toFixed(1)} ${(ax + 10).toFixed(1)},${(ay - 5).toFixed(1)} ${(ax + 7).toFixed(1)},${ay.toFixed(1)} ${(ax + 10).toFixed(1)},${(ay + 5).toFixed(1)}"
-                       fill="#67e8f9" opacity="0.95"/>
-            `;
-          }
+        if (ax > nodeX + 16 && ax < 710) {
+          elements += `
+            <polygon points="${ax.toFixed(1)},${ay.toFixed(1)} ${(ax + 11).toFixed(1)},${(ay - 6).toFixed(1)} ${(ax + 8).toFixed(1)},${ay.toFixed(1)} ${(ax + 11).toFixed(1)},${(ay + 6).toFixed(1)}"
+                     fill="#67e8f9" opacity="${(0.95 * inflowAlpha).toFixed(2)}"/>
+          `;
         }
       }
 
-      // Swarm of particles flowing along the funnel
-      for (let p = 0; p < 18; p++) {
-        const particleProg = ((p2Frame * 0.06 + p * 0.13) % 1.0);
+      // Inflow energy particles streaming along lines towards the node
+      for (let p = 0; p < 16; p++) {
+        const particleProg = ((loopFrame * 0.05 + p * 0.125) % 1.0);
         const px = 720 - particleProg * (720 - nodeX);
-        const spread = (1 - particleProg) * 160;
-        const py = nodeY + Math.sin(p * 2.1 + p2Frame * 0.3) * spread;
-        const r = p % 3 === 0 ? 3 : 1.8;
-        elements += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${r}" fill="#a5f3fc" opacity="0.8"/>`;
-      }
-
-      // Energy Concentration at the node (frames 30..32 -> p2Frame 12..14)
-      if (p2Frame >= 12 && p2Frame <= 15) {
-        const conc = (p2Frame - 12) / 3;
-        const rConc = 16 + conc * 18;
-        elements += `
-          <circle cx="${nodeX}" cy="${nodeY}" r="${rConc}" fill="#ffffff" opacity="0.9"/>
-          <circle cx="${nodeX}" cy="${nodeY}" r="${rConc * 1.8}" fill="#38bdf8" opacity="0.7"/>
-        `;
-      }
-
-      // Outburst: Radial shockwaves bursting out from node (p2Frame >= 14, frames 32..43)
-      if (p2Frame >= 14) {
-        const bt = p2Frame - 14; // 0..11
-        // Outburst Ring 1
-        const br1 = 14 + bt * 40;
-        const bop1 = Math.max(0, 1 - bt / 12).toFixed(2);
-        elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${br1}" fill="none" stroke="#38bdf8" stroke-width="4.5" opacity="${bop1}"/>`;
-
-        // Outburst Ring 2
-        if (bt >= 3) {
-          const bt2 = bt - 3;
-          const br2 = 12 + bt2 * 36;
-          const bop2 = Math.max(0, 1 - bt2 / 9).toFixed(2);
-          elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${br2}" fill="none" stroke="#67e8f9" stroke-width="3" opacity="${bop2}"/>`;
-        }
-
-        // Outburst Ring 3
-        if (bt >= 6) {
-          const bt3 = bt - 6;
-          const br3 = 10 + bt3 * 32;
-          const bop3 = Math.max(0, 1 - bt3 / 6).toFixed(2);
-          elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${br3}" fill="none" stroke="#e0f2fe" stroke-width="2.5" opacity="${bop3}"/>`;
-        }
+        const spread = (1 - particleProg) * 150;
+        const py = nodeY + Math.sin(p * 2.3 + loopFrame * 0.35) * spread;
+        const r = p % 2 === 0 ? 3 : 1.8;
+        elements += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${r}" fill="#a5f3fc" opacity="${(0.85 * inflowAlpha).toFixed(2)}"/>`;
       }
     }
 
-    // Focal Left Aperture Node (centered on column 0, row 1)
+    // ===== 2. CONCENTRATION & FLASH at Left Focal Node (frames 18..24) =====
+    if (loopFrame >= 18 && loopFrame <= 25) {
+      const prog = (loopFrame - 18) / 7;
+      const coreR = 14 + prog * 20;
+      const glowR = 28 + prog * 40;
+      const flashOp = (1 - Math.abs(prog - 0.7) * 1.5).toFixed(2);
+      elements += `
+        <circle cx="${nodeX}" cy="${nodeY}" r="${glowR}" fill="#38bdf8" opacity="${Math.max(0, parseFloat(flashOp) * 0.6).toFixed(2)}"/>
+        <circle cx="${nodeX}" cy="${nodeY}" r="${coreR}" fill="#ffffff" opacity="${Math.max(0, parseFloat(flashOp)).toFixed(2)}"/>
+      `;
+    }
+
+    // ===== 3. OUTWARD CIRCULAR WAVES (RIPPLES) spreading across the matrix (frames 22..39) =====
+    if (loopFrame >= 22) {
+      const waveT = loopFrame - 22; // 0..17
+
+      // Wave 1
+      const r1 = 16 + waveT * 32;
+      const op1 = Math.max(0, 1 - waveT / 18).toFixed(2);
+      elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r1}" fill="none" stroke="#38bdf8" stroke-width="4.5" opacity="${op1}"/>`;
+
+      // Wave 2
+      if (waveT >= 4) {
+        const wt2 = waveT - 4;
+        const r2 = 14 + wt2 * 30;
+        const op2 = Math.max(0, 1 - wt2 / 14).toFixed(2);
+        elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r2}" fill="none" stroke="#67e8f9" stroke-width="3.5" opacity="${op2}"/>`;
+      }
+
+      // Wave 3
+      if (waveT >= 8) {
+        const wt3 = waveT - 8;
+        const r3 = 12 + wt3 * 28;
+        const op3 = Math.max(0, 1 - wt3 / 10).toFixed(2);
+        elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r3}" fill="none" stroke="#bae6fd" stroke-width="2.5" opacity="${op3}"/>`;
+      }
+    }
+
+    // Focal Left Aperture Node (centered at nodeX=84, nodeY=216, row 1 col 0)
     const baseNode = `
-      <circle cx="${nodeX}" cy="${nodeY}" r="40" fill="none" stroke="#0c4a6e" stroke-width="2" stroke-opacity="0.6"/>
-      <circle cx="${nodeX}" cy="${nodeY}" r="26" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="6 4"/>
-      <circle cx="${nodeX}" cy="${nodeY}" r="14" fill="#0369a1" stroke="#38bdf8" stroke-width="2"/>
-      <circle cx="${nodeX}" cy="${nodeY}" r="7" fill="#38bdf8"/>
-      <circle cx="${nodeX}" cy="${nodeY}" r="3" fill="#ffffff"/>
+      <circle cx="${nodeX}" cy="${nodeY}" r="42" fill="none" stroke="#0c4a6e" stroke-width="2.5" stroke-opacity="0.65"/>
+      <circle cx="${nodeX}" cy="${nodeY}" r="28" fill="none" stroke="#0284c7" stroke-width="3" stroke-dasharray="6 4"/>
+      <circle cx="${nodeX}" cy="${nodeY}" r="16" fill="#0369a1" stroke="#38bdf8" stroke-width="2.5"/>
+      <circle cx="${nodeX}" cy="${nodeY}" r="8" fill="#38bdf8"/>
+      <circle cx="${nodeX}" cy="${nodeY}" r="4" fill="#ffffff"/>
     `;
 
     const svg = `
@@ -732,9 +691,8 @@ export class SvgKeyRenderer {
           </radialGradient>
         </defs>
         <rect x="0" y="0" width="720" height="432" fill="url(#meshBg)"/>
-
-        ${elements}
         ${baseNode}
+        ${elements}
 
         <!-- Stream Deck Key Bezel Accent -->
         <rect x="${vx + 2}" y="${vy + 2}" width="140" height="140" rx="24" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.3"/>

@@ -45,6 +45,16 @@ export class StreamDeckCoreBridge {
     return this.telemetry;
   }
 
+  setState(state: AgentState): void {
+    this.telemetry.state = state;
+    for (const listener of this.telemetryListeners) {
+      listener(this.telemetry);
+    }
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "set_state", state }));
+    }
+  }
+
   onTelemetry(listener: (telemetry: TelemetryData) => void): () => void {
     this.telemetryListeners.add(listener);
     listener(this.telemetry);

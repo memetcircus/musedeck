@@ -92,12 +92,17 @@ async function main() {
       case "spark":
         console.log("✨ [Bridge] Received SPARK command from surface");
         try {
-          const thumb = stateMachine.getTelemetry().lastThumbnail;
+          let thumb = stateMachine.getTelemetry().lastThumbnail;
+          if (!thumb) {
+            console.log("📸 [Spark] No existing snip. Prompting interactive SAM 3.1 snip...");
+            const res = await samClient.snipScreenRegion();
+            thumb = res.thumbnailBase64;
+            stateMachine.setLastThumbnail(thumb);
+            await TerminalAutomation.pasteSnippetIntoTerminal(res.segmentedImagePath);
+          }
           if (thumb) {
             const res = await sparkClient.generateCodeFromImage(thumb, msg.prompt);
             stateMachine.setLastSparkCode(res.code);
-          } else {
-            console.warn("No thumbnail available for Spark synthesis");
           }
         } catch (err: any) {
           console.error("Spark failed:", err.message);

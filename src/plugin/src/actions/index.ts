@@ -90,10 +90,8 @@ export class AgentStatusAction extends SingletonAction {
     this.bridge.onTelemetry((telemetry) => {
       const img = SvgKeyRenderer.renderStatusKey(telemetry);
       for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning) {
-          void key.setImage(img);
-          void key.setTitle("");
-        }
+        void key.setImage(img);
+        void key.setTitle("");
       }
     });
   }
@@ -108,7 +106,7 @@ export class AgentStatusAction extends SingletonAction {
           void ev.action.setImage(SvgKeyRenderer.renderStatusKey(this.bridge.getTelemetry()));
           void ev.action.setTitle("");
         },
-        false,
+        true, // Exclude from thinking wave animation so status icon is always visible
         0,
         0
       );
@@ -124,8 +122,18 @@ export class AgentStatusAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    const telemetry = this.bridge.getTelemetry();
-    console.log(`[StatusKey] Current state: ${telemetry.state}`);
+    const current = this.bridge.getTelemetry();
+    const cycle = [
+      AgentState.IDLE,
+      AgentState.PLANNING,
+      AgentState.EXECUTING,
+      AgentState.WAITING_APPROVAL,
+      AgentState.ERROR,
+    ];
+    const currentIndex = cycle.indexOf(current.state);
+    const nextState = cycle[(currentIndex + 1) % cycle.length];
+    console.log(`[StatusKey] Cycling agent state: ${current.state} -> ${nextState}`);
+    this.bridge.setState(nextState);
   }
 }
 

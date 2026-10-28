@@ -182,14 +182,16 @@ end tell
   }
 
   /**
-   * Bring Terminal to the front and paste the snipped image file path into muse prompt
+   * Bring Terminal to the front and insert the snipped image file path directly
+   * at the user's active cursor location without erasing their prompt.
    */
   static async pasteSnippetIntoTerminal(
     filePath: string,
-    promptPrefix = "Turn this into a React Tailwind component: "
+    promptPrefix = ""
   ): Promise<void> {
     const cleanPath = filePath.trim();
-    const fullPrompt = `${promptPrefix}${cleanPath}`;
+    // Insert just the path (and a trailing space) or with prefix if explicitly specified
+    const textToInsert = promptPrefix ? `${promptPrefix}${cleanPath} ` : `${cleanPath} `;
 
     // 1. Always copy clean file path to macOS clipboard via pbcopy
     try {
@@ -202,24 +204,24 @@ end tell
     // 2. Bring Terminal.app to the front specifically targeting muse session
     await this.focusMuseTerminalWindow();
 
-    // 3. Clear any dirty line draft (Ctrl+C) and type clean prompt using native helper
+    // 3. Type text directly at current cursor position (preserves user prompt!)
     const macTypeBin = this.getMacTypeBin();
     if (macTypeBin) {
       try {
-        await execAsync(`"${macTypeBin}" clear-and-type "${fullPrompt}"`);
-        console.log(`📋 [Terminal] Directly typed prompt into active Terminal: ${fullPrompt}`);
+        await execAsync(`"${macTypeBin}" text "${textToInsert}"`);
+        console.log(`📋 [Terminal] Inserted snippet path at active cursor: ${textToInsert}`);
         return;
       } catch (err: any) {
         console.warn("Native mac-type typing failed, attempting fallback:", err.message);
       }
     }
 
-    // Fallback: AppleScript System Events keystroke
+    // Fallback: AppleScript System Events keystroke without wiping user's text
     const appleScript = `
 tell application "Terminal" to activate
-delay 0.1
+delay 0.05
 tell application "System Events"
-  keystroke "${this.escapeForAppleScript(fullPrompt)}"
+  keystroke "${this.escapeForAppleScript(textToInsert)}"
 end tell
     `.trim();
 

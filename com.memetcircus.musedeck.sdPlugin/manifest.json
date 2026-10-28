@@ -74,10 +74,10 @@
       "States": [{ "Image": "imgs/actions/reject/key" }]
     },
     {
-      "Name": "SAM 3.1 Snip",
+      "Name": "Screenshot",
       "UUID": "com.memetcircus.musedeck.sam-snip",
       "Icon": "imgs/actions/sam-snip/icon",
-      "Tooltip": "Interactive screen snip, SAM 3.1 foreground segmentation, and clipboard copy with live thumbnail preview.",
+      "Tooltip": "Interactive screen capture: snip UI region and insert image path directly into terminal.",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/sam-snip/key" }]
     },
