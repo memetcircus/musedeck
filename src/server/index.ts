@@ -139,8 +139,13 @@ async function main() {
   let lastObservedState = "IDLE";
   setInterval(async () => {
     try {
-      const thinkingState = await TerminalAutomation.checkTerminalThinkingState();
       const curState = stateMachine.getState();
+      // NEVER clobber human approval gate with background terminal thinking observer!
+      if (curState === AgentState.WAITING_APPROVAL) {
+        return;
+      }
+
+      const thinkingState = await TerminalAutomation.checkTerminalThinkingState();
 
       if (thinkingState === "THINKING") {
         if (curState !== AgentState.EXECUTING) {

@@ -126,12 +126,8 @@ export class TerminalSessionWatcher extends EventEmitter {
 
         try {
           const stat = fs.statSync(newestJsonl);
-          // If this session was modified within the last 15 seconds, inspect recent tail for ongoing wait
-          if (Date.now() - stat.mtimeMs < 15000) {
-            this.currentOffset = Math.max(0, stat.size - 4096);
-          } else {
-            this.currentOffset = stat.size;
-          }
+          // Start slightly before current end (8KB) to immediately catch any active ongoing approval wait
+          this.currentOffset = Math.max(0, stat.size - 8192);
         } catch {
           this.currentOffset = 0;
         }
