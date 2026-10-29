@@ -178,6 +178,7 @@ export class SvgKeyRenderer {
 
   /**
    * Render individual prompt snippet card for Snippets Submenu
+   * Edge-to-edge frame without corner brackets, high contrast typography.
    */
   static renderSnippetCard(
     line1: string,
@@ -186,27 +187,23 @@ export class SvgKeyRenderer {
     borderColor = "#a855f7",
     textColor = "#ffffff"
   ): string {
+    const subFontSize = subtitle.length > 10 ? 15 : subtitle.length > 8 ? 16 : 18;
+
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <!-- Outer Frame -->
-        <rect x="5" y="5" width="134" height="134" rx="22" fill="#070b14" stroke="${borderColor}" stroke-width="2.8"/>
-        <rect x="9" y="9" width="126" height="126" rx="18" fill="none" stroke="${borderColor}" stroke-width="1.2" stroke-opacity="0.4"/>
-
-        <!-- Tech Corner Accents -->
-        <path d="M14 26 L14 14 L26 14" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
-        <path d="M130 26 L130 14 L118 14" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
-        <path d="M14 118 L14 130 L26 130" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
-        <path d="M130 118 L130 130 L118 130" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+        <!-- Edge-to-edge Frame without corner brackets -->
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
 
         <!-- Title Lines -->
-        <text x="72" y="${line2 ? '48' : '58'}" fill="${textColor}" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${line1}</text>
-        ${line2 ? `<text x="72" y="74" fill="${textColor}" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${line2}</text>` : ''}
+        <text x="72" y="${line2 ? '46' : '58'}" fill="#ffffff" font-size="${line2 ? '22' : '34'}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="${line2 ? '0.8' : '1.5'}">${line1}</text>
+        ${line2 ? `<text x="72" y="73" fill="#ffffff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>` : ''}
 
         <!-- Divider Line -->
-        <line x1="36" y1="92" x2="108" y2="92" stroke="${borderColor}" stroke-width="2" stroke-opacity="0.6"/>
+        <line x1="16" y1="86" x2="128" y2="86" stroke="${borderColor}" stroke-width="1.8" stroke-opacity="0.5"/>
 
-        <!-- Subtitle -->
-        <text x="72" y="116" fill="${borderColor}" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subtitle}</text>
+        <!-- Subtitle (Large, ultra-readable) -->
+        <text x="72" y="118" fill="${textColor}" font-size="${subFontSize}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subtitle}</text>
       </svg>
     `);
   }
@@ -217,8 +214,7 @@ export class SvgKeyRenderer {
   static renderEmptyTile(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect x="5" y="5" width="134" height="134" rx="22" fill="#04070e" stroke="#1e293b" stroke-width="2"/>
-        <circle cx="72" cy="72" r="3" fill="#334155"/>
+        <rect width="144" height="144" rx="24" fill="#04070e" stroke="#1e293b" stroke-width="1.5"/>
       </svg>
     `);
   }
