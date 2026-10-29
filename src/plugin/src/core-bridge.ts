@@ -4,6 +4,7 @@ import { AgentState, type TelemetryData } from "../../agent/types.js";
 import { telemetrySubmenuManager } from "./ui/telemetry-submenu.js";
 import { snippetsSubmenuManager } from "./ui/snippets-submenu.js";
 import { reviewSubmenuManager } from "./ui/review-submenu.js";
+import { sessionsSubmenuManager } from "./ui/sessions-submenu.js";
 
 export class StreamDeckCoreBridge {
   private ws: WebSocket | null = null;
@@ -119,6 +120,16 @@ export class StreamDeckCoreBridge {
             reviewSubmenuManager.open();
           } else if (msg.type === "close_review") {
             reviewSubmenuManager.close();
+          } else if (msg.type === "toggle_sessions") {
+            if (sessionsSubmenuManager.isActive) {
+              sessionsSubmenuManager.close();
+            } else {
+              void sessionsSubmenuManager.open();
+            }
+          } else if (msg.type === "open_sessions") {
+            void sessionsSubmenuManager.open();
+          } else if (msg.type === "close_sessions") {
+            sessionsSubmenuManager.close();
           } else if (msg.type === "switch_page") {
             const page = typeof msg.page === "number" ? msg.page : 1;
             console.log(`[Bridge] Received switch_page command to page ${page}`);

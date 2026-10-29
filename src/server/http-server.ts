@@ -162,6 +162,22 @@ export class MuseHttpServer {
       res.json({ ok: true });
     });
 
+    // Sessions Submenu Endpoints
+    this.app.post("/api/sessions/toggle", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "toggle_sessions" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/sessions/open", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "open_sessions" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/sessions/close", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "close_sessions" as any });
+      res.json({ ok: true });
+    });
+
     this.app.post("/api/review/trigger-review", (_req: Request, res: Response) => {
       stateMachine.setWaitingApproval(
         {

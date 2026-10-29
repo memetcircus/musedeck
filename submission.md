@@ -148,3 +148,4 @@ We leveraged Baseten and Modal endpoints for running Muse Spark Open with ultra-
 * **2:35 - 3:00: Impact & Conclusion**
   * Summary: zero distraction, verified physical human-in-the-loop, full Meta stack integration.
   * Closing callout: Built for the Meta Global AI Developer Hackathon.
+

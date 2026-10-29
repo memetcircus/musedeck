@@ -111,3 +111,4 @@ class ReviewSubmenuManager {
 }
 
 export const reviewSubmenuManager = new ReviewSubmenuManager();
+

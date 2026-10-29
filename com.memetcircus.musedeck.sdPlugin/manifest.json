@@ -58,18 +58,18 @@
       "States": [{ "Image": "imgs/actions/diff/key" }]
     },
     {
-      "Name": "Structured Prompt",
+      "Name": "Approve (HITL)",
       "UUID": "com.memetcircus.musedeck.approve",
       "Icon": "imgs/actions/approve/icon",
-      "Tooltip": "Transform request into structured spec and execution plan (Spec -> Architecture -> Tasks -> Review)",
+      "Tooltip": "Physical Human-in-the-Loop Approval key. Press to unpause agent when waiting for review.",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/approve/key" }]
     },
     {
-      "Name": "Reject (HITL)",
+      "Name": "Muse Sessions",
       "UUID": "com.memetcircus.musedeck.reject",
       "Icon": "imgs/actions/reject/icon",
-      "Tooltip": "Physical Human-in-the-Loop Rejection key. Press to reject diff and request revision.",
+      "Tooltip": "Multi-session manager and drawer for Meta Muse Code terminals",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/reject/key" }]
     },

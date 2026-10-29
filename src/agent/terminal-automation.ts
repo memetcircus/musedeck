@@ -8,11 +8,102 @@ const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export interface MuseSessionInfo {
+  id: number;
+  title: string;
+  project: string;
+  isThinking: boolean;
+  isActive: boolean;
+}
+
 /**
  * macOS Terminal.app Automation Controller
  * Connects physical Stream Deck keys directly to the developer's active Terminal running muse.
  */
 export class TerminalAutomation {
+  static getActiveSessionId(): number | null {
+    try {
+      const idStr = fs.readFileSync("/tmp/musedeck/active_terminal_window_id.txt", "utf8").trim();
+      const idNum = parseInt(idStr, 10);
+      return isNaN(idNum) ? null : idNum;
+    } catch {
+      return null;
+    }
+  }
+
+  static async setActiveSession(windowId: number): Promise<boolean> {
+    try {
+      fs.mkdirSync("/tmp/musedeck", { recursive: true });
+      fs.writeFileSync("/tmp/musedeck/active_terminal_window_id.txt", windowId.toString());
+      console.log(`🎯 [Terminal] Switched active Muse session to window ID: ${windowId}`);
+    } catch (e: any) {
+      console.warn("Could not write active window ID:", e.message);
+    }
+    return await this.focusMuseTerminalWindow();
+  }
+
+  static async listMuseSessions(): Promise<MuseSessionInfo[]> {
+    const savedActiveId = this.getActiveSessionId();
+    const appleScript = `
+tell application "Terminal"
+  set sessionList to {}
+  repeat with w in windows
+    set winTitle to name of w
+    set wId to id of w
+    if winTitle contains "muse-bin" or winTitle contains "MUSE_ACTIVE_SESSION" or (winTitle contains "muse" and not (winTitle contains "codex")) then
+      set tabContent to contents of selected tab of w
+      set isThinking to (tabContent contains "Thinking (" or tabContent contains "Working (" or tabContent contains "esc to interrupt")
+      set end of sessionList to (wId as string) & ":::" & winTitle & ":::" & isThinking
+    end if
+  end repeat
+  return sessionList
+end tell
+    `.trim();
+
+    try {
+      const { stdout } = await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      const raw = stdout.trim();
+      if (!raw) return [];
+
+      const entries = raw.split(", ");
+      const sessions: MuseSessionInfo[] = [];
+
+      for (const entry of entries) {
+        const parts = entry.split(":::");
+        if (parts.length >= 2) {
+          const id = parseInt(parts[0], 10);
+          const title = parts[1];
+          const isThinking = parts[2] === "true";
+
+          let project = "MUSE";
+          if (title.includes("—")) {
+            const segments = title.split("—").map((s) => s.trim());
+            if (segments.length >= 2 && segments[1]) {
+              project = segments[1].split(/[\s▸]/)[0].toUpperCase();
+            }
+          } else if (title.includes("MUSE_ACTIVE_SESSION")) {
+            project = "MUSEDECK";
+          }
+
+          const isActive = savedActiveId ? id === savedActiveId : sessions.length === 0;
+
+          sessions.push({
+            id,
+            title,
+            project,
+            isThinking,
+            isActive,
+          });
+        }
+      }
+
+      return sessions;
+    } catch (e: any) {
+      console.warn("Could not list muse sessions:", e.message);
+      return [];
+    }
+  }
+
   private static getMacTypeBin(): string | null {
     const candidates = [
       path.resolve(__dirname, "../../bin/mac-type"),

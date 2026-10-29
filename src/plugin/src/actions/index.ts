@@ -1,6 +1,7 @@
 import { telemetrySubmenuManager } from "../ui/telemetry-submenu.js";
 import { snippetsSubmenuManager } from "../ui/snippets-submenu.js";
 import { reviewSubmenuManager } from "../ui/review-submenu.js";
+import { sessionsSubmenuManager } from "../ui/sessions-submenu.js";
 import {
   action,
   SingletonAction,
@@ -35,6 +36,11 @@ function checkSubmenuKeyDown(ev: any): boolean {
     return true;
   }
 
+  if (sessionsSubmenuManager.isActive) {
+    void sessionsSubmenuManager.handleKeyDown(col, row);
+    return true;
+  }
+
   if (telemetrySubmenuManager.isActive) {
     return telemetrySubmenuManager.handleKeyDown(col, row);
   }
@@ -53,6 +59,10 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
       if (telemetry.state !== AgentState.WAITING_APPROVAL) {
         reviewSubmenuManager.close();
       }
+      return;
+    }
+    if (sessionsSubmenuManager.isActive) {
+      void sessionsSubmenuManager.refreshSessions();
       return;
     }
     if (telemetrySubmenuManager.isActive) {
@@ -105,6 +115,9 @@ function unregisterDeckKey(ev: WillDisappearEvent): void {
   if (reviewSubmenuManager.isActive) {
     reviewSubmenuManager.forceClose();
   }
+  if (sessionsSubmenuManager.isActive) {
+    sessionsSubmenuManager.forceClose();
+  }
   if (telemetrySubmenuManager.isActive) {
     console.log("⚠️ [Submenu] Key disappearing while submenu active -> force-closing submenu to prevent stuck state");
     telemetrySubmenuManager.forceClose();
@@ -120,7 +133,7 @@ export class AgentStatusAction extends SingletonAction {
     super();
     reviewSubmenuManager.setBridge(this.bridge);
     this.bridge.onTelemetry((telemetry) => {
-      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
+      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || sessionsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
       const img = SvgKeyRenderer.renderStatusKey(telemetry);
       for (const key of this.activeKeys) {
         if (!museBeamAnimator.isRunning) {
@@ -158,12 +171,15 @@ export class AgentStatusAction extends SingletonAction {
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
     const current = this.bridge.getTelemetry();
-    console.log(`[StatusKey] Tapped (Current state: ${current.state}). Bringing active Muse Terminal to front...`);
-    await TerminalAutomation.bringTerminalToFront();
 
-    // If awaiting approval: open Review / HITL Submenu
+    // If awaiting approval: specifically open Review / HITL Submenu without direct focus action
     if (current.state === AgentState.WAITING_APPROVAL) {
+      console.log("[StatusKey] Awaiting approval -> Opening Review Submenu");
       reviewSubmenuManager.open();
+    } else {
+      // Normal states (READY, RUNNING, IDLE): Bring active Muse Terminal directly to the front!
+      console.log(`[StatusKey] Tapped (Current state: ${current.state}). Bringing active Muse Terminal to front...`);
+      await TerminalAutomation.bringTerminalToFront();
     }
   }
 }
@@ -303,19 +319,50 @@ export class StructPromptAction extends SingletonAction {
 // Backwards compatibility alias
 export { StructPromptAction as ApproveAction };
 
-// --- KEY 4: DORMANT / CLEAN KARO ---
+// --- KEY 4: SESSIONS SUBMENU KEY (PAGE 1: COL 4, ROW 0) ---
 @action({ UUID: "com.memetcircus.musedeck.reject" })
-export class RejectAction extends SingletonAction {
+export class SessionsAction extends SingletonAction {
+  private activeKeys = new Set<KeyAction>();
+
   constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
+    if (this.bridge) {
+      this.bridge.onTelemetry(() => {
+        if (
+          snippetsSubmenuManager.isActive ||
+          reviewSubmenuManager.isActive ||
+          sessionsSubmenuManager.isActive ||
+          telemetrySubmenuManager.isActive
+        )
+          return;
+        const img = SvgKeyRenderer.renderSessionsPageKey(
+          sessionsSubmenuManager.sessionCount || 1,
+          sessionsSubmenuManager.hasThinkingSession
+        );
+        for (const key of this.activeKeys) {
+          if (!museBeamAnimator.isRunning) {
+            void key.setImage(img);
+            void key.setTitle("");
+          }
+        }
+      });
+    }
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
+      if (this.bridge) attachGlobalThinkingListener(this.bridge);
+      await sessionsSubmenuManager.refreshSessions();
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderEmptyTile());
+          void ev.action.setImage(
+            SvgKeyRenderer.renderSessionsPageKey(
+              sessionsSubmenuManager.sessionCount || 1,
+              sessionsSubmenuManager.hasThinkingSession
+            )
+          );
           void ev.action.setTitle("");
         },
         false,
@@ -327,12 +374,20 @@ export class RejectAction extends SingletonAction {
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
+    console.log("🖥️ [SessionsKey] Tapped -> Opening Sessions Submenu");
+    await sessionsSubmenuManager.open();
   }
 }
+
+// Backwards compatibility alias
+export { SessionsAction as RejectAction };
 
 // --- KEY 5: SAM 3.1 SNIP KEY ---
 @action({ UUID: "com.memetcircus.musedeck.sam-snip" })
@@ -342,7 +397,7 @@ export class SamSnipAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
     this.bridge.onTelemetry(() => {
-      if (snippetsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
+      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || sessionsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
       const img = SvgKeyRenderer.renderSamSnipKey("idle");
       for (const key of this.activeKeys) {
         if (!museBeamAnimator.isRunning) {
@@ -484,7 +539,7 @@ export class HaltAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
     this.bridge.onTelemetry((telemetry) => {
-      if (snippetsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
+      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || sessionsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
       const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
       const img = SvgKeyRenderer.renderHaltKey(isThinking);
       for (const key of this.activeKeys) {

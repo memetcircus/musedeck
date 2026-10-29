@@ -284,6 +284,157 @@ export class SvgKeyRenderer {
   }
 
   /**
+   * Sessions Key on Page 1 (Col 4, Row 0)
+   */
+  static renderSessionsPageKey(count = 1, hasThinking = false): string {
+    const borderColor = hasThinking ? "#a855f7" : "#38bdf8";
+    const statusText = hasThinking ? "WORKING" : `${count} OPEN`;
+    const statusColor = hasThinking ? "#f472b6" : "#7dd3fc";
+
+    const pulseBorder = hasThinking
+      ? `<animate attributeName="stroke" values="#a855f7;#ec4899;#a855f7" dur="1.2s" repeatCount="indefinite"/>`
+      : "";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="${borderColor}" stroke-width="3">
+          ${pulseBorder}
+        </rect>
+        <!-- Corner brackets -->
+        <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 28 L 132 12 L 116 12" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 12 116 L 12 132 L 28 132" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 116 L 132 132 L 116 132" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+
+        <!-- Multi-terminal window stack icon -->
+        <g transform="translate(42, 22)">
+          <!-- Back terminal window -->
+          <rect x="14" y="6" width="46" height="34" rx="6" fill="#1e1b4b" fill-opacity="0.6" stroke="#818cf8" stroke-width="2"/>
+          <!-- Front terminal window -->
+          <rect x="0" y="16" width="46" height="34" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5"/>
+          <line x1="8" y1="28" x2="16" y2="28" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="20" y1="28" x2="38" y2="28" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+        </g>
+
+        <text x="72" y="106" fill="#f8fafc" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">SESSIONS</text>
+        <text x="72" y="124" fill="${statusColor}" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${statusText}</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * New Session Key in Sessions Submenu (Col 1, Row 0)
+   */
+  static renderNewSessionKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#06b6d4" stroke-width="3"/>
+        <!-- Corner reticle brackets -->
+        <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 132 28 L 132 12 L 116 12" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 12 116 L 12 132 L 28 132" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 132 116 L 132 132 L 116 132" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- Plus icon inside cyber circle -->
+        <circle cx="72" cy="48" r="26" fill="#083344" fill-opacity="0.6" stroke="#22d3ee" stroke-width="2.5"/>
+        <line x1="72" y1="36" x2="72" y2="60" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="60" y1="48" x2="84" y2="48" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+
+        <text x="72" y="106" fill="#e0f2fe" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">NEW</text>
+        <text x="72" y="124" fill="#22d3ee" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SESSION</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Session Card in Sessions Submenu with customized cyber flowing nodes
+   */
+  static renderSessionCard(
+    sessionIndex: number,
+    project: string,
+    isActive: boolean,
+    isThinking: boolean
+  ): string {
+    const borderColor = isThinking ? "#a855f7" : isActive ? "#22c55e" : "#38bdf8";
+    const borderWidth = isThinking || isActive ? 3.5 : 2.5;
+
+    // Corner beacon
+    let cornerBeacon = "";
+    if (isThinking) {
+      cornerBeacon = `
+        <circle cx="124" cy="20" r="5" fill="#c084fc">
+          <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
+          <animate attributeName="r" values="3.5;6.5;3.5" dur="1s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="124" cy="20" r="2.5" fill="#ffffff"/>
+      `;
+    } else if (isActive) {
+      cornerBeacon = `<circle cx="124" cy="20" r="4.5" fill="#22c55e" stroke="#86efac" stroke-width="1.5"/>`;
+    } else {
+      cornerBeacon = `<circle cx="124" cy="20" r="3.5" fill="#475569"/>`;
+    }
+
+    // Status footer: Flowing nodes if thinking, or CURRENT / READY
+    let footerSvg = "";
+    if (isThinking) {
+      footerSvg = `
+        <text x="72" y="106" fill="#e9d5ff" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">THINKING</text>
+        <g transform="translate(48, 122)">
+          <!-- Node 1 -->
+          <circle cx="8" cy="0" r="3.5" fill="#38bdf8">
+            <animate attributeName="opacity" values="0.25;1;0.25" dur="0.9s" begin="0s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="2.5;4.5;2.5" dur="0.9s" begin="0s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Node 2 -->
+          <circle cx="24" cy="0" r="3.5" fill="#a855f7">
+            <animate attributeName="opacity" values="0.25;1;0.25" dur="0.9s" begin="0.3s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="2.5;4.5;2.5" dur="0.9s" begin="0.3s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Node 3 -->
+          <circle cx="40" cy="0" r="3.5" fill="#38bdf8">
+            <animate attributeName="opacity" values="0.25;1;0.25" dur="0.9s" begin="0.6s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="2.5;4.5;2.5" dur="0.9s" begin="0.6s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+      `;
+    } else if (isActive) {
+      footerSvg = `
+        <text x="72" y="112" fill="#86efac" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">ACTIVE</text>
+        <text x="72" y="126" fill="#4ade80" font-size="10" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">CURRENT</text>
+      `;
+    } else {
+      footerSvg = `
+        <text x="72" y="112" fill="#cbd5e1" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STANDBY</text>
+        <text x="72" y="126" fill="#64748b" font-size="10" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">IDLE</text>
+      `;
+    }
+
+    const displayProject = project.length > 9 ? project.substring(0, 8) + "…" : project;
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="${borderColor}" stroke-width="${borderWidth}"/>
+        
+        <!-- Corner brackets -->
+        <path d="M 12 26 L 12 12 L 26 12" fill="none" stroke="${borderColor}" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 132 26 L 132 12 L 118 12" fill="none" stroke="${borderColor}" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 12 118 L 12 132 L 26 132" fill="none" stroke="${borderColor}" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 132 118 L 132 132 L 118 132" fill="none" stroke="${borderColor}" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- Header: Session Number and Beacon -->
+        <text x="20" y="24" fill="#94a3b8" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" letter-spacing="0.5">#${sessionIndex}</text>
+        ${cornerBeacon}
+
+        <!-- Project name in center -->
+        <text x="72" y="68" fill="#f8fafc" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${displayProject}</text>
+        <line x1="36" y1="78" x2="108" y2="78" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.6"/>
+
+        ${footerSvg}
+      </svg>
+    `);
+  }
+
+  /**
    * Key 3: Physical HITL APPROVE Key (Only visible & active when awaiting review)
    */
   static renderApproveKey(isAwaiting: boolean): string {
