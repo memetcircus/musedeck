@@ -42,10 +42,10 @@
       "States": [{ "Image": "imgs/actions/status/key" }]
     },
     {
-      "Name": "Active Task",
+      "Name": "Voice Input (⌥+V)",
       "UUID": "com.memetcircus.musedeck.task",
       "Icon": "imgs/actions/task/icon",
-      "Tooltip": "Telemetry display showing the active task and current subagent step",
+      "Tooltip": "Physical toggle for Meta Muse Code CLI native voice input (Option+V).",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/task/key" }]
     },

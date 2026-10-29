@@ -26,6 +26,20 @@ func typeString(_ text: String) {
     }
 }
 
+func pressOptionV() {
+    let vKeyCode: CGKeyCode = 0x09 // 'v'
+    if let keyDown = CGEvent(keyboardEventSource: source, virtualKey: vKeyCode, keyDown: true) {
+        keyDown.flags = .maskAlternate
+        keyDown.post(tap: .cghidEventTap)
+    }
+    usleep(30000)
+    if let keyUp = CGEvent(keyboardEventSource: source, virtualKey: vKeyCode, keyDown: false) {
+        keyUp.flags = []
+        keyUp.post(tap: .cghidEventTap)
+    }
+    usleep(50000)
+}
+
 func pressReturn() {
     let returnKeyCode: CGKeyCode = 0x24
     if let keyDown = CGEvent(keyboardEventSource: source, virtualKey: returnKeyCode, keyDown: true) {
@@ -69,6 +83,8 @@ case "key":
     }
 case "ctrl-c":
     pressCtrlC()
+case "opt-v", "voice":
+    pressOptionV()
 case "enter":
     pressReturn()
 default:

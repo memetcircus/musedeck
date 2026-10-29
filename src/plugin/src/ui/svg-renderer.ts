@@ -80,21 +80,52 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 1: Active Task Key
+   * Key 1: Voice Input Toggle Key (Option + V) for Meta Muse Code CLI
+   */
+  static renderVoiceKey(isRecording = false): string {
+    if (isRecording) {
+      return this.svgToDataUri(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+          <rect width="144" height="144" rx="26" fill="#2a0505" stroke="#ef4444" stroke-width="4.5"/>
+          <circle cx="72" cy="48" r="30" fill="#7f1d1d" fill-opacity="0.4" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6, 4"/>
+          <!-- Active Recording Glowing Dot & Radials -->
+          <circle cx="72" cy="48" r="14" fill="#ef4444" stroke="#fee2e2" stroke-width="2.5"/>
+          <path d="M42 40 C38 45 38 51 42 56" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+          <path d="M102 40 C106 45 106 51 102 56" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+          <path d="M34 34 C28 42 28 54 34 62" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M110 34 C116 42 116 54 110 62" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="72" y="104" fill="#fee2e2" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">RECORDING</text>
+          <text x="72" y="124" fill="#fca5a5" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">⌥+V TO STOP</text>
+        </svg>
+      `);
+    }
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#081a30" stroke="#0ea5e9" stroke-width="3.5"/>
+        <!-- Microphone Body -->
+        <rect x="64" y="26" width="16" height="30" rx="8" fill="#0284c7" stroke="#38bdf8" stroke-width="2.5"/>
+        <line x1="68" y1="34" x2="76" y2="34" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/>
+        <line x1="68" y1="40" x2="76" y2="40" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/>
+        <line x1="68" y1="46" x2="76" y2="46" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/>
+        <!-- Mic Cradle -->
+        <path d="M54 44 C54 60 90 60 90 44" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="72" y1="60" x2="72" y2="72" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="60" y1="72" x2="84" y2="72" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Sound waves -->
+        <path d="M44 42 C41 46 41 50 44 54" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M100 42 C103 46 103 50 100 54" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round"/>
+        <text x="72" y="104" fill="#f0f9ff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">VOICE</text>
+        <text x="72" y="124" fill="#38bdf8" font-size="14" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">⌥+V</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key 1: Active Task Key (Legacy)
    */
   static renderTaskKey(stepText = "Active"): string {
-    return CyberIcons["p1_task"];
-    /* return this.svgToDataUri(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#082f49" stroke="#0ea5e9" stroke-width="3.5"/>
-        <rect x="50" y="24" width="44" height="50" rx="8" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="3"/>
-        <rect x="60" y="18" width="24" height="10" rx="4" fill="#38bdf8"/>
-        <line x1="58" y1="42" x2="86" y2="42" stroke="#bae6fd" stroke-width="3" stroke-linecap="round"/>
-        <line x1="58" y1="52" x2="86" y2="52" stroke="#bae6fd" stroke-width="3" stroke-linecap="round"/>
-        <line x1="58" y1="62" x2="76" y2="62" stroke="#bae6fd" stroke-width="3" stroke-linecap="round"/>
-        <text x="72" y="115" fill="#f0f9ff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TASK</text>
-      </svg>
-    `); */
+    return this.renderVoiceKey(false);
   }
 
   /**

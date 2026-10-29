@@ -150,6 +150,38 @@ end tell
   }
 
   /**
+   * Send physical Option+V (⌥+v) into active Terminal running muse to toggle voice recording
+   */
+  static async sendVoiceToggleKeystroke(): Promise<void> {
+    await this.focusMuseTerminalWindow();
+    const macTypeBin = this.getMacTypeBin();
+    if (macTypeBin) {
+      try {
+        await execAsync(`"${macTypeBin}" opt-v`);
+        console.log(`🎙️ [Terminal] Sent Option+V (Voice toggle) to active Muse session via native helper`);
+        return;
+      } catch (err: any) {
+        console.warn("Native mac-type opt-v failed, attempting fallback:", err.message);
+      }
+    }
+
+    // Fallback: send Option+V via AppleScript System Events
+    try {
+      const appleScript = `
+tell application "Terminal" to activate
+delay 0.05
+tell application "System Events"
+  keystroke "v" using {option down}
+end tell
+      `.trim();
+      await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      console.log(`🎙️ [Terminal] Sent Option+V via AppleScript`);
+    } catch (e: any) {
+      console.error("Failed to send Option+V via AppleScript:", e.message);
+    }
+  }
+
+  /**
    * Send physical interrupt (Esc / Ctrl+C) into active Terminal running muse
    */
   static async sendInterruptEscape(): Promise<void> {

@@ -130,21 +130,14 @@ export class AgentStatusAction extends SingletonAction {
   }
 }
 
-// --- KEY 1: ACTIVE TASK / TELEMETRY ---
+// --- KEY 1: VOICE INPUT (OPTION + V) ---
 @action({ UUID: "com.memetcircus.musedeck.task" })
 export class ActiveTaskAction extends SingletonAction {
   private activeKeys = new Set<KeyAction>();
+  private isRecording = false;
 
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
-    this.bridge.onTelemetry((telemetry) => {
-      const img = SvgKeyRenderer.renderTaskKey(telemetry.activeStep);
-      for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning) {
-          void key.setImage(img);
-        }
-      }
-    });
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
@@ -154,8 +147,8 @@ export class ActiveTaskAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          const tel = this.bridge.getTelemetry();
-          void ev.action.setImage(SvgKeyRenderer.renderTaskKey(tel.activeStep));
+          void ev.action.setImage(SvgKeyRenderer.renderVoiceKey(this.isRecording));
+          void ev.action.setTitle("");
         },
         false,
         1,
@@ -173,7 +166,15 @@ export class ActiveTaskAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    console.log("Current Task:", this.bridge.getTelemetry().activeTask);
+    this.isRecording = !this.isRecording;
+    console.log(`🎙️ [Voice Key] Toggled voice input: ${this.isRecording ? "RECORDING (Option+V)" : "STOPPED"}`);
+
+    const img = SvgKeyRenderer.renderVoiceKey(this.isRecording);
+    for (const key of this.activeKeys) {
+      void key.setImage(img);
+    }
+
+    await TerminalAutomation.sendVoiceToggleKeystroke();
   }
 }
 
