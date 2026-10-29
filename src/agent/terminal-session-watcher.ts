@@ -252,8 +252,8 @@ export class TerminalSessionWatcher extends EventEmitter {
     }
 
     // 4. TASK STARTED (Tool execution running)
-    if (payloadType === "runtime.session.task") {
-      const evKind = event.payload?.event?.kind;
+    if (payloadType === "runtime.session.task" || payloadType === "tool_batch.effect.started") {
+      const evKind = event.payload?.event?.kind || event.payload?.record?.kind;
       if (evKind === "started") {
         if (this.stateMachine.getState() !== AgentState.WAITING_APPROVAL) {
           this.stateMachine.transition(AgentState.EXECUTING, "Running task in terminal");
@@ -262,10 +262,15 @@ export class TerminalSessionWatcher extends EventEmitter {
       return;
     }
 
-    // 5. SESSION / COMMAND SETTLED (Finished running, waiting for input)
-    if (payloadType === "runtime.command_intake.settled" || payloadType === "session.end") {
+    // 5. RUN COMPLETED / COMMAND SETTLED (Finished running, waiting for input)
+    const isRunTerminal = 
+      (payloadType === "runtime.session" && event.payload?.event?.kind === "terminal") ||
+      payloadType === "runtime.command_intake.settled" || 
+      payloadType === "session.end";
+
+    if (isRunTerminal) {
       if (this.stateMachine.getState() !== AgentState.WAITING_APPROVAL) {
-        console.log("🏁 [SessionWatcher] Command settled -> Agent READY");
+        console.log("🏁 [SessionWatcher] Command completed / settled -> Agent READY");
         this.stateMachine.transition(AgentState.IDLE, "Terminal ready for input");
       }
       return;

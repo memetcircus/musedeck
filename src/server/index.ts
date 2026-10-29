@@ -66,12 +66,20 @@ async function main() {
     switch (msg.type) {
       case "approve":
         console.log("⚡ [Bridge] Received APPROVE command from surface");
-        await museRunner.approve(msg.feedback);
+        if (museRunner.getIsRunning()) {
+          await museRunner.approve(msg.feedback);
+        } else {
+          stateMachine.transition(AgentState.EXECUTING, "Tool execution approved");
+        }
         break;
 
       case "reject":
         console.log("❌ [Bridge] Received REJECT command from surface");
-        await museRunner.reject(msg.feedback);
+        if (museRunner.getIsRunning()) {
+          await museRunner.reject(msg.feedback);
+        } else {
+          stateMachine.transition(AgentState.IDLE, "Tool execution rejected");
+        }
         break;
 
       case "halt":
@@ -153,7 +161,7 @@ async function main() {
           stateMachine.transition(AgentState.EXECUTING, "Muse Thinking...");
         }
       } else if (thinkingState === "IDLE") {
-        if (curState === AgentState.EXECUTING && lastObservedState === "THINKING") {
+        if (curState === AgentState.EXECUTING || curState === AgentState.PLANNING) {
           lastObservedState = "IDLE";
           stateMachine.transition(AgentState.IDLE, "Ready for instructions");
         }
