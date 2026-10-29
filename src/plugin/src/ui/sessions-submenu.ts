@@ -113,7 +113,9 @@ class SessionsSubmenuManager {
             image = SvgKeyRenderer.renderHistoricalSessionCard(
               sessionIdx,
               session.project,
-              session.dateStr || "PAST"
+              session.timeBadge || "PAST",
+              session.timeStr || "--:--",
+              session.ageCategory || "today"
             );
           } else {
             image = SvgKeyRenderer.renderSessionCard(

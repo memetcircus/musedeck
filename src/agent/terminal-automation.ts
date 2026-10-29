@@ -16,6 +16,9 @@ export interface MuseSessionInfo {
   isActive: boolean;
   isHistorical?: boolean;
   dateStr?: string;
+  timeStr?: string;
+  timeBadge?: string;
+  ageCategory?: "today" | "yesterday" | "older";
   sessionId?: string;
 }
 
@@ -179,19 +182,58 @@ end tell
       // If no prompt was found, do not restore this session
       if (!prompt) continue;
 
-      const project = workspace ? path.basename(workspace.trim()).toUpperCase() : "MUSE";
-      const date = new Date(item.mtime);
-      const dateStr =
-        date.toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase() +
-        " " +
-        date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+      const homeDir = process.env.HOME || "/Users/akif";
+      let project = "GLOBAL";
+      if (workspace) {
+        const trimmedWs = workspace.trim();
+        if (trimmedWs === homeDir || trimmedWs === homeDir + "/" || trimmedWs === "~") {
+          project = "GLOBAL";
+        } else {
+          project = path.basename(trimmedWs).toUpperCase();
+        }
+      }
+
+      const now = new Date();
+      const sessionDate = new Date(item.mtime);
+
+      const isToday =
+        now.getFullYear() === sessionDate.getFullYear() &&
+        now.getMonth() === sessionDate.getMonth() &&
+        now.getDate() === sessionDate.getDate();
+
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const isYesterday =
+        yesterday.getFullYear() === sessionDate.getFullYear() &&
+        yesterday.getMonth() === sessionDate.getMonth() &&
+        yesterday.getDate() === sessionDate.getDate();
+
+      let timeBadge = "";
+      let ageCategory: "today" | "yesterday" | "older" = "older";
+
+      if (isToday) {
+        timeBadge = "TODAY";
+        ageCategory = "today";
+      } else if (isYesterday) {
+        timeBadge = "YESTRDY";
+        ageCategory = "yesterday";
+      } else {
+        timeBadge = sessionDate.toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
+        ageCategory = "older";
+      }
+
+      const timeStr = sessionDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+      const dateStr = `${timeBadge} ${timeStr}`;
 
       results.push({
         id: item.sid,
         sessionId: item.sid,
         title: prompt,
-        project: project || "MUSE",
+        project: project || "GLOBAL",
         dateStr,
+        timeStr,
+        timeBadge,
+        ageCategory,
         isThinking: false,
         isActive: false,
         isHistorical: true,
