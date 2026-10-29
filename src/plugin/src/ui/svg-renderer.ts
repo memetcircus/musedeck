@@ -252,29 +252,120 @@ export class SvgKeyRenderer {
     `);
   }
 
-  static renderActiveApproveKey(): string {
+  /**
+   * HITL Option 1: YES (Approve Once - Sends '1')
+   */
+  static renderHitlOption1Key(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#22c55e" stroke-width="3.5"/>
-        <circle cx="72" cy="46" r="28" fill="#14532d" fill-opacity="0.45" stroke="#4ade80" stroke-width="2.5"/>
-        <polyline points="56,47 68,59 88,37" fill="none" stroke="#22c55e" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="72" y="106" fill="#86efac" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">APPROVE</text>
-        <text x="72" y="124" fill="#4ade80" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">ACCEPT (Y)</text>
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#22c55e" stroke-width="3"/>
+        <circle cx="72" cy="72" r="50" fill="#22c55e" fill-opacity="0.04"/>
+
+        <!-- Top pill: #1 -->
+        <rect x="12" y="14" width="42" height="24" rx="6" fill="#14532d" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="33" y="31" fill="#86efac" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">#1</text>
+
+        <!-- Right badge: ONCE -->
+        <rect x="64" y="14" width="68" height="24" rx="6" fill="#14532d" fill-opacity="0.6" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="98" y="31" fill="#86efac" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">ONCE</text>
+
+        <!-- Center: YES -->
+        <text x="72" y="76" fill="#ffffff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">YES</text>
+        <line x1="16" y1="87" x2="128" y2="87" stroke="#22c55e" stroke-width="1.5" stroke-opacity="0.5"/>
+
+        <!-- Bottom: APPROVE (1) -->
+        <text x="72" y="121" fill="#4ade80" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">APPROVE (1)</text>
       </svg>
     `);
   }
 
-  static renderActiveRejectKey(): string {
+  /**
+   * HITL Option 2: ALWAYS (Allow for session - Sends '2')
+   */
+  static renderHitlOption2Key(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#ef4444" stroke-width="3.5"/>
-        <circle cx="72" cy="46" r="28" fill="#7f1d1d" fill-opacity="0.45" stroke="#f87171" stroke-width="2.5"/>
-        <line x1="58" y1="32" x2="86" y2="60" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
-        <line x1="86" y1="32" x2="58" y2="60" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
-        <text x="72" y="106" fill="#fca5a5" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">REJECT</text>
-        <text x="72" y="124" fill="#f87171" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">DECLINE (N)</text>
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#06b6d4" stroke-width="3"/>
+        <circle cx="72" cy="72" r="50" fill="#06b6d4" fill-opacity="0.04"/>
+
+        <!-- Top pill: #2 -->
+        <rect x="12" y="14" width="42" height="24" rx="6" fill="#164e63" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="33" y="31" fill="#67e8f9" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">#2</text>
+
+        <!-- Right badge: SESSION -->
+        <rect x="62" y="14" width="70" height="24" rx="6" fill="#164e63" fill-opacity="0.6" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="97" y="31" fill="#67e8f9" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">SESSION</text>
+
+        <!-- Center: ALWAYS -->
+        <text x="72" y="76" fill="#ffffff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">ALWAYS</text>
+        <line x1="16" y1="87" x2="128" y2="87" stroke="#06b6d4" stroke-width="1.5" stroke-opacity="0.5"/>
+
+        <!-- Bottom: ALLOW ALL (2) -->
+        <text x="72" y="121" fill="#22d3ee" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">ALLOW ALL (2)</text>
       </svg>
     `);
+  }
+
+  /**
+   * HITL Option 3: NO (Reject once - Sends '3')
+   */
+  static renderHitlOption3Key(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#ef4444" stroke-width="3"/>
+        <circle cx="72" cy="72" r="50" fill="#ef4444" fill-opacity="0.04"/>
+
+        <!-- Top pill: #3 -->
+        <rect x="12" y="14" width="42" height="24" rx="6" fill="#7f1d1d" stroke="#f87171" stroke-width="1.5"/>
+        <text x="33" y="31" fill="#fca5a5" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">#3</text>
+
+        <!-- Right badge: DENY -->
+        <rect x="64" y="14" width="68" height="24" rx="6" fill="#7f1d1d" fill-opacity="0.6" stroke="#f87171" stroke-width="1.5"/>
+        <text x="98" y="31" fill="#fca5a5" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">DENY</text>
+
+        <!-- Center: NO -->
+        <text x="72" y="76" fill="#ffffff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">NO</text>
+        <line x1="16" y1="87" x2="128" y2="87" stroke="#ef4444" stroke-width="1.5" stroke-opacity="0.5"/>
+
+        <!-- Bottom: REJECT (3) -->
+        <text x="72" y="121" fill="#f87171" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">REJECT (3)</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * HITL Option 4: TELL WHY / FEEDBACK (Sends '4')
+   */
+  static renderHitlOption4Key(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#f59e0b" stroke-width="3"/>
+        <circle cx="72" cy="72" r="50" fill="#f59e0b" fill-opacity="0.04"/>
+
+        <!-- Top pill: #4 -->
+        <rect x="12" y="14" width="42" height="24" rx="6" fill="#78350f" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="33" y="31" fill="#fde047" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">#4</text>
+
+        <!-- Right badge: STOP -->
+        <rect x="64" y="14" width="68" height="24" rx="6" fill="#78350f" fill-opacity="0.6" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="98" y="31" fill="#fde047" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">STOP</text>
+
+        <!-- Center: TELL WHY -->
+        <text x="72" y="76" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TELL WHY</text>
+        <line x1="16" y1="87" x2="128" y2="87" stroke="#f59e0b" stroke-width="1.5" stroke-opacity="0.5"/>
+
+        <!-- Bottom: FEEDBACK (4) -->
+        <text x="72" y="121" fill="#fbbf24" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">FEEDBACK (4)</text>
+      </svg>
+    `);
+  }
+
+  static renderActiveApproveKey(): string {
+    return this.renderHitlOption1Key();
+  }
+
+  static renderActiveRejectKey(): string {
+    return this.renderHitlOption3Key();
   }
 
   /**

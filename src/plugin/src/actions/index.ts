@@ -590,7 +590,7 @@ export class ResetAction extends SingletonAction {
       const usage = telemetry.apiUsage;
       const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
       for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning && !telemetrySubmenuManager.isActive && !sessionsSubmenuManager.isActive && !snippetsSubmenuManager.isActive) {
+        if (!museBeamAnimator.isRunning && !telemetrySubmenuManager.isActive && !sessionsSubmenuManager.isActive && !snippetsSubmenuManager.isActive && !reviewSubmenuManager.isActive) {
           void key.setImage(img);
           void key.setTitle("");
         }

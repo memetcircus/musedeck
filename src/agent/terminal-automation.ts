@@ -376,9 +376,9 @@ end tell
   }
 
   /**
-   * Send a physical 'y' or 'n' keypress into Terminal.app for HITL approvals
+   * Send a physical keypress into Terminal.app for HITL approvals (e.g. "1", "2", "3", "4", "y", "n")
    */
-  static async sendApprovalKeystroke(key: "y" | "n"): Promise<void> {
+  static async sendApprovalKeystroke(key: string): Promise<void> {
     // 1. Focus active Terminal window running muse
     await this.focusMuseTerminalWindow();
 

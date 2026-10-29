@@ -10,6 +10,7 @@ import { SamClient } from "../api/sam-client.js";
 import { MuseSparkClient } from "../api/spark-client.js";
 import { MuseHttpServer } from "./http-server.js";
 import { MuseWsServer, type SurfaceMessage } from "./ws-server.js";
+import { TerminalSessionWatcher } from "../agent/terminal-session-watcher.js";
 
 async function main() {
   console.log(`
@@ -46,6 +47,10 @@ async function main() {
     wsServer,
   });
   await httpServer.start();
+
+  // 6. Initialize Live Terminal Session Watcher (Tails external Terminal.app Muse sessions)
+  const sessionWatcher = new TerminalSessionWatcher(stateMachine);
+  sessionWatcher.start();
 
   // Wire Telemetry Events to WebSocket Broadcast
   stateMachine.on("telemetry", (telemetry) => {

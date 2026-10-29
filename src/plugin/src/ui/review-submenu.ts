@@ -29,6 +29,7 @@ class ReviewSubmenuManager {
   open(): void {
     console.log("⚖️ [ReviewSubmenu] Opening Review / HITL Approval Submenu");
     this.active = true;
+    void TerminalAutomation.bringTerminalToFront();
     this.render();
   }
 
@@ -54,16 +55,22 @@ class ReviewSubmenuManager {
       let image = "";
 
       if (row === 0 && col === 0) {
-        // Sol üst köşe: Yukarı yönlü BACK tuşu
+        // (0, 0): BACK key
         image = SvgKeyRenderer.renderUpBackKey();
       } else if (row === 0 && col === 1) {
-        // (1, 0): APPROVE (Y) - Yeşil buton
-        image = SvgKeyRenderer.renderActiveApproveKey();
+        // (1, 0): Option 1 - YES (Approve once)
+        image = SvgKeyRenderer.renderHitlOption1Key();
       } else if (row === 0 && col === 2) {
-        // (2, 0): REJECT (N) - Kırmızı buton
-        image = SvgKeyRenderer.renderActiveRejectKey();
+        // (2, 0): Option 2 - ALWAYS (Yes, don't ask again)
+        image = SvgKeyRenderer.renderHitlOption2Key();
+      } else if (row === 0 && col === 3) {
+        // (3, 0): Option 3 - NO (Reject)
+        image = SvgKeyRenderer.renderHitlOption3Key();
+      } else if (row === 0 && col === 4) {
+        // (4, 0): Option 4 - TELL WHY (Feedback / Stop)
+        image = SvgKeyRenderer.renderHitlOption4Key();
       } else {
-        // Diğer tüm tuşlar: Karanlık bekleme karosu
+        // Other rows: Dark blank tiles
         image = SvgKeyRenderer.renderEmptyTile();
       }
 
@@ -77,16 +84,16 @@ class ReviewSubmenuManager {
   async handleKeyDown(col: number, row: number): Promise<boolean> {
     if (!this.active) return false;
 
-    // 1. Sol üst köşe (0, 0): BACK -> kapat ve Page 1'e dön
+    // 1. (0, 0): BACK -> close and restore Page 1
     if (col === 0 && row === 0) {
       this.close();
       return true;
     }
 
-    // 2. (1, 0): APPROVE (Y)
+    // 2. (1, 0): Option 1: YES
     if (col === 1 && row === 0) {
-      console.log("✅ [ReviewSubmenu] User pressed APPROVE -> Sending 'y' to active Muse Terminal");
-      await TerminalAutomation.sendApprovalKeystroke("y");
+      console.log("✅ [ReviewSubmenu] Option 1 (YES) selected -> Sending '1' to active Muse Terminal");
+      await TerminalAutomation.sendApprovalKeystroke("1");
       if (this.bridge) {
         await this.bridge.approve();
       }
@@ -94,10 +101,21 @@ class ReviewSubmenuManager {
       return true;
     }
 
-    // 3. (2, 0): REJECT (N)
+    // 3. (2, 0): Option 2: ALWAYS (Allow for session)
     if (col === 2 && row === 0) {
-      console.log("❌ [ReviewSubmenu] User pressed REJECT -> Sending 'n' to active Muse Terminal");
-      await TerminalAutomation.sendApprovalKeystroke("n");
+      console.log("🚀 [ReviewSubmenu] Option 2 (ALWAYS) selected -> Sending '2' to active Muse Terminal");
+      await TerminalAutomation.sendApprovalKeystroke("2");
+      if (this.bridge) {
+        await this.bridge.approve();
+      }
+      this.close();
+      return true;
+    }
+
+    // 4. (3, 0): Option 3: NO (Reject)
+    if (col === 3 && row === 0) {
+      console.log("❌ [ReviewSubmenu] Option 3 (NO) selected -> Sending '3' to active Muse Terminal");
+      await TerminalAutomation.sendApprovalKeystroke("3");
       if (this.bridge) {
         await this.bridge.reject();
       }
@@ -105,7 +123,18 @@ class ReviewSubmenuManager {
       return true;
     }
 
-    // Alt menüdeyken diğer boş tuşlara basılırsa işlem yapma
+    // 5. (4, 0): Option 4: TELL WHY (Feedback)
+    if (col === 4 && row === 0) {
+      console.log("💬 [ReviewSubmenu] Option 4 (FEEDBACK) selected -> Sending '4' to active Muse Terminal");
+      await TerminalAutomation.sendApprovalKeystroke("4");
+      if (this.bridge) {
+        await this.bridge.reject();
+      }
+      this.close();
+      return true;
+    }
+
+    // Other keys
     return true;
   }
 }

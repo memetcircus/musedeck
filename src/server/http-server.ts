@@ -162,6 +162,16 @@ export class MuseHttpServer {
       res.json({ ok: true });
     });
 
+    // Test endpoint to trigger WAITING_APPROVAL state for live demo
+    this.app.post("/api/test/trigger-approval", (_req: Request, res: Response) => {
+      stateMachine.setWaitingApproval(
+        { filesChanged: 1, insertions: 15, deletions: 3, files: [{ path: "Terminal: bash command", additions: 15, deletions: 3 }] },
+        "Tool 'bash' requires human confirmation. Choose 1: YES, 2: ALWAYS, 3: NO, 4: TELL WHY",
+        "bash command approval"
+      );
+      res.json({ ok: true, state: stateMachine.getState() });
+    });
+
     // Sessions Submenu Endpoints
     this.app.post("/api/sessions/toggle", (_req: Request, res: Response) => {
       wsServer?.broadcast({ type: "toggle_sessions" as any });
