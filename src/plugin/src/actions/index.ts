@@ -40,8 +40,12 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
   isThinkingListenerAttached = true;
 
   bridge.onTelemetry((telemetry) => {
+    if (snippetsSubmenuManager.isActive) {
+      return;
+    }
     if (telemetrySubmenuManager.isActive) {
       telemetrySubmenuManager.render(telemetry);
+      return;
     }
     const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
     if (isThinking && !museBeamAnimator.isRunning) {
@@ -63,8 +67,10 @@ function registerDeckKey(
 ): void {
   if (!ev.action.isKey()) return;
   const payload = ev.payload as any;
-  const col = payload?.coordinates?.column ?? fallbackCol;
-  const row = payload?.coordinates?.row ?? fallbackRow;
+  const col = ev.action.coordinates?.column ?? payload?.coordinates?.column ?? fallbackCol;
+  const row = ev.action.coordinates?.row ?? payload?.coordinates?.row ?? fallbackRow;
+
+  console.log(`[KeyRegistry] Registering action=${ev.action.manifestId} at col=${col}, row=${row}`);
 
   keyRegistry.add(ev.action.id, {
     action: ev.action,
@@ -98,6 +104,7 @@ export class AgentStatusAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
     this.bridge.onTelemetry((telemetry) => {
+      if (snippetsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
       const img = SvgKeyRenderer.renderStatusKey(telemetry);
       for (const key of this.activeKeys) {
         if (!museBeamAnimator.isRunning) {
@@ -347,6 +354,7 @@ export class SamSnipAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
     this.bridge.onTelemetry(() => {
+      if (snippetsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
       const img = SvgKeyRenderer.renderSamSnipKey("idle");
       for (const key of this.activeKeys) {
         if (!museBeamAnimator.isRunning) {
@@ -488,6 +496,7 @@ export class HaltAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
     this.bridge.onTelemetry((telemetry) => {
+      if (snippetsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
       const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
       const img = SvgKeyRenderer.renderHaltKey(isThinking);
       for (const key of this.activeKeys) {

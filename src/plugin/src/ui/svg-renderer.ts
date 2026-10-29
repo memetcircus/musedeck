@@ -139,6 +139,20 @@ export class SvgKeyRenderer {
   }
 
   /**
+   * Render Upward Back key for submenus (pure vector retina SVG)
+   */
+  static renderUpBackKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#a855f7" stroke-width="3"/>
+        <circle cx="72" cy="72" r="34" fill="#581c87" fill-opacity="0.4" stroke="#c084fc" stroke-width="2.5"/>
+        <!-- Prominent Upward Arrow -->
+        <path d="M72 42 L52 62 M72 42 L92 62 M72 42 L72 98" fill="none" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `);
+  }
+
+  /**
    * Key 2: Snippets Submenu Launcher (replaces Diff)
    */
   static renderSnippetsKey(): string {

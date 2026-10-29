@@ -43,6 +43,7 @@ async function main() {
     museRunner,
     samClient,
     sparkClient,
+    wsServer,
   });
   await httpServer.start();
 

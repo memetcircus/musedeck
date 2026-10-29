@@ -1,4 +1,16 @@
 import streamDeck from "@elgato/streamdeck";
+import * as fs from "node:fs";
+const logFile = "/tmp/musedeck_plugin.log";
+const origLog = console.log;
+const origErr = console.error;
+console.log = (...args: any[]) => {
+  origLog(...args);
+  try { fs.appendFileSync(logFile, `[LOG ${new Date().toISOString()}] ` + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(" ") + "\n"); } catch {}
+};
+console.error = (...args: any[]) => {
+  origErr(...args);
+  try { fs.appendFileSync(logFile, `[ERR ${new Date().toISOString()}] ` + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(" ") + "\n"); } catch {}
+};
 import { StreamDeckCoreBridge } from "./core-bridge.js";
 import {
   AgentStatusAction,

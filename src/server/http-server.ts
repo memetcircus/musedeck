@@ -16,6 +16,7 @@ export interface HttpServerDependencies {
   museRunner: MuseRunner;
   samClient: SamClient;
   sparkClient: MuseSparkClient;
+  wsServer?: any;
 }
 
 export class MuseHttpServer {
@@ -41,7 +42,7 @@ export class MuseHttpServer {
   }
 
   private configureRoutes(): void {
-    const { stateMachine, museRunner, samClient, sparkClient } = this.deps;
+    const { stateMachine, museRunner, samClient, sparkClient, wsServer } = this.deps;
 
     // Health check
     this.app.get("/health", (_req: Request, res: Response) => {
@@ -127,6 +128,22 @@ export class MuseHttpServer {
         console.error("SAM Snip error:", err.message);
         res.status(500).json({ ok: false, error: err.message });
       }
+    });
+
+    // Snippets Submenu Endpoints
+    this.app.post("/api/snippets/toggle", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "toggle_snippets" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/snippets/open", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "open_snippets" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/snippets/close", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "close_snippets" as any });
+      res.json({ ok: true });
     });
 
     // Start / Stop Thinking Animation Demo

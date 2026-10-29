@@ -108,6 +108,7 @@ class SnippetsSubmenuManager {
 
   render(): void {
     if (!this.active) return;
+    console.log(`[SnippetsSubmenu] render() called, total keys in registry: ${keyRegistry.all().length}`);
 
     for (const key of keyRegistry.all()) {
       const col = key.column;
@@ -116,12 +117,14 @@ class SnippetsSubmenuManager {
       let image = "";
 
       if (row === 0 && col === 0) {
-        // Sol üst köşe: Yukarı yönlü BACK tuşu (tıpkı credits alt menüsündeki gibi)
-        image = CyberIcons["submenu_up"];
+        // Sol üst köşe: Yukarı yönlü BACK tuşu
+        console.log(`[SnippetsSubmenu] (0,0) rendering UpBackKey for action=${key.action.manifestId}`);
+        image = SvgKeyRenderer.renderUpBackKey();
       } else {
         const keyCoord = `${col},${row}`;
         const snippet = SNIPPETS[keyCoord];
         if (snippet) {
+          console.log(`[SnippetsSubmenu] (${col},${row}) rendering snippet "${snippet.line1}" for action=${key.action.manifestId}`);
           image = SvgKeyRenderer.renderSnippetCard(
             snippet.line1,
             snippet.line2,
@@ -130,6 +133,7 @@ class SnippetsSubmenuManager {
             snippet.textColor
           );
         } else {
+          console.log(`[SnippetsSubmenu] (${col},${row}) rendering empty tile for action=${key.action.manifestId}`);
           image = SvgKeyRenderer.renderEmptyTile();
         }
       }
@@ -164,3 +168,4 @@ class SnippetsSubmenuManager {
 }
 
 export const snippetsSubmenuManager = new SnippetsSubmenuManager();
+
