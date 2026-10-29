@@ -106,10 +106,10 @@
       "States": [{ "Image": "imgs/actions/halt/key" }]
     },
     {
-      "Name": "Reset Agent",
+      "Name": "AI Credits HUD",
       "UUID": "com.memetcircus.musedeck.reset",
       "Icon": "imgs/actions/reset/icon",
-      "Tooltip": "Clears agent buffers and resets state back to IDLE.",
+      "Tooltip": "Real-time AI credit balance and model telemetry dashboard.",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/reset/key" }]
     },

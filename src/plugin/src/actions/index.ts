@@ -579,20 +579,40 @@ export class HaltAction extends SingletonAction {
   }
 }
 
-// --- KEY 9: RESET KEY ---
+// --- KEY 9 (PAGE 1: COL 4, ROW 1): AI CREDITS HUD & TELEMETRY SUBMENU ---
 @action({ UUID: "com.memetcircus.musedeck.reset" })
 export class ResetAction extends SingletonAction {
+  private activeKeys = new Set<KeyAction>();
+
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
+    this.bridge.onTelemetry((telemetry) => {
+      const usage = telemetry.apiUsage;
+      const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
+      for (const key of this.activeKeys) {
+        if (!museBeamAnimator.isRunning && !telemetrySubmenuManager.isActive && !sessionsSubmenuManager.isActive && !snippetsSubmenuManager.isActive) {
+          void key.setImage(img);
+          void key.setTitle("");
+        }
+      }
+    });
+  }
+
+  private renderKeyImage(key: KeyAction): void {
+    const usage = this.bridge?.getTelemetry()?.apiUsage;
+    const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
+    void key.setImage(img);
+    void key.setTitle("");
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
       attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderResetKey());
+          this.renderKeyImage(ev.action as KeyAction);
         },
         false,
         4,
@@ -603,11 +623,18 @@ export class ResetAction extends SingletonAction {
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    await this.bridge.reset();
+    if (telemetrySubmenuManager.isActive) {
+      telemetrySubmenuManager.close();
+      return;
+    }
+    telemetrySubmenuManager.open(this.bridge?.getTelemetry());
   }
 }
 

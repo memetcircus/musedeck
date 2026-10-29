@@ -228,28 +228,26 @@ export class SvgKeyRenderer {
 
   /**
    * Key 3: Struct Prompt Key (Transforms user task into structured spec & execution plan)
+   * Clean edge-to-edge frame without corner brackets, high legibility typography.
    */
   static renderStructPromptKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#a855f7" stroke-width="3"/>
-        <!-- Cyber reticle corner brackets -->
-        <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M 132 28 L 132 12 L 116 12" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M 12 116 L 12 132 L 28 132" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M 132 116 L 132 132 L 116 132" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#a855f7" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="50" fill="#a855f7" fill-opacity="0.04"/>
 
         <!-- Structured Document / Spec Icon -->
-        <g transform="translate(45, 23)">
-          <rect x="0" y="0" width="54" height="58" rx="8" fill="#581c87" fill-opacity="0.35" stroke="#c084fc" stroke-width="2.5"/>
-          <line x1="12" y1="16" x2="42" y2="16" stroke="#f5f3ff" stroke-width="3" stroke-linecap="round"/>
-          <line x1="12" y1="27" x2="36" y2="27" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="12" y1="37" x2="42" y2="37" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="12" y1="47" x2="28" y2="47" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+        <g transform="translate(46, 16)">
+          <rect x="0" y="0" width="52" height="56" rx="8" fill="#581c87" fill-opacity="0.35" stroke="#c084fc" stroke-width="2.5"/>
+          <line x1="12" y1="16" x2="40" y2="16" stroke="#f5f3ff" stroke-width="3" stroke-linecap="round"/>
+          <line x1="12" y1="26" x2="34" y2="26" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="12" y1="36" x2="40" y2="36" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="12" y1="46" x2="26" y2="46" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
         </g>
 
-        <text x="72" y="106" fill="#f5f3ff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STRUCT</text>
-        <text x="72" y="124" fill="#c084fc" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PROMPT</text>
+        <!-- High-Legibility Titles -->
+        <text x="72" y="97" fill="#f5f3ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STRUCT</text>
+        <text x="72" y="121" fill="#c084fc" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">PROMPT</text>
       </svg>
     `);
   }
@@ -257,7 +255,7 @@ export class SvgKeyRenderer {
   static renderActiveApproveKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#22c55e" stroke-width="3.5"/>
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#22c55e" stroke-width="3.5"/>
         <circle cx="72" cy="46" r="28" fill="#14532d" fill-opacity="0.45" stroke="#4ade80" stroke-width="2.5"/>
         <polyline points="56,47 68,59 88,37" fill="none" stroke="#22c55e" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
         <text x="72" y="106" fill="#86efac" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">APPROVE</text>
@@ -269,7 +267,7 @@ export class SvgKeyRenderer {
   static renderActiveRejectKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#ef4444" stroke-width="3.5"/>
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#ef4444" stroke-width="3.5"/>
         <circle cx="72" cy="46" r="28" fill="#7f1d1d" fill-opacity="0.45" stroke="#f87171" stroke-width="2.5"/>
         <line x1="58" y1="32" x2="86" y2="60" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
         <line x1="86" y1="32" x2="58" y2="60" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
@@ -281,6 +279,7 @@ export class SvgKeyRenderer {
 
   /**
    * Sessions Key on Page 1 (Col 4, Row 0)
+   * Clean edge-to-edge frame without corner brackets, high legibility typography.
    */
   static renderSessionsPageKey(count = 1, hasThinking = false): string {
     const borderColor = hasThinking ? "#a855f7" : "#38bdf8";
@@ -293,27 +292,24 @@ export class SvgKeyRenderer {
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#070b14" stroke="${borderColor}" stroke-width="3">
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5">
           ${pulseBorder}
         </rect>
-        <!-- Corner brackets -->
-        <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M 132 28 L 132 12 L 116 12" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M 12 116 L 12 132 L 28 132" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M 132 116 L 132 132 L 116 132" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
 
         <!-- Multi-terminal window stack icon -->
-        <g transform="translate(42, 22)">
+        <g transform="translate(44, 16)">
           <!-- Back terminal window -->
-          <rect x="14" y="6" width="46" height="34" rx="6" fill="#1e1b4b" fill-opacity="0.6" stroke="#818cf8" stroke-width="2"/>
+          <rect x="14" y="6" width="44" height="34" rx="6" fill="#1e1b4b" fill-opacity="0.6" stroke="#818cf8" stroke-width="2"/>
           <!-- Front terminal window -->
-          <rect x="0" y="16" width="46" height="34" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5"/>
+          <rect x="0" y="16" width="44" height="34" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5"/>
           <line x1="8" y1="28" x2="16" y2="28" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="20" y1="28" x2="38" y2="28" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+          <line x1="20" y1="28" x2="36" y2="28" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
         </g>
 
-        <text x="72" y="106" fill="#f8fafc" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">SESSIONS</text>
-        <text x="72" y="124" fill="${statusColor}" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${statusText}</text>
+        <!-- High-Legibility Titles -->
+        <text x="72" y="97" fill="#f8fafc" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">SESSIONS</text>
+        <text x="72" y="121" fill="${statusColor}" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${statusText}</text>
       </svg>
     `);
   }
@@ -808,41 +804,26 @@ export class SvgKeyRenderer {
    * Page 2 Key 11: Main Clean High-Legibility AI Credits HUD Key
    * Shows only big, crisp, readable numbers - no tiny micro-text!
    */
+  /**
+   * AI Credits & Telemetry HUD Key (Col 4, Row 1 on Page 1 / Page 2)
+   * Clean edge-to-edge frame without corner notches, bold readable balance.
+   */
   static renderApiStatusKey(credits = "$149.97"): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <defs>
-          <linearGradient id="cyberBg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#041a14"/>
-            <stop offset="100%" stop-color="#020e0a"/>
-          </linearGradient>
-          <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2.5" result="blur"/>
-            <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-
-        <!-- Cyber Bezel & Tech Frame -->
-        <rect x="5" y="5" width="134" height="134" rx="22" fill="url(#cyberBg)" stroke="#059669" stroke-width="2.5"/>
-        <rect x="10" y="10" width="124" height="124" rx="18" fill="none" stroke="#10b981" stroke-width="1.2" stroke-opacity="0.5"/>
-
-        <!-- Tech Corner Notches -->
-        <path d="M16 28 L16 16 L28 16" fill="none" stroke="#34d399" stroke-width="2"/>
-        <path d="M128 28 L128 16 L116 16" fill="none" stroke="#34d399" stroke-width="2"/>
-        <path d="M16 116 L16 128 L28 128" fill="none" stroke="#34d399" stroke-width="2"/>
-        <path d="M128 116 L128 128 L116 128" fill="none" stroke="#34d399" stroke-width="2"/>
+        <!-- Clean Edge-to-edge Frame -->
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#10b981" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="50" fill="#10b981" fill-opacity="0.04"/>
 
         <!-- Top Header: High-Visibility Cyan Label -->
-        <text x="72" y="34" fill="#38bdf8" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">CREDITS</text>
+        <text x="72" y="32" fill="#38bdf8" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">CREDITS</text>
+        <line x1="18" y1="44" x2="126" y2="44" stroke="#10b981" stroke-width="1.5" stroke-opacity="0.4"/>
 
         <!-- Center: Big Neon Green Balance -->
-        <text x="72" y="78" fill="#10b981" font-size="26" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" filter="url(#neonGlow)">${credits}</text>
+        <text x="72" y="82" fill="#10b981" font-size="28" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${credits}</text>
 
-        <!-- Bottom: High-Visibility Details Callout -->
-        <text x="72" y="122" fill="#34d399" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STATS ↗</text>
+        <!-- Bottom: High-Visibility Telemetry Callout -->
+        <text x="72" y="121" fill="#34d399" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">LIVE STATS ↗</text>
       </svg>
     `);
   }
