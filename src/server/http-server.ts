@@ -129,6 +129,17 @@ export class MuseHttpServer {
       }
     });
 
+    // Start / Stop Thinking Animation Demo
+    this.app.post("/api/animation/start", (_req: Request, res: Response) => {
+      stateMachine.startPlanning("Meta Muse Code is actively synthesizing code...");
+      res.json({ ok: true, state: stateMachine.getState() });
+    });
+
+    this.app.post("/api/animation/stop", (_req: Request, res: Response) => {
+      stateMachine.reset();
+      res.json({ ok: true, state: stateMachine.getState() });
+    });
+
     // Muse Spark Image-to-Code
     this.app.post("/api/spark", async (req: Request, res: Response) => {
       const { prompt } = req.body;

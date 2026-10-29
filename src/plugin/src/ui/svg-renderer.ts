@@ -12,7 +12,7 @@ import { AgentState, type TelemetryData } from "../../../agent/types.js";
 
 export class SvgKeyRenderer {
   /**
-   * Key 0: Dynamic Agent Status Badge
+   * Key 0: Dynamic Agent Status Badge (Icon + Contextual State Label)
    */
   static renderStatusKey(telemetry: TelemetryData): string {
     const { state } = telemetry;
@@ -22,9 +22,10 @@ export class SvgKeyRenderer {
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
             <rect width="144" height="144" rx="26" fill="#070b14" stroke="#10b981" stroke-width="3"/>
-            <circle cx="72" cy="72" r="44" fill="#064e3b" fill-opacity="0.3" stroke="#34d399" stroke-width="3.5" stroke-dasharray="10, 8"/>
-            <circle cx="72" cy="72" r="30" fill="#065f46" stroke="#10b981" stroke-width="2"/>
-            <path d="M56 72 L67 83 L89 57" fill="none" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="72" cy="48" r="30" fill="#064e3b" fill-opacity="0.35" stroke="#34d399" stroke-width="3" stroke-dasharray="8, 6"/>
+            <circle cx="72" cy="48" r="20" fill="#065f46" stroke="#10b981" stroke-width="2"/>
+            <path d="M62 48 L69 55 L83 39" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="72" y="118" fill="#a7f3d0" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">READY</text>
           </svg>
         `);
 
@@ -32,10 +33,11 @@ export class SvgKeyRenderer {
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
             <rect width="144" height="144" rx="26" fill="#070b14" stroke="#0ea5e9" stroke-width="3"/>
-            <circle cx="72" cy="72" r="44" fill="#0c4a6e" fill-opacity="0.3" stroke="#38bdf8" stroke-width="3.5" stroke-dasharray="8, 6"/>
-            <circle cx="72" cy="72" r="28" fill="#0369a1" fill-opacity="0.4" stroke="#7dd3fc" stroke-width="2"/>
-            <path d="M72 44 L77 65 L98 72 L77 79 L72 100 L67 79 L46 72 L67 65 Z" fill="#38bdf8"/>
-            <circle cx="72" cy="72" r="6" fill="#ffffff"/>
+            <circle cx="72" cy="48" r="30" fill="#0c4a6e" fill-opacity="0.35" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6, 5"/>
+            <circle cx="72" cy="48" r="18" fill="#0369a1" fill-opacity="0.5" stroke="#7dd3fc" stroke-width="2"/>
+            <path d="M72 28 L76 43 L91 48 L76 53 L72 68 L68 53 L53 48 L68 43 Z" fill="#38bdf8"/>
+            <circle cx="72" cy="48" r="4.5" fill="#ffffff"/>
+            <text x="72" y="118" fill="#7dd3fc" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PLAN</text>
           </svg>
         `);
 
@@ -43,9 +45,10 @@ export class SvgKeyRenderer {
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
             <rect width="144" height="144" rx="26" fill="#070b14" stroke="#a855f7" stroke-width="3"/>
-            <circle cx="72" cy="72" r="44" fill="#581c87" fill-opacity="0.3" stroke="#c084fc" stroke-width="3.5" stroke-dasharray="14, 8"/>
-            <circle cx="72" cy="72" r="30" fill="#6b21a8" fill-opacity="0.4" stroke="#a855f7" stroke-width="2"/>
-            <path d="M76 44 L56 74 L73 74 L68 100 L90 68 L73 68 Z" fill="#ffffff" stroke="#c084fc" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="72" cy="48" r="30" fill="#581c87" fill-opacity="0.35" stroke="#c084fc" stroke-width="3" stroke-dasharray="10, 6"/>
+            <circle cx="72" cy="48" r="19" fill="#6b21a8" fill-opacity="0.5" stroke="#a855f7" stroke-width="2"/>
+            <path d="M75 28 L58 49 L72 49 L68 68 L86 46 L72 46 Z" fill="#ffffff" stroke="#c084fc" stroke-width="1.5" stroke-linejoin="round"/>
+            <text x="72" y="118" fill="#e9d5ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">RUNNING</text>
           </svg>
         `);
 
@@ -53,10 +56,11 @@ export class SvgKeyRenderer {
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
             <rect width="144" height="144" rx="26" fill="#070b14" stroke="#f59e0b" stroke-width="3"/>
-            <circle cx="72" cy="72" r="44" fill="#78350f" fill-opacity="0.3" stroke="#fbbf24" stroke-width="3.5" stroke-dasharray="10, 8"/>
-            <polygon points="72,40 102,96 42,96" fill="#92400e" fill-opacity="0.6" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
-            <line x1="72" y1="58" x2="72" y2="76" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round"/>
-            <circle cx="72" cy="87" r="3.5" fill="#ffffff"/>
+            <circle cx="72" cy="48" r="31" fill="#78350f" fill-opacity="0.35" stroke="#fbbf24" stroke-width="3" stroke-dasharray="8, 6"/>
+            <polygon points="72,25 96,69 48,69" fill="#92400e" fill-opacity="0.75" stroke="#fde047" stroke-width="3" stroke-linejoin="round"/>
+            <line x1="72" y1="38" x2="72" y2="53" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+            <circle cx="72" cy="62" r="2.8" fill="#ffffff"/>
+            <text x="72" y="118" fill="#fde047" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REVIEW</text>
           </svg>
         `);
 
@@ -65,10 +69,11 @@ export class SvgKeyRenderer {
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
             <rect width="144" height="144" rx="26" fill="#070b14" stroke="#ef4444" stroke-width="3"/>
-            <circle cx="72" cy="72" r="44" fill="#7f1d1d" fill-opacity="0.3" stroke="#f87171" stroke-width="3.5" stroke-dasharray="10, 8"/>
-            <circle cx="72" cy="72" r="30" fill="#991b1b" fill-opacity="0.5" stroke="#ef4444" stroke-width="2"/>
-            <line x1="56" y1="56" x2="88" y2="88" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round"/>
-            <line x1="88" y1="56" x2="56" y2="88" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round"/>
+            <circle cx="72" cy="48" r="30" fill="#7f1d1d" fill-opacity="0.35" stroke="#f87171" stroke-width="3" stroke-dasharray="8, 6"/>
+            <circle cx="72" cy="48" r="19" fill="#991b1b" fill-opacity="0.6" stroke="#ef4444" stroke-width="2"/>
+            <line x1="60" y1="36" x2="84" y2="60" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+            <line x1="84" y1="36" x2="60" y2="60" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+            <text x="72" y="118" fill="#fecaca" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">ERROR</text>
           </svg>
         `);
     }
@@ -559,13 +564,14 @@ export class SvgKeyRenderer {
    * Render tile slice for the 5x3 Meta Muse Code Quantum Beam animation
    * Inspired by Meta Muse Code / Spark visual identity.
    *
-   * EXACT SEQUENCE SPECIFICATION (User Verified):
-   * 1. INFLOW: Laser streamlines and directional arrows (<) stream in from the RIGHT edge (x=720)
-   *    and converge/gather into the left focal aperture node at (84, 216).
-   * 2. CONCENTRATION & FLASH: Energy accumulates at the focal node, pulsating and flashing.
-   * 3. OUTWARD RIPPLES: Concentric circular waves burst out from the focal node,
-   *    propagating outwards across the entire 5x3 grid towards the edges.
-   * 4. Seamless loop.
+   * ORGANIC WATER FLOW & OVERCHARGE DETONATION SEQUENCE:
+   * 1. WAVE 1 (frames 0..24): First water flow bursts in from the right edge,
+   *    travels across the darkness, and enters the left node.
+   * 2. WAVE 2 (frames 12..36): Second heavier water flow surges in, charging the node to level 2.
+   * 3. WAVE 3 (frames 24..45): High-energy water flow surges in, pushing the node into violent OVERCHARGE.
+   * 4. DETONATION (frames 45..57): Overcharged node EXPLODES with blinding flash and massive concentric
+   *    circular shockwaves blasting across the entire 15-key matrix.
+   * 5. COOLDOWN (frames 57..59): Total darkness before seamless loop.
    */
   static renderMuseBeamTile(col: number, row: number, frame: number): string {
     const vx = col * 144;
@@ -573,129 +579,192 @@ export class SvgKeyRenderer {
     const nodeX = 84;
     const nodeY = 216;
 
-    const totalFrames = 40;
+    const totalFrames = 60;
     const loopFrame = frame % totalFrames;
+
+    // Dark space background
+    const bg = `<rect x="0" y="0" width="720" height="432" fill="#000208"/>`;
+
+    // Fast cubic Bézier point evaluator along stream from right (s=0) to left (s=1)
+    const getPoint = (s: number, startY: number) => {
+      const clamped = Math.max(0, Math.min(1, s));
+      const u = 1 - clamped;
+      const cp1X = 520;
+      const cp1Y = nodeY + (startY - nodeY) * 0.88;
+      const cp2X = 240;
+      const cp2Y = nodeY + (startY - nodeY) * 0.12;
+
+      const x = u * u * u * 720 + 3 * u * u * clamped * cp1X + 3 * u * clamped * clamped * cp2X + clamped * clamped * clamped * nodeX;
+      const y = u * u * u * startY + 3 * u * u * clamped * cp1Y + 3 * u * clamped * clamped * cp2Y + clamped * clamped * clamped * nodeY;
+      return { x, y };
+    };
 
     let elements = "";
 
-    // Core laser beam along horizontal center line (always softly pulsing)
-    elements += `
-      <line x1="${nodeX}" y1="${nodeY}" x2="720" y2="${nodeY}" stroke="#0369a1" stroke-width="3" stroke-opacity="0.4"/>
-      <line x1="${nodeX}" y1="${nodeY}" x2="720" y2="${nodeY}" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.75"/>
-      <line x1="${nodeX}" y1="${nodeY}" x2="720" y2="${nodeY}" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.9"/>
-    `;
+    // 12 Streamline Channels fanning out to the right edge
+    const numChannels = 12;
 
-    // ===== 1. INFLOW: Streamlines and Arrows flowing from RIGHT (720) to LEFT (nodeX=84) =====
-    // Inflow is strongest during frames 0..24
-    const inflowAlpha = loopFrame < 24 ? 1 : Math.max(0, 1 - (loopFrame - 24) / 8);
+    // Define 3 Water Waves traveling right-to-left
+    const waves = [
+      { startFrame: 0,  duration: 22, length: 0.38, opacity: 0.85, width: 2.4, color: "#38bdf8" },
+      { startFrame: 12, duration: 22, length: 0.42, opacity: 0.95, width: 2.8, color: "#67e8f9" },
+      { startFrame: 24, duration: 20, length: 0.46, opacity: 1.00, width: 3.2, color: "#a5f3fc" },
+    ];
 
-    if (inflowAlpha > 0.05) {
-      const numLines = 14;
-      for (let i = 0; i < numLines; i++) {
-        const startY = 32 + i * 28.3; // 32..400
-        const cp1X = 540;
-        const cp1Y = nodeY + (startY - nodeY) * 0.76;
-        const cp2X = 280;
-        const cp2Y = nodeY + (startY - nodeY) * 0.18;
-        const dashOffset = loopFrame * 26 + i * 22;
+    // Render active water flows (ONLY if inside frames 0..46, before detonation)
+    if (loopFrame <= 45) {
+      for (const wave of waves) {
+        if (loopFrame >= wave.startFrame && loopFrame <= wave.startFrame + wave.duration + 5) {
+          const waveT = (loopFrame - wave.startFrame) / wave.duration; // 0.0 to ~1.2
+          const headS = Math.min(1.0, waveT);
+          const tailS = Math.max(0.0, headS - wave.length);
 
-        // Curved guide path
-        elements += `
-          <path d="M 720 ${startY.toFixed(1)} C ${cp1X} ${cp1Y.toFixed(1)}, ${cp2X} ${cp2Y.toFixed(1)}, ${nodeX} ${nodeY}"
-                fill="none" stroke="#0369a1" stroke-width="1.8" stroke-opacity="${(0.35 * inflowAlpha).toFixed(2)}"/>
-          <path d="M 720 ${startY.toFixed(1)} C ${cp1X} ${cp1Y.toFixed(1)}, ${cp2X} ${cp2Y.toFixed(1)}, ${nodeX} ${nodeY}"
-                fill="none" stroke="#38bdf8" stroke-width="2.8" stroke-linecap="round"
-                stroke-dasharray="28 160" stroke-dashoffset="${dashOffset}" stroke-opacity="${inflowAlpha.toFixed(2)}"/>
-        `;
+          if (headS > 0.01 && tailS < 0.99) {
+            // Fade out as it enters the node
+            const enterFade = headS >= 0.95 ? Math.max(0, 1 - (headS - 0.95) / 0.15) : 1.0;
+            const flowAlpha = (wave.opacity * enterFade).toFixed(2);
 
-        // Leftward Directional Arrows / Chevrons (<) streaming towards the left node
-        const arrowProgress = ((loopFrame * 0.055 + i * 0.14) % 1.0);
-        const t = arrowProgress;
-        const u = 1 - t;
-        const ax = u * u * u * 720 + 3 * u * u * t * cp1X + 3 * u * t * t * cp2X + t * t * t * nodeX;
-        const ay = u * u * u * startY + 3 * u * u * t * cp1Y + 3 * u * t * t * cp2Y + t * t * t * nodeY;
+            for (let ch = 0; ch < numChannels; ch++) {
+              const startY = 36 + ch * 32.7; // 36..396
 
-        if (ax > nodeX + 16 && ax < 710) {
-          elements += `
-            <polygon points="${ax.toFixed(1)},${ay.toFixed(1)} ${(ax + 11).toFixed(1)},${(ay - 6).toFixed(1)} ${(ax + 8).toFixed(1)},${ay.toFixed(1)} ${(ax + 11).toFixed(1)},${(ay + 6).toFixed(1)}"
-                     fill="#67e8f9" opacity="${(0.95 * inflowAlpha).toFixed(2)}"/>
-          `;
+              // Stream segment points
+              const p0 = getPoint(tailS, startY);
+              const p1 = getPoint(tailS + (headS - tailS) * 0.35, startY);
+              const p2 = getPoint(tailS + (headS - tailS) * 0.70, startY);
+              const p3 = getPoint(headS, startY);
+
+              // Water jet body
+              elements += `
+                <path d="M ${p0.x.toFixed(1)} ${p0.y.toFixed(1)} Q ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)} T ${p3.x.toFixed(1)} ${p3.y.toFixed(1)}"
+                      fill="none" stroke="${wave.color}" stroke-width="${wave.width}" stroke-linecap="round"
+                      stroke-opacity="${flowAlpha}"/>
+              `;
+
+              // Arrowhead (<) at the leading tip of the water jet
+              if (p3.x > nodeX + 12 && p3.x < 715) {
+                const dx = p3.x - p2.x;
+                const dy = p3.y - p2.y;
+                const len = Math.hypot(dx, dy) || 1;
+                const ux = dx / len;
+                const uy = dy / len;
+                // Perpendicular vector
+                const nx = -uy;
+                const ny = ux;
+
+                // Triangle pointing in direction of flow (ux, uy)
+                const arrowLen = 10;
+                const arrowWidth = 5.5;
+                const tipX = p3.x;
+                const tipY = p3.y;
+                const b1X = tipX - ux * arrowLen + nx * arrowWidth;
+                const b1Y = tipY - uy * arrowLen + ny * arrowWidth;
+                const b2X = tipX - ux * arrowLen - nx * arrowWidth;
+                const b2Y = tipY - uy * arrowLen - ny * arrowWidth;
+                const notchX = tipX - ux * (arrowLen * 0.7);
+                const notchY = tipY - uy * (arrowLen * 0.7);
+
+                elements += `
+                  <polygon points="${tipX.toFixed(1)},${tipY.toFixed(1)} ${b1X.toFixed(1)},${b1Y.toFixed(1)} ${notchX.toFixed(1)},${notchY.toFixed(1)} ${b2X.toFixed(1)},${b2Y.toFixed(1)}"
+                           fill="${wave.color}" opacity="${flowAlpha}"/>
+                `;
+              }
+
+              // Stardust micro-droplets travelling with the jet
+              if (ch % 2 === 0) {
+                const dropS = tailS + (headS - tailS) * 0.55;
+                const dp = getPoint(dropS, startY);
+                elements += `<circle cx="${dp.x.toFixed(1)}" cy="${dp.y.toFixed(1)}" r="2" fill="#ffffff" opacity="${flowAlpha}"/>`;
+              }
+            }
+          }
         }
       }
-
-      // Inflow energy particles streaming along lines towards the node
-      for (let p = 0; p < 16; p++) {
-        const particleProg = ((loopFrame * 0.05 + p * 0.125) % 1.0);
-        const px = 720 - particleProg * (720 - nodeX);
-        const spread = (1 - particleProg) * 150;
-        const py = nodeY + Math.sin(p * 2.3 + loopFrame * 0.35) * spread;
-        const r = p % 2 === 0 ? 3 : 1.8;
-        elements += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${r}" fill="#a5f3fc" opacity="${(0.85 * inflowAlpha).toFixed(2)}"/>`;
-      }
     }
 
-    // ===== 2. CONCENTRATION & FLASH at Left Focal Node (frames 18..24) =====
-    if (loopFrame >= 18 && loopFrame <= 25) {
-      const prog = (loopFrame - 18) / 7;
-      const coreR = 14 + prog * 20;
-      const glowR = 28 + prog * 40;
-      const flashOp = (1 - Math.abs(prog - 0.7) * 1.5).toFixed(2);
-      elements += `
-        <circle cx="${nodeX}" cy="${nodeY}" r="${glowR}" fill="#38bdf8" opacity="${Math.max(0, parseFloat(flashOp) * 0.6).toFixed(2)}"/>
-        <circle cx="${nodeX}" cy="${nodeY}" r="${coreR}" fill="#ffffff" opacity="${Math.max(0, parseFloat(flashOp)).toFixed(2)}"/>
-      `;
-    }
+    // Node Overcharge State (ONLY appears starting frame 18 as water arrives)
+    if (loopFrame >= 18 && loopFrame <= 56) {
+      if (loopFrame < 45) {
+        // Charging phase: Glow and size grow with each incoming wave
+        let chargeLevel = 1;
+        let haloRadius = 24;
+        let coreColor = "#0284c7";
+        let glowColor = "#38bdf8";
 
-    // ===== 3. OUTWARD CIRCULAR WAVES (RIPPLES) spreading across the matrix (frames 22..39) =====
-    if (loopFrame >= 22) {
-      const waveT = loopFrame - 22; // 0..17
+        if (loopFrame >= 30 && loopFrame < 38) {
+          chargeLevel = 2;
+          haloRadius = 32;
+          coreColor = "#0369a1";
+          glowColor = "#67e8f9";
+        } else if (loopFrame >= 38) {
+          // VIOLENT OVERCHARGE (Level 3): Rapid pulsing, intense white/cyan energy
+          chargeLevel = 3;
+          const jitter = (loopFrame % 2 === 0 ? 3 : -3);
+          haloRadius = 42 + jitter;
+          coreColor = "#38bdf8";
+          glowColor = "#ffffff";
+        }
 
-      // Wave 1
-      const r1 = 16 + waveT * 32;
-      const op1 = Math.max(0, 1 - waveT / 18).toFixed(2);
-      elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r1}" fill="none" stroke="#38bdf8" stroke-width="4.5" opacity="${op1}"/>`;
+        const pulseScale = 1.0 + Math.sin(loopFrame * 0.8) * 0.15;
+        const rHalo = (haloRadius * pulseScale).toFixed(1);
 
-      // Wave 2
-      if (waveT >= 4) {
-        const wt2 = waveT - 4;
-        const r2 = 14 + wt2 * 30;
-        const op2 = Math.max(0, 1 - wt2 / 14).toFixed(2);
-        elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r2}" fill="none" stroke="#67e8f9" stroke-width="3.5" opacity="${op2}"/>`;
+        elements += `
+          <!-- Soft Energy Corona -->
+          <circle cx="${nodeX}" cy="${nodeY}" r="${rHalo}" fill="${coreColor}" fill-opacity="0.35"
+                  stroke="${glowColor}" stroke-width="${chargeLevel >= 3 ? 3.5 : 2}" stroke-opacity="0.8"/>
+          <!-- Inner Core -->
+          <circle cx="${nodeX}" cy="${nodeY}" r="${(14 * pulseScale).toFixed(1)}" fill="${coreColor}" stroke="#ffffff" stroke-width="2"/>
+          <circle cx="${nodeX}" cy="${nodeY}" r="6" fill="#ffffff"/>
+        `;
+
+        if (chargeLevel === 3) {
+          // Overcharge crackling arcs
+          elements += `
+            <circle cx="${nodeX}" cy="${nodeY}" r="28" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="6 4"/>
+            <circle cx="${nodeX}" cy="${nodeY}" r="50" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 8" opacity="0.8"/>
+          `;
+        }
+      } else {
+        // EXPLOSION & DETONATION PHASE (Frames 45..56)
+        const explodeT = loopFrame - 45; // 0..11
+
+        // Blinding flash at epicenter (frames 45..49)
+        if (explodeT <= 4) {
+          const flashOp = (1 - explodeT / 4).toFixed(2);
+          const flashR = 24 + explodeT * 26;
+          elements += `
+            <circle cx="${nodeX}" cy="${nodeY}" r="${flashR * 1.5}" fill="#38bdf8" opacity="${(parseFloat(flashOp) * 0.7).toFixed(2)}"/>
+            <circle cx="${nodeX}" cy="${nodeY}" r="${flashR}" fill="#ffffff" opacity="${flashOp}"/>
+          `;
+        }
+
+        // Massive Concentric Radial Shockwaves blasting across the entire board
+        // Wave 1
+        const r1 = 18 + explodeT * 38;
+        const op1 = Math.max(0, 1 - explodeT / 12).toFixed(2);
+        elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r1}" fill="none" stroke="#38bdf8" stroke-width="5" opacity="${op1}"/>`;
+
+        // Wave 2
+        if (explodeT >= 3) {
+          const t2 = explodeT - 3;
+          const r2 = 14 + t2 * 34;
+          const op2 = Math.max(0, 1 - t2 / 10).toFixed(2);
+          elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r2}" fill="none" stroke="#67e8f9" stroke-width="4" opacity="${op2}"/>`;
+        }
+
+        // Wave 3
+        if (explodeT >= 6) {
+          const t3 = explodeT - 6;
+          const r3 = 12 + t3 * 30;
+          const op3 = Math.max(0, 1 - t3 / 8).toFixed(2);
+          elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r3}" fill="none" stroke="#ffffff" stroke-width="3" opacity="${op3}"/>`;
+        }
       }
-
-      // Wave 3
-      if (waveT >= 8) {
-        const wt3 = waveT - 8;
-        const r3 = 12 + wt3 * 28;
-        const op3 = Math.max(0, 1 - wt3 / 10).toFixed(2);
-        elements += `<circle cx="${nodeX}" cy="${nodeY}" r="${r3}" fill="none" stroke="#bae6fd" stroke-width="2.5" opacity="${op3}"/>`;
-      }
     }
-
-    // Focal Left Aperture Node (centered at nodeX=84, nodeY=216, row 1 col 0)
-    const baseNode = `
-      <circle cx="${nodeX}" cy="${nodeY}" r="42" fill="none" stroke="#0c4a6e" stroke-width="2.5" stroke-opacity="0.65"/>
-      <circle cx="${nodeX}" cy="${nodeY}" r="28" fill="none" stroke="#0284c7" stroke-width="3" stroke-dasharray="6 4"/>
-      <circle cx="${nodeX}" cy="${nodeY}" r="16" fill="#0369a1" stroke="#38bdf8" stroke-width="2.5"/>
-      <circle cx="${nodeX}" cy="${nodeY}" r="8" fill="#38bdf8"/>
-      <circle cx="${nodeX}" cy="${nodeY}" r="4" fill="#ffffff"/>
-    `;
 
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="${vx} ${vy} 144 144">
-        <defs>
-          <radialGradient id="meshBg" cx="12%" cy="50%" r="90%">
-            <stop offset="0%" stop-color="#08182b"/>
-            <stop offset="50%" stop-color="#020817"/>
-            <stop offset="100%" stop-color="#000206"/>
-          </radialGradient>
-        </defs>
-        <rect x="0" y="0" width="720" height="432" fill="url(#meshBg)"/>
-        ${baseNode}
+        ${bg}
         ${elements}
-
-        <!-- Stream Deck Key Bezel Accent -->
-        <rect x="${vx + 2}" y="${vy + 2}" width="140" height="140" rx="24" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.3"/>
       </svg>
     `;
 

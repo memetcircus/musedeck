@@ -50,7 +50,7 @@ export class MuseBeamAnimator {
         void key.action.setImage(svg);
       }
     }
-    this.frame = (this.frame + 1) % 40;
+    this.frame = (this.frame + 1) % 60;
   }
 }
 
