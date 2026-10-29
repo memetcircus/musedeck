@@ -46,7 +46,7 @@ class SessionsSubmenuManager {
   async open(): Promise<void> {
     console.log("🖥️ [SessionsSubmenu] Opening Muse Sessions Sub-Dashboard");
     this.active = true;
-    this.cachedSessions = await TerminalAutomation.listMuseSessions();
+    await this.loadAllSessions();
     this.render();
   }
 
@@ -61,13 +61,24 @@ class SessionsSubmenuManager {
     this.active = false;
   }
 
+  private async loadAllSessions(): Promise<void> {
+    const live = await TerminalAutomation.listMuseSessions();
+    const needed = Math.max(0, SESSION_SLOTS.length - live.length);
+    const past = TerminalAutomation.getPastSessions(needed + 5);
+
+    // Filter past sessions so they don't duplicate any live sessions
+    const filteredPast = past
+      .filter((p) => !live.some((l) => String(l.id) === String(p.id) || l.title.includes(String(p.id))))
+      .slice(0, needed);
+
+    this.cachedSessions = [...live, ...filteredPast];
+  }
+
   async refreshSessions(): Promise<void> {
-    if (!this.active) {
-      this.cachedSessions = await TerminalAutomation.listMuseSessions();
-      return;
+    await this.loadAllSessions();
+    if (this.active) {
+      this.render();
     }
-    this.cachedSessions = await TerminalAutomation.listMuseSessions();
-    this.render();
   }
 
   render(): void {
@@ -98,12 +109,20 @@ class SessionsSubmenuManager {
 
         if (session) {
           const sessionIdx = this.cachedSessions.indexOf(session) + 1;
-          image = SvgKeyRenderer.renderSessionCard(
-            sessionIdx,
-            session.project,
-            session.isActive,
-            session.isThinking
-          );
+          if (session.isHistorical) {
+            image = SvgKeyRenderer.renderHistoricalSessionCard(
+              sessionIdx,
+              session.project,
+              session.dateStr || "PAST"
+            );
+          } else {
+            image = SvgKeyRenderer.renderSessionCard(
+              sessionIdx,
+              session.project,
+              session.isActive,
+              session.isThinking
+            );
+          }
         } else {
           image = SvgKeyRenderer.renderEmptyTile();
         }
@@ -133,15 +152,19 @@ class SessionsSubmenuManager {
       return true;
     }
 
-    // 3. Session Selection:
-    const keyCoord = `${col},${row}`;
+    // 3. Session Selection (Live or Historical Resume):
     for (let i = 0; i < SESSION_SLOTS.length; i++) {
       const slot = SESSION_SLOTS[i];
       if (slot.col === col && slot.row === row) {
         if (i < this.cachedSessions.length) {
           const selected = this.cachedSessions[i];
-          console.log(`🎯 [SessionsSubmenu] Selected Session #${i + 1} (${selected.project}, WinID: ${selected.id})`);
-          await TerminalAutomation.setActiveSession(selected.id);
+          if (selected.isHistorical && selected.sessionId) {
+            console.log(`⏳ [SessionsSubmenu] Resuming historical session: ${selected.sessionId} (${selected.project})`);
+            await TerminalAutomation.resumeMuseSession(selected.sessionId);
+          } else {
+            console.log(`🎯 [SessionsSubmenu] Switching to live session: #${i + 1} (${selected.project}, WinID: ${selected.id})`);
+            await TerminalAutomation.setActiveSession(Number(selected.id));
+          }
           this.close();
           return true;
         }

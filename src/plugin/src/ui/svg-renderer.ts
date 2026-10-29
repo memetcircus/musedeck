@@ -347,6 +347,56 @@ export class SvgKeyRenderer {
   }
 
   /**
+   * Historical / Resumable Session Card in Sessions Submenu
+   */
+  static renderHistoricalSessionCard(
+    sessionIndex: number,
+    project: string,
+    dateStr: string
+  ): string {
+    const borderColor = "#f59e0b"; // Amber / Gold for resume
+    const numStr = sessionIndex < 10 ? `#0${sessionIndex}` : `#${sessionIndex}`;
+
+    // Left pill: Session Index
+    const numPill = `
+      <rect x="14" y="14" width="46" height="22" rx="6" fill="#1e293b" stroke="${borderColor}" stroke-width="1.5"/>
+      <text x="37" y="30" fill="#fde047" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${numStr}</text>
+    `;
+
+    // Right pill: RESUME badge
+    const statusPill = `
+      <rect x="68" y="14" width="62" height="22" rx="6" fill="#78350f" fill-opacity="0.6" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="99" y="30" fill="#fef08a" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">RESUME</text>
+    `;
+
+    const displayProject = project.length > 9 ? project.substring(0, 8) + "…" : project;
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
+        
+        <!-- Corner brackets -->
+        <path d="M 12 26 L 12 12 L 26 12" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 26 L 132 12 L 118 12" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 12 118 L 12 132 L 26 132" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 118 L 132 132 L 118 132" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+
+        <!-- Header: Session Number and RESUME Badge -->
+        ${numPill}
+        ${statusPill}
+
+        <!-- Project name in center -->
+        <text x="72" y="70" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${displayProject}</text>
+        <line x1="28" y1="80" x2="116" y2="80" stroke="${borderColor}" stroke-width="2" stroke-opacity="0.6"/>
+
+        <!-- Footer: RESTORE & Date -->
+        <text x="72" y="106" fill="#fbbf24" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">RESTORE</text>
+        <text x="72" y="126" fill="#cbd5e1" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${dateStr}</text>
+      </svg>
+    `);
+  }
+
+  /**
    * Session Card in Sessions Submenu with cyber badges and high-contrast typography
    */
   static renderSessionCard(

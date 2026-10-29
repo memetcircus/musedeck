@@ -9,11 +9,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export interface MuseSessionInfo {
-  id: number;
+  id: string | number;
   title: string;
   project: string;
   isThinking: boolean;
   isActive: boolean;
+  isHistorical?: boolean;
+  dateStr?: string;
+  sessionId?: string;
 }
 
 /**
@@ -101,6 +104,126 @@ end tell
     } catch (e: any) {
       console.warn("Could not list muse sessions:", e.message);
       return [];
+    }
+  }
+
+  /**
+   * Scan Muse historical sessions on disk (~/.local/share/muse/sessions)
+   * Only includes non-empty sessions where the user actually entered a prompt/command.
+   */
+  static getPastSessions(limit = 12): MuseSessionInfo[] {
+    const base = path.join(process.env.HOME || "/Users/akif", ".local/share/muse/sessions");
+    if (!fs.existsSync(base)) return [];
+
+    const found: Array<{ sid: string; jsonl: string; mtime: number }> = [];
+
+    try {
+      const years = fs.readdirSync(base).filter((y) => y.startsWith("20"));
+      for (const y of years.sort().reverse()) {
+        const yPath = path.join(base, y);
+        const months = fs.readdirSync(yPath).filter((m) => !m.startsWith("."));
+        for (const m of months.sort().reverse()) {
+          const mPath = path.join(yPath, m);
+          const days = fs.readdirSync(mPath).filter((d) => !d.startsWith("."));
+          for (const d of days.sort().reverse()) {
+            const dPath = path.join(mPath, d);
+            const sids = fs.readdirSync(dPath).filter((s) => !s.startsWith("."));
+            for (const sid of sids) {
+              const sPath = path.join(dPath, sid);
+              const jsonl = path.join(sPath, "session.jsonl");
+              if (fs.existsSync(jsonl)) {
+                try {
+                  const stat = fs.statSync(jsonl);
+                  found.push({ sid, jsonl, mtime: stat.mtimeMs });
+                } catch {}
+              }
+            }
+          }
+        }
+      }
+    } catch (e: any) {
+      console.warn("Error reading past sessions directory:", e.message);
+      return [];
+    }
+
+    // Sort newest to oldest
+    found.sort((a, b) => b.mtime - a.mtime);
+
+    const results: MuseSessionInfo[] = [];
+    for (const item of found) {
+      if (results.length >= limit) break;
+
+      let workspace = "";
+      let prompt = "";
+      try {
+        const content = fs.readFileSync(item.jsonl, "utf8");
+        // Skip empty sessions where user entered nothing!
+        if (!content.includes("runtime.user_intent.accepted")) {
+          continue;
+        }
+
+        const lines = content.split("\n").slice(0, 80);
+        for (const l of lines) {
+          if (!l) continue;
+          try {
+            const obj = JSON.parse(l);
+            if (obj.payload_type === "runtime.session.metadata") {
+              workspace = obj.payload?.record?.workspace_root || "";
+            } else if (obj.payload_type === "runtime.user_intent.accepted" && !prompt) {
+              prompt = obj.payload?.refill_blocks?.[0]?.text?.replace(/[\r\n\\]+/g, " ").trim().substring(0, 35) || "";
+            }
+          } catch {}
+        }
+      } catch {}
+
+      // If no prompt was found, do not restore this session
+      if (!prompt) continue;
+
+      const project = workspace ? path.basename(workspace.trim()).toUpperCase() : "MUSE";
+      const date = new Date(item.mtime);
+      const dateStr =
+        date.toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase() +
+        " " +
+        date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+      results.push({
+        id: item.sid,
+        sessionId: item.sid,
+        title: prompt,
+        project: project || "MUSE",
+        dateStr,
+        isThinking: false,
+        isActive: false,
+        isHistorical: true,
+      });
+    }
+
+    return results;
+  }
+
+  /**
+   * Resume an existing historical session in a new Terminal window
+   */
+  static async resumeMuseSession(sessionId: string): Promise<void> {
+    const command = `muse resume ${sessionId.trim()}`;
+    const appleScript = `
+tell application "Terminal"
+  activate
+  set newTab to (do script "${this.escapeForAppleScript(command)}")
+  try
+    set custom title of selected tab of window 1 to "MUSE_ACTIVE_SESSION"
+    set title displays custom title of selected tab of window 1 to true
+    set winId to id of window 1
+    do shell script "mkdir -p /tmp/musedeck && echo " & winId & " > /tmp/musedeck/active_terminal_window_id.txt"
+  end try
+end tell
+    `.trim();
+
+    try {
+      await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      console.log(`💻 [Terminal] Resumed session ${sessionId} in dedicated Terminal window: ${command}`);
+    } catch (err: any) {
+      console.error("Failed to resume session via AppleScript:", err.message);
     }
   }
 

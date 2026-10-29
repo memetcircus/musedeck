@@ -34,6 +34,7 @@ When building with autonomous coding agents, developers face significant cogniti
 MuseDeck replaces this friction with physical, tactile controls:
 - Real-time 5x3 dynamic visual telemetry: A live 15-key matrix displaying agent state (Idle, Planning, Waiting Approval, Executing) with animated Quantum Beam matrix pulses during active synthesis.
 - Physical Human-in-the-Loop (HITL) Review Gate: When review is needed, the status key flashes amber/red. Tapping it automatically surfaces the exact Muse Code terminal to the foreground and opens a tactile Review Submenu ([↑ BACK], [APPROVE (Y)], [REJECT (N)]).
+- Kiro IDE-style Session Resurrection Drawer: A physical session switcher that lists active terminal sessions and intelligently scans disk history for past sessions—automatically filtering out empty/unused sessions. Tapping any historical session restores its full context, prompt history, and workspace directory with zero terminal commands required.
 - One-touch Multimodal Input: Native Option+V Voice Transcribe streaming, interactive SAM 3.1 UI screenshot segmentation that pastes coordinates directly at the terminal cursor, and automated React/Tailwind code synthesis via Muse Spark.
 - Prompt Engineering Cockpit: Instant prompt restructuring (Struct Prompt -> Requirements, Technical Design, Task Breakdown, Review Gate) and prompt qualifier snippets (Be Honest, Don't Code, Keep Short, Show Opts, Go!).
 ```
