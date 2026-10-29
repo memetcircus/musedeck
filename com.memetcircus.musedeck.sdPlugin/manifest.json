@@ -58,10 +58,10 @@
       "States": [{ "Image": "imgs/actions/diff/key" }]
     },
     {
-      "Name": "Approve (HITL)",
+      "Name": "Structured Prompt",
       "UUID": "com.memetcircus.musedeck.approve",
       "Icon": "imgs/actions/approve/icon",
-      "Tooltip": "Physical Human-in-the-Loop Approval key. Press to unpause agent when waiting for review.",
+      "Tooltip": "Transform request into structured spec and execution plan (Spec -> Architecture -> Tasks -> Review)",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/approve/key" }]
     },

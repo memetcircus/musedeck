@@ -146,6 +146,39 @@ export class MuseHttpServer {
       res.json({ ok: true });
     });
 
+    // Review Submenu Endpoints
+    this.app.post("/api/review/toggle", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "toggle_review" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/review/open", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "open_review" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/review/close", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "close_review" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/review/trigger-review", (_req: Request, res: Response) => {
+      stateMachine.setWaitingApproval(
+        {
+          filesChanged: 2,
+          insertions: 15,
+          deletions: 3,
+          files: [
+            { path: "src/index.ts", additions: 10, deletions: 2 },
+            { path: "src/auth.ts", additions: 5, deletions: 1 },
+          ],
+        },
+        "Review diff & approve changes",
+        "Waiting for developer review"
+      );
+      res.json({ ok: true, state: stateMachine.getState() });
+    });
+
     // Start / Stop Thinking Animation Demo
     this.app.post("/api/animation/start", (_req: Request, res: Response) => {
       stateMachine.startPlanning("Meta Muse Code is actively synthesizing code...");

@@ -59,11 +59,11 @@ end tell
     }
   }
 
-  static async bringTerminalToFront(): Promise<void> {
-    await this.focusMuseTerminalWindow();
+  static async bringTerminalToFront(): Promise<boolean> {
+    return await this.focusMuseTerminalWindow();
   }
 
-  private static async focusMuseTerminalWindow(): Promise<void> {
+  private static async focusMuseTerminalWindow(): Promise<boolean> {
     const appleScript = `
 tell application "Terminal"
   set targetWin to missing value
@@ -82,32 +82,40 @@ tell application "Terminal"
     end if
   end try
 
-  -- 2. Fallback: match window with "MUSE_ACTIVE_SESSION", "muse-bin", or "musedeck" (explicitly exclude "codex")
+  -- 2. Fallback: match window with "MUSE_ACTIVE_SESSION", "muse-bin", or "muse" in title or tab content (exclude "codex")
   if targetWin is missing value then
     repeat with w in windows
       set winName to name of w
-      if winName contains "MUSE_ACTIVE_SESSION" or winName contains "muse-bin" or (winName contains "musedeck" and not (winName contains "codex")) then
+      if winName contains "MUSE_ACTIVE_SESSION" or winName contains "muse-bin" or (winName contains "muse" and not (winName contains "codex")) then
         set targetWin to w
         exit repeat
       end if
     end repeat
   end if
 
-  -- 3. Bring target window to front and activate
+  -- 3. Bring target window to front if found, else do NOT activate random terminals
   if targetWin is not missing value then
     set index of targetWin to 1
     activate
+    return "FOUND"
   else
-    activate
+    return "NOT_FOUND"
   end if
 end tell
     `.trim();
 
     try {
-      await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
-      await new Promise((r) => setTimeout(r, 250));
+      const { stdout } = await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      const status = stdout.trim();
+      if (status === "FOUND") {
+        await new Promise((r) => setTimeout(r, 200));
+        return true;
+      }
+      console.warn("⚠️ [TerminalAutomation] No active Muse Code terminal session found in Terminal.app windows");
+      return false;
     } catch (e: any) {
       console.warn("Could not focus muse window specifically:", e.message);
+      return false;
     }
   }
 
@@ -266,42 +274,62 @@ end tell
   }
 
   /**
-   * Type a prompt snippet directly into active Muse Terminal prompt at the cursor
+   * Type a prompt snippet directly into active Muse Terminal prompt at the cursor.
+   * If pressEnter is true (e.g. for "GO!"), immediately executes with Enter.
+   * Strictly verifies that an active Muse Code terminal exists before typing.
    */
-  static async typeSnippetIntoTerminal(snippetText: string): Promise<void> {
+  static async typeSnippetIntoTerminal(snippetText: string, pressEnter = false): Promise<boolean> {
     const cleanText = snippetText.trim();
-    const textToInsert = ` ${cleanText} `;
+    const textToInsert = pressEnter ? cleanText : ` ${cleanText} `;
 
-    // 1. Bring active Muse Terminal to front
-    await this.focusMuseTerminalWindow();
+    // 1. Bring active Muse Terminal to front (verifies Muse session exists!)
+    const hasMuseSession = await this.focusMuseTerminalWindow();
+    if (!hasMuseSession) {
+      console.warn(`⚠️ [Terminal] Ignored typing "${cleanText}": No active Muse Code terminal found.`);
+      return false;
+    }
 
     // 2. Type text directly via native mac-type helper
     const macTypeBin = this.getMacTypeBin();
     if (macTypeBin) {
       try {
         await execAsync(`"${macTypeBin}" text "${this.escapeForShell(textToInsert)}"`);
-        console.log(`📝 [Terminal] Typed prompt snippet at cursor: "${cleanText}"`);
-        return;
+        if (pressEnter) {
+          await new Promise((r) => setTimeout(r, 60));
+          await execAsync(`"${macTypeBin}" enter`);
+        }
+        console.log(`📝 [Terminal] Typed prompt snippet at cursor: "${cleanText}" (pressEnter=${pressEnter})`);
+        return true;
       } catch (err: any) {
         console.warn("Native mac-type typing failed, attempting fallback:", err.message);
       }
     }
 
     // Fallback: AppleScript System Events
+    const enterScript = pressEnter ? "\n  delay 0.05\n  key code 36" : "";
     const appleScript = `
 tell application "Terminal" to activate
 delay 0.05
 tell application "System Events"
-  keystroke "${this.escapeForAppleScript(textToInsert)}"
+  keystroke "${this.escapeForAppleScript(textToInsert)}"${enterScript}
 end tell
     `.trim();
 
     try {
       await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
-      console.log(`📝 [Terminal] Typed snippet via AppleScript`);
+      console.log(`📝 [Terminal] Typed snippet via AppleScript (pressEnter=${pressEnter})`);
+      return true;
     } catch (err: any) {
       console.error("Failed to type snippet:", err.message);
+      return false;
     }
+  }
+
+  /**
+   * Type a structured prompt directly into active Muse Terminal and press Enter
+   */
+  static async typePromptIntoTerminal(promptText: string, pressEnter = true): Promise<boolean> {
+    return this.typeSnippetIntoTerminal(promptText, pressEnter);
   }
 
   /**

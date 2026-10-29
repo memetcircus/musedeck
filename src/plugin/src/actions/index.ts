@@ -1,5 +1,6 @@
 import { telemetrySubmenuManager } from "../ui/telemetry-submenu.js";
 import { snippetsSubmenuManager } from "../ui/snippets-submenu.js";
+import { reviewSubmenuManager } from "../ui/review-submenu.js";
 import {
   action,
   SingletonAction,
@@ -29,6 +30,11 @@ function checkSubmenuKeyDown(ev: any): boolean {
     return true;
   }
 
+  if (reviewSubmenuManager.isActive) {
+    void reviewSubmenuManager.handleKeyDown(col, row);
+    return true;
+  }
+
   if (telemetrySubmenuManager.isActive) {
     return telemetrySubmenuManager.handleKeyDown(col, row);
   }
@@ -41,6 +47,12 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
 
   bridge.onTelemetry((telemetry) => {
     if (snippetsSubmenuManager.isActive) {
+      return;
+    }
+    if (reviewSubmenuManager.isActive) {
+      if (telemetry.state !== AgentState.WAITING_APPROVAL) {
+        reviewSubmenuManager.close();
+      }
       return;
     }
     if (telemetrySubmenuManager.isActive) {
@@ -90,6 +102,9 @@ function unregisterDeckKey(ev: WillDisappearEvent): void {
   if (snippetsSubmenuManager.isActive) {
     snippetsSubmenuManager.forceClose();
   }
+  if (reviewSubmenuManager.isActive) {
+    reviewSubmenuManager.forceClose();
+  }
   if (telemetrySubmenuManager.isActive) {
     console.log("⚠️ [Submenu] Key disappearing while submenu active -> force-closing submenu to prevent stuck state");
     telemetrySubmenuManager.forceClose();
@@ -103,8 +118,9 @@ export class AgentStatusAction extends SingletonAction {
 
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
+    reviewSubmenuManager.setBridge(this.bridge);
     this.bridge.onTelemetry((telemetry) => {
-      if (snippetsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
+      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
       const img = SvgKeyRenderer.renderStatusKey(telemetry);
       for (const key of this.activeKeys) {
         if (!museBeamAnimator.isRunning) {
@@ -144,6 +160,11 @@ export class AgentStatusAction extends SingletonAction {
     const current = this.bridge.getTelemetry();
     console.log(`[StatusKey] Tapped (Current state: ${current.state}). Bringing active Muse Terminal to front...`);
     await TerminalAutomation.bringTerminalToFront();
+
+    // If awaiting approval: open Review / HITL Submenu
+    if (current.state === AgentState.WAITING_APPROVAL) {
+      reviewSubmenuManager.open();
+    }
   }
 }
 
@@ -238,33 +259,24 @@ export class DiffSummaryAction extends SingletonAction {
   }
 }
 
-// --- KEY 3: APPROVE KEY (HITL GATE) ---
+// --- KEY 3: STRUCT PROMPT KEY (TRANSFORMS SPEC & EXECUTION PLAN) ---
 @action({ UUID: "com.memetcircus.musedeck.approve" })
-export class ApproveAction extends SingletonAction {
+export class StructPromptAction extends SingletonAction {
   private activeKeys = new Set<KeyAction>();
 
-  constructor(private readonly bridge: StreamDeckCoreBridge) {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
-    this.bridge.onTelemetry((telemetry) => {
-      const isAwaiting = telemetry.state === AgentState.WAITING_APPROVAL;
-      const img = SvgKeyRenderer.renderApproveKey(isAwaiting);
-      for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning && !snippetsSubmenuManager.isActive && !telemetrySubmenuManager.isActive) {
-          void key.setImage(img);
-        }
-      }
-    });
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
-      attachGlobalThinkingListener(this.bridge);
+      if (this.bridge) attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
-          void ev.action.setImage(SvgKeyRenderer.renderApproveKey(isAwaiting));
+          void ev.action.setImage(SvgKeyRenderer.renderStructPromptKey());
+          void ev.action.setTitle("");
         },
         false,
         3,
@@ -282,43 +294,29 @@ export class ApproveAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
-    if (!isAwaiting) {
-      console.log("[Approve] Ignored: Agent is not awaiting approval");
-      return;
-    }
-    await TerminalAutomation.sendApprovalKeystroke("y");
-    await this.bridge.approve();
+    console.log("📐 [StructPrompt] Typing structured spec prompt into active Muse terminal...");
+    const prompt = "Turn this into a structured spec. Create requirements first, then a technical design, then break it into tasks. Do not execute anything until I review and approve the plan.";
+    await TerminalAutomation.typePromptIntoTerminal(prompt, true);
   }
 }
 
-// --- KEY 4: REJECT KEY (HITL GATE) ---
+// Backwards compatibility alias
+export { StructPromptAction as ApproveAction };
+
+// --- KEY 4: DORMANT / CLEAN KARO ---
 @action({ UUID: "com.memetcircus.musedeck.reject" })
 export class RejectAction extends SingletonAction {
-  private activeKeys = new Set<KeyAction>();
-
-  constructor(private readonly bridge: StreamDeckCoreBridge) {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
-    this.bridge.onTelemetry((telemetry) => {
-      const isAwaiting = telemetry.state === AgentState.WAITING_APPROVAL;
-      const img = SvgKeyRenderer.renderRejectKey(isAwaiting);
-      for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning && !snippetsSubmenuManager.isActive && !telemetrySubmenuManager.isActive) {
-          void key.setImage(img);
-        }
-      }
-    });
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
-      this.activeKeys.add(ev.action);
-      attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
-          void ev.action.setImage(SvgKeyRenderer.renderRejectKey(isAwaiting));
+          void ev.action.setImage(SvgKeyRenderer.renderEmptyTile());
+          void ev.action.setTitle("");
         },
         false,
         4,
@@ -329,20 +327,10 @@ export class RejectAction extends SingletonAction {
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
-    for (const key of this.activeKeys) {
-      if (key.id === ev.action.id) this.activeKeys.delete(key);
-    }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
-    if (!isAwaiting) {
-      console.log("[Reject] Ignored: Agent is not awaiting approval");
-      return;
-    }
-    await TerminalAutomation.sendApprovalKeystroke("n");
-    await this.bridge.reject();
   }
 }
 

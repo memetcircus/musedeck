@@ -3,6 +3,7 @@ import streamDeck from "@elgato/streamdeck";
 import { AgentState, type TelemetryData } from "../../agent/types.js";
 import { telemetrySubmenuManager } from "./ui/telemetry-submenu.js";
 import { snippetsSubmenuManager } from "./ui/snippets-submenu.js";
+import { reviewSubmenuManager } from "./ui/review-submenu.js";
 
 export class StreamDeckCoreBridge {
   private ws: WebSocket | null = null;
@@ -108,6 +109,16 @@ export class StreamDeckCoreBridge {
             snippetsSubmenuManager.open();
           } else if (msg.type === "close_snippets") {
             snippetsSubmenuManager.close();
+          } else if (msg.type === "toggle_review") {
+            if (reviewSubmenuManager.isActive) {
+              reviewSubmenuManager.close();
+            } else {
+              reviewSubmenuManager.open();
+            }
+          } else if (msg.type === "open_review") {
+            reviewSubmenuManager.open();
+          } else if (msg.type === "close_review") {
+            reviewSubmenuManager.close();
           } else if (msg.type === "switch_page") {
             const page = typeof msg.page === "number" ? msg.page : 1;
             console.log(`[Bridge] Received switch_page command to page ${page}`);

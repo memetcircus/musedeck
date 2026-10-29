@@ -16,7 +16,7 @@ import {
   AgentStatusAction,
   ActiveTaskAction,
   DiffSummaryAction,
-  ApproveAction,
+  StructPromptAction,
   RejectAction,
   SamSnipAction,
   SparkCodeAction,
@@ -53,7 +53,7 @@ const bridge = new StreamDeckCoreBridge();
 streamDeck.actions.registerAction(new AgentStatusAction(bridge));
 streamDeck.actions.registerAction(new ActiveTaskAction(bridge));
 streamDeck.actions.registerAction(new DiffSummaryAction(bridge));
-streamDeck.actions.registerAction(new ApproveAction(bridge));
+streamDeck.actions.registerAction(new StructPromptAction(bridge));
 streamDeck.actions.registerAction(new RejectAction(bridge));
 streamDeck.actions.registerAction(new SamSnipAction(bridge));
 streamDeck.actions.registerAction(new SparkCodeAction(bridge));

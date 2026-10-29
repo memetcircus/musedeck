@@ -10,6 +10,7 @@ export interface SnippetDefinition {
   text: string;
   borderColor: string;
   textColor: string;
+  pressEnter?: boolean;
 }
 
 export const SNIPPETS: Record<string, SnippetDefinition> = {
@@ -70,14 +71,7 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     text: "Go!",
     borderColor: "#22c55e",
     textColor: "#f0fdf4",
-  },
-  "3,1": {
-    line1: "STRUCT",
-    line2: "PROMPT",
-    subtitle: "OPTIMIZE",
-    text: "Restructure my prompt for maximum clarity and best Muse Code results.",
-    borderColor: "#a855f7",
-    textColor: "#f5f3ff",
+    pressEnter: true,
   },
 };
 
@@ -158,8 +152,8 @@ class SnippetsSubmenuManager {
     const keyCoord = `${col},${row}`;
     const snippet = SNIPPETS[keyCoord];
     if (snippet) {
-      console.log(`📝 [Snippets] Pasting snippet "${snippet.line1} ${snippet.line2}" into Muse terminal...`);
-      await TerminalAutomation.typeSnippetIntoTerminal(snippet.text);
+      console.log(`📝 [Snippets] Typing snippet "${snippet.line1} ${snippet.line2}" into active Muse terminal (pressEnter=${snippet.pressEnter ?? false})...`);
+      await TerminalAutomation.typeSnippetIntoTerminal(snippet.text, snippet.pressEnter ?? false);
       return true;
     }
 

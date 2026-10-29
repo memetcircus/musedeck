@@ -55,12 +55,19 @@ export class SvgKeyRenderer {
       case AgentState.WAITING_APPROVAL:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#f59e0b" stroke-width="3"/>
-            <circle cx="72" cy="48" r="31" fill="#78350f" fill-opacity="0.35" stroke="#fbbf24" stroke-width="3" stroke-dasharray="8, 6"/>
-            <polygon points="72,25 96,69 48,69" fill="#92400e" fill-opacity="0.75" stroke="#fde047" stroke-width="3" stroke-linejoin="round"/>
-            <line x1="72" y1="38" x2="72" y2="53" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
-            <circle cx="72" cy="62" r="2.8" fill="#ffffff"/>
-            <text x="72" y="118" fill="#fde047" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REVIEW</text>
+            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#f59e0b" stroke-width="3">
+              <animate attributeName="stroke" values="#f59e0b;#ef4444;#f59e0b" dur="1s" repeatCount="indefinite"/>
+            </rect>
+            <circle cx="72" cy="46" r="30" fill="#78350f" fill-opacity="0.35" stroke="#fbbf24" stroke-width="3" stroke-dasharray="8, 6">
+              <animate attributeName="fill-opacity" values="0.25;0.75;0.25" dur="1s" repeatCount="indefinite"/>
+            </circle>
+            <polygon points="72,23 96,67 48,67" fill="#92400e" fill-opacity="0.85" stroke="#fde047" stroke-width="3" stroke-linejoin="round">
+              <animate attributeName="stroke" values="#fde047;#ffffff;#fde047" dur="1s" repeatCount="indefinite"/>
+            </polygon>
+            <line x1="72" y1="36" x2="72" y2="51" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+            <circle cx="72" cy="60" r="2.8" fill="#ffffff"/>
+            <text x="72" y="105" fill="#fde047" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">REVIEW</text>
+            <text x="72" y="123" fill="#fca5a5" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">APPROVAL</text>
           </svg>
         `);
 
@@ -221,6 +228,59 @@ export class SvgKeyRenderer {
    */
   static renderDiffKey(telemetry: TelemetryData): string {
     return this.renderSnippetsKey();
+  }
+
+  /**
+   * Key 3: Struct Prompt Key (Transforms user task into structured spec & execution plan)
+   */
+  static renderStructPromptKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#a855f7" stroke-width="3"/>
+        <!-- Cyber reticle corner brackets -->
+        <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 28 L 132 12 L 116 12" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 12 116 L 12 132 L 28 132" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 116 L 132 132 L 116 132" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
+
+        <!-- Structured Document / Spec Icon -->
+        <g transform="translate(45, 23)">
+          <rect x="0" y="0" width="54" height="58" rx="8" fill="#581c87" fill-opacity="0.35" stroke="#c084fc" stroke-width="2.5"/>
+          <line x1="12" y1="16" x2="42" y2="16" stroke="#f5f3ff" stroke-width="3" stroke-linecap="round"/>
+          <line x1="12" y1="27" x2="36" y2="27" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="12" y1="37" x2="42" y2="37" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="12" y1="47" x2="28" y2="47" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+        </g>
+
+        <text x="72" y="106" fill="#f5f3ff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STRUCT</text>
+        <text x="72" y="124" fill="#c084fc" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PROMPT</text>
+      </svg>
+    `);
+  }
+
+  static renderActiveApproveKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#22c55e" stroke-width="3.5"/>
+        <circle cx="72" cy="46" r="28" fill="#14532d" fill-opacity="0.45" stroke="#4ade80" stroke-width="2.5"/>
+        <polyline points="56,47 68,59 88,37" fill="none" stroke="#22c55e" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="106" fill="#86efac" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">APPROVE</text>
+        <text x="72" y="124" fill="#4ade80" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">ACCEPT (Y)</text>
+      </svg>
+    `);
+  }
+
+  static renderActiveRejectKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#ef4444" stroke-width="3.5"/>
+        <circle cx="72" cy="46" r="28" fill="#7f1d1d" fill-opacity="0.45" stroke="#f87171" stroke-width="2.5"/>
+        <line x1="58" y1="32" x2="86" y2="60" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
+        <line x1="86" y1="32" x2="58" y2="60" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
+        <text x="72" y="106" fill="#fca5a5" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">REJECT</text>
+        <text x="72" y="124" fill="#f87171" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">DECLINE (N)</text>
+      </svg>
+    `);
   }
 
   /**
