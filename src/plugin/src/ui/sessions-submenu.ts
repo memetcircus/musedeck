@@ -153,3 +153,4 @@ class SessionsSubmenuManager {
 }
 
 export const sessionsSubmenuManager = new SessionsSubmenuManager();
+

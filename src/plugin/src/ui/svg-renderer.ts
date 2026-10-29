@@ -330,24 +330,24 @@ export class SvgKeyRenderer {
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
         <rect width="144" height="144" rx="26" fill="#070b14" stroke="#06b6d4" stroke-width="3"/>
         <!-- Corner reticle brackets -->
-        <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
-        <path d="M 132 28 L 132 12 L 116 12" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
-        <path d="M 12 116 L 12 132 L 28 132" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
-        <path d="M 132 116 L 132 132 L 116 132" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 28 L 132 12 L 116 12" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 12 116 L 12 132 L 28 132" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 116 L 132 132 L 116 132" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round"/>
 
         <!-- Plus icon inside cyber circle -->
-        <circle cx="72" cy="48" r="26" fill="#083344" fill-opacity="0.6" stroke="#22d3ee" stroke-width="2.5"/>
-        <line x1="72" y1="36" x2="72" y2="60" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
-        <line x1="60" y1="48" x2="84" y2="48" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="72" cy="42" r="22" fill="#083344" fill-opacity="0.75" stroke="#22d3ee" stroke-width="2.5"/>
+        <line x1="72" y1="31" x2="72" y2="53" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="61" y1="42" x2="83" y2="42" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
 
-        <text x="72" y="106" fill="#e0f2fe" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">NEW</text>
-        <text x="72" y="124" fill="#22d3ee" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SESSION</text>
+        <text x="72" y="96" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">NEW</text>
+        <text x="72" y="122" fill="#22d3ee" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">SESSION</text>
       </svg>
     `);
   }
 
   /**
-   * Session Card in Sessions Submenu with customized cyber flowing nodes
+   * Session Card in Sessions Submenu with cyber badges and high-contrast typography
    */
   static renderSessionCard(
     sessionIndex: number,
@@ -358,54 +358,66 @@ export class SvgKeyRenderer {
     const borderColor = isThinking ? "#a855f7" : isActive ? "#22c55e" : "#38bdf8";
     const borderWidth = isThinking || isActive ? 3.5 : 2.5;
 
-    // Corner beacon
-    let cornerBeacon = "";
+    // Left pill: Session Index (#01, #02...)
+    const numStr = sessionIndex < 10 ? `#0${sessionIndex}` : `#${sessionIndex}`;
+    const numPill = `
+      <rect x="14" y="14" width="46" height="22" rx="6" fill="#1e293b" stroke="${borderColor}" stroke-width="1.5"/>
+      <text x="37" y="30" fill="#f8fafc" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${numStr}</text>
+    `;
+
+    // Right pill: Status badge (Replaces the tiny dot!)
+    let statusPill = "";
     if (isThinking) {
-      cornerBeacon = `
-        <circle cx="124" cy="20" r="5" fill="#c084fc">
-          <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
-          <animate attributeName="r" values="3.5;6.5;3.5" dur="1s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="124" cy="20" r="2.5" fill="#ffffff"/>
+      statusPill = `
+        <rect x="70" y="14" width="60" height="22" rx="6" fill="#581c87" stroke="#c084fc" stroke-width="1.5">
+          <animate attributeName="stroke" values="#c084fc;#f472b6;#c084fc" dur="1s" repeatCount="indefinite"/>
+        </rect>
+        <text x="100" y="30" fill="#f5d0fe" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">⚡ BUSY</text>
       `;
     } else if (isActive) {
-      cornerBeacon = `<circle cx="124" cy="20" r="4.5" fill="#22c55e" stroke="#86efac" stroke-width="1.5"/>`;
+      statusPill = `
+        <rect x="68" y="14" width="62" height="22" rx="6" fill="#14532d" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="99" y="30" fill="#86efac" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">ACTIVE</text>
+      `;
     } else {
-      cornerBeacon = `<circle cx="124" cy="20" r="3.5" fill="#475569"/>`;
+      statusPill = `
+        <rect x="72" y="14" width="58" height="22" rx="6" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>
+        <text x="101" y="30" fill="#94a3b8" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">IDLE</text>
+      `;
     }
 
-    // Status footer: Flowing nodes if thinking, or CURRENT / READY
+    // Status footer: Bold status or flowing nodes if thinking
     let footerSvg = "";
     if (isThinking) {
       footerSvg = `
-        <text x="72" y="106" fill="#e9d5ff" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">THINKING</text>
-        <g transform="translate(48, 122)">
+        <text x="72" y="104" fill="#e9d5ff" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">THINKING...</text>
+        <g transform="translate(39, 122)">
           <!-- Node 1 -->
-          <circle cx="8" cy="0" r="3.5" fill="#38bdf8">
-            <animate attributeName="opacity" values="0.25;1;0.25" dur="0.9s" begin="0s" repeatCount="indefinite"/>
-            <animate attributeName="r" values="2.5;4.5;2.5" dur="0.9s" begin="0s" repeatCount="indefinite"/>
+          <circle cx="14" cy="0" r="4.5" fill="#38bdf8">
+            <animate attributeName="opacity" values="0.2;1;0.2" dur="0.8s" begin="0s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="3;6;3" dur="0.8s" begin="0s" repeatCount="indefinite"/>
           </circle>
           <!-- Node 2 -->
-          <circle cx="24" cy="0" r="3.5" fill="#a855f7">
-            <animate attributeName="opacity" values="0.25;1;0.25" dur="0.9s" begin="0.3s" repeatCount="indefinite"/>
-            <animate attributeName="r" values="2.5;4.5;2.5" dur="0.9s" begin="0.3s" repeatCount="indefinite"/>
+          <circle cx="33" cy="0" r="4.5" fill="#a855f7">
+            <animate attributeName="opacity" values="0.2;1;0.2" dur="0.8s" begin="0.25s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="3;6;3" dur="0.8s" begin="0.25s" repeatCount="indefinite"/>
           </circle>
           <!-- Node 3 -->
-          <circle cx="40" cy="0" r="3.5" fill="#38bdf8">
-            <animate attributeName="opacity" values="0.25;1;0.25" dur="0.9s" begin="0.6s" repeatCount="indefinite"/>
-            <animate attributeName="r" values="2.5;4.5;2.5" dur="0.9s" begin="0.6s" repeatCount="indefinite"/>
+          <circle cx="52" cy="0" r="4.5" fill="#38bdf8">
+            <animate attributeName="opacity" values="0.2;1;0.2" dur="0.8s" begin="0.5s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="3;6;3" dur="0.8s" begin="0.5s" repeatCount="indefinite"/>
           </circle>
         </g>
       `;
     } else if (isActive) {
       footerSvg = `
-        <text x="72" y="112" fill="#86efac" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">ACTIVE</text>
-        <text x="72" y="126" fill="#4ade80" font-size="10" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">CURRENT</text>
+        <text x="72" y="106" fill="#86efac" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">CURRENT</text>
+        <text x="72" y="126" fill="#4ade80" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">● CONNECTED</text>
       `;
     } else {
       footerSvg = `
-        <text x="72" y="112" fill="#cbd5e1" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STANDBY</text>
-        <text x="72" y="126" fill="#64748b" font-size="10" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">IDLE</text>
+        <text x="72" y="106" fill="#f1f5f9" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STANDBY</text>
+        <text x="72" y="126" fill="#94a3b8" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">READY</text>
       `;
     }
 
@@ -416,18 +428,18 @@ export class SvgKeyRenderer {
         <rect width="144" height="144" rx="26" fill="#070b14" stroke="${borderColor}" stroke-width="${borderWidth}"/>
         
         <!-- Corner brackets -->
-        <path d="M 12 26 L 12 12 L 26 12" fill="none" stroke="${borderColor}" stroke-width="2" stroke-linecap="round"/>
-        <path d="M 132 26 L 132 12 L 118 12" fill="none" stroke="${borderColor}" stroke-width="2" stroke-linecap="round"/>
-        <path d="M 12 118 L 12 132 L 26 132" fill="none" stroke="${borderColor}" stroke-width="2" stroke-linecap="round"/>
-        <path d="M 132 118 L 132 132 L 118 132" fill="none" stroke="${borderColor}" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 12 26 L 12 12 L 26 12" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 26 L 132 12 L 118 12" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 12 118 L 12 132 L 26 132" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 132 118 L 132 132 L 118 132" fill="none" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round"/>
 
-        <!-- Header: Session Number and Beacon -->
-        <text x="20" y="24" fill="#94a3b8" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" letter-spacing="0.5">#${sessionIndex}</text>
-        ${cornerBeacon}
+        <!-- Header: Session Number Pill and Status Badge Pill -->
+        ${numPill}
+        ${statusPill}
 
         <!-- Project name in center -->
-        <text x="72" y="68" fill="#f8fafc" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${displayProject}</text>
-        <line x1="36" y1="78" x2="108" y2="78" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.6"/>
+        <text x="72" y="70" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${displayProject}</text>
+        <line x1="28" y1="80" x2="116" y2="80" stroke="${borderColor}" stroke-width="2" stroke-opacity="0.7"/>
 
         ${footerSvg}
       </svg>
