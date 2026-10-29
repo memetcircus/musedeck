@@ -87,6 +87,33 @@ export class SvgKeyRenderer {
   }
 
   /**
+   * Hardware-Driven Flashing Approval Key (alternates every 400ms for high-visibility physical LED flash)
+   */
+  static renderFlashingApprovalKey(phase: boolean): string {
+    const strokeColor = phase ? "#f59e0b" : "#ef4444";
+    const bgFill = phase ? "#451a03" : "#450a0a";
+    const glowFill = phase ? "#78350f" : "#7f1d1d";
+    const glowStroke = phase ? "#fbbf24" : "#f87171";
+    const polyStroke = phase ? "#fde047" : "#fca5a5";
+    const text1 = phase ? "REVIEW" : "ACTION";
+    const text2 = phase ? "APPROVAL" : "REQUIRED";
+    const text1Color = phase ? "#fde047" : "#ffffff";
+    const text2Color = phase ? "#fca5a5" : "#f87171";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="${bgFill}" stroke="${strokeColor}" stroke-width="4"/>
+        <circle cx="72" cy="46" r="30" fill="${glowFill}" fill-opacity="0.5" stroke="${glowStroke}" stroke-width="3" stroke-dasharray="8, 6"/>
+        <polygon points="72,23 96,67 48,67" fill="#92400e" fill-opacity="0.9" stroke="${polyStroke}" stroke-width="3" stroke-linejoin="round"/>
+        <line x1="72" y1="36" x2="72" y2="51" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="72" cy="60" r="2.8" fill="#ffffff"/>
+        <text x="72" y="103" fill="${text1Color}" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.2">${text1}</text>
+        <text x="72" y="124" fill="${text2Color}" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${text2}</text>
+      </svg>
+    `);
+  }
+
+  /**
    * Key 1: Voice Input Toggle Key (Option + V) for Meta Muse Code CLI
    */
   static renderVoiceKey(isRecording = false): string {

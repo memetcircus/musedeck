@@ -52,13 +52,26 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
   isThinkingListenerAttached = true;
 
   bridge.onTelemetry((telemetry) => {
-    if (snippetsSubmenuManager.isActive) {
+    // 1. AUTO-OPEN REVIEW SUBMENU ON APPROVAL WAIT!
+    if (telemetry.state === AgentState.WAITING_APPROVAL) {
+      if (museBeamAnimator.isRunning) {
+        museBeamAnimator.stop();
+      }
+      if (!reviewSubmenuManager.isActive) {
+        console.log("🚨 [Approval] WAITING_APPROVAL detected -> Automatically presenting 4-option HITL drawer!");
+        reviewSubmenuManager.open();
+      }
       return;
     }
+
+    // 2. AUTO-CLOSE REVIEW SUBMENU WHEN RESOLVED
     if (reviewSubmenuManager.isActive) {
-      if (telemetry.state !== AgentState.WAITING_APPROVAL) {
-        reviewSubmenuManager.close();
-      }
+      console.log("🔙 [Approval] No longer waiting approval -> Closing review submenu");
+      reviewSubmenuManager.close();
+      return;
+    }
+
+    if (snippetsSubmenuManager.isActive) {
       return;
     }
     if (sessionsSubmenuManager.isActive) {
@@ -69,6 +82,7 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
       telemetrySubmenuManager.render(telemetry);
       return;
     }
+
     const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
     if (isThinking && !museBeamAnimator.isRunning) {
       console.log("🌊 [StreamDeck] Meta Muse Code Thinking -> Starting 5x3 Quantum Beam Matrix Animation");
@@ -102,7 +116,13 @@ function registerDeckKey(
     restore,
   });
 
-  if (!museBeamAnimator.isRunning || excludeFromAnimation) {
+  if (reviewSubmenuManager.isActive) {
+    reviewSubmenuManager.render();
+  } else if (snippetsSubmenuManager.isActive) {
+    snippetsSubmenuManager.render();
+  } else if (telemetrySubmenuManager.isActive) {
+    telemetrySubmenuManager.render();
+  } else if (!museBeamAnimator.isRunning || excludeFromAnimation) {
     restore();
   }
 }
@@ -128,11 +148,19 @@ function unregisterDeckKey(ev: WillDisappearEvent): void {
 @action({ UUID: "com.memetcircus.musedeck.status" })
 export class AgentStatusAction extends SingletonAction {
   private activeKeys = new Set<KeyAction>();
+  private flashTimer: NodeJS.Timeout | null = null;
+  private flashPhase = false;
 
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
     reviewSubmenuManager.setBridge(this.bridge);
     this.bridge.onTelemetry((telemetry) => {
+      if (telemetry.state === AgentState.WAITING_APPROVAL) {
+        this.startFlashing();
+      } else {
+        this.stopFlashing();
+      }
+
       if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || sessionsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
       const img = SvgKeyRenderer.renderStatusKey(telemetry);
       for (const key of this.activeKeys) {
@@ -144,6 +172,26 @@ export class AgentStatusAction extends SingletonAction {
     });
   }
 
+  private startFlashing(): void {
+    if (this.flashTimer) return;
+    this.flashPhase = false;
+    this.flashTimer = setInterval(() => {
+      this.flashPhase = !this.flashPhase;
+      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || sessionsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
+      const img = SvgKeyRenderer.renderFlashingApprovalKey(this.flashPhase);
+      for (const key of this.activeKeys) {
+        void key.setImage(img);
+      }
+    }, 400);
+  }
+
+  private stopFlashing(): void {
+    if (this.flashTimer) {
+      clearInterval(this.flashTimer);
+      this.flashTimer = null;
+    }
+  }
+
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
@@ -151,7 +199,11 @@ export class AgentStatusAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderStatusKey(this.bridge.getTelemetry()));
+          if (this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL) {
+            void ev.action.setImage(SvgKeyRenderer.renderFlashingApprovalKey(this.flashPhase));
+          } else {
+            void ev.action.setImage(SvgKeyRenderer.renderStatusKey(this.bridge.getTelemetry()));
+          }
           void ev.action.setTitle("");
         },
         false, // Include in thinking wave animation so whole board animates; only HALT stays visible
@@ -162,6 +214,7 @@ export class AgentStatusAction extends SingletonAction {
   }
 
   override onWillDisappear(ev: WillDisappearEvent): void {
+    this.stopFlashing();
     unregisterDeckKey(ev);
     for (const key of this.activeKeys) {
       if (key.id === ev.action.id) this.activeKeys.delete(key);
