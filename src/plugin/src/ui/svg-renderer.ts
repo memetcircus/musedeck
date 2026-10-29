@@ -139,48 +139,92 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 2: Diff Summary Key
+   * Key 2: Snippets Submenu Launcher (replaces Diff)
    */
-  static renderDiffKey(telemetry: TelemetryData): string {
-    const { diffStats } = telemetry;
-    const hasDiff = diffStats.filesChanged > 0;
-
-    if (!hasDiff) {
-      return CyberIcons["p1_diff"];
-      /* return this.svgToDataUri(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-          <rect width="144" height="144" rx="26" fill="#0b0f19" stroke="#475569" stroke-width="3.5"/>
-          <path d="M54 34 L54 64 M90 44 L90 74 M54 64 C54 78 90 60 90 74" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
-          <circle cx="54" cy="34" r="6" fill="#38bdf8"/>
-          <circle cx="90" cy="74" r="6" fill="#a855f7"/>
-          <text x="72" y="115" fill="#cbd5e1" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">NO DIFF</text>
-        </svg>
-      `); */
-    }
-
+  static renderSnippetsKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#0b1329" stroke="#6366f1" stroke-width="4"/>
-        <path d="M52 28 L52 56 M92 38 L92 66 M52 56 C52 70 92 52 92 66" fill="none" stroke="#818cf8" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="52" cy="28" r="6" fill="#38bdf8"/>
-        <circle cx="92" cy="66" r="6" fill="#a855f7"/>
-        <text x="72" y="96" fill="#ffffff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${diffStats.filesChanged} FILES</text>
-        <text x="72" y="122" fill="#4ade80" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">+${diffStats.insertions} / -${diffStats.deletions}</text>
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#a855f7" stroke-width="3"/>
+        <circle cx="72" cy="48" r="32" fill="#581c87" fill-opacity="0.35" stroke="#c084fc" stroke-width="2" stroke-dasharray="6, 5"/>
+        <!-- Brackets & Slash Code Icon -->
+        <path d="M52 34 L38 48 L52 62" fill="none" stroke="#e9d5ff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M92 34 L106 48 L92 62" fill="none" stroke="#e9d5ff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="77" y1="32" x2="67" y2="64" stroke="#a855f7" stroke-width="4" stroke-linecap="round"/>
+        <text x="72" y="118" fill="#e9d5ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">SNIPPETS</text>
       </svg>
     `);
   }
 
   /**
-   * Key 3: Physical HITL APPROVE Key
+   * Render individual prompt snippet card for Snippets Submenu
+   */
+  static renderSnippetCard(
+    line1: string,
+    line2: string,
+    subtitle: string,
+    borderColor = "#a855f7",
+    textColor = "#ffffff"
+  ): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <!-- Outer Frame -->
+        <rect x="5" y="5" width="134" height="134" rx="22" fill="#070b14" stroke="${borderColor}" stroke-width="2.8"/>
+        <rect x="9" y="9" width="126" height="126" rx="18" fill="none" stroke="${borderColor}" stroke-width="1.2" stroke-opacity="0.4"/>
+
+        <!-- Tech Corner Accents -->
+        <path d="M14 26 L14 14 L26 14" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+        <path d="M130 26 L130 14 L118 14" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+        <path d="M14 118 L14 130 L26 130" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+        <path d="M130 118 L130 130 L118 130" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+
+        <!-- Title Lines -->
+        <text x="72" y="${line2 ? '48' : '58'}" fill="${textColor}" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${line1}</text>
+        ${line2 ? `<text x="72" y="74" fill="${textColor}" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${line2}</text>` : ''}
+
+        <!-- Divider Line -->
+        <line x1="36" y1="92" x2="108" y2="92" stroke="${borderColor}" stroke-width="2" stroke-opacity="0.6"/>
+
+        <!-- Subtitle -->
+        <text x="72" y="116" fill="${borderColor}" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subtitle}</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Render blank cyber tile for inactive submenu keys
+   */
+  static renderEmptyTile(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect x="5" y="5" width="134" height="134" rx="22" fill="#04070e" stroke="#1e293b" stroke-width="2"/>
+        <circle cx="72" cy="72" r="3" fill="#334155"/>
+      </svg>
+    `);
+  }
+
+  /**
+   * Key 2: Diff Summary Key (Legacy)
+   */
+  static renderDiffKey(telemetry: TelemetryData): string {
+    return this.renderSnippetsKey();
+  }
+
+  /**
+   * Key 3: Physical HITL APPROVE Key (Only visible & active when awaiting review)
    */
   static renderApproveKey(isAwaiting: boolean): string {
-    if (!isAwaiting) return CyberIcons["p1_approve"];
-    const strokeColor = isAwaiting ? "#22c55e" : "#16a34a";
-    const fillColor = isAwaiting ? "#052e16" : "#022c22";
+    if (!isAwaiting) {
+      return this.svgToDataUri(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+          <rect width="144" height="144" rx="26" fill="#070b14" stroke="#1e293b" stroke-width="2"/>
+          <circle cx="72" cy="72" r="4" fill="#334155"/>
+        </svg>
+      `);
+    }
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${isAwaiting ? '5' : '3.5'}"/>
+        <rect width="144" height="144" rx="26" fill="#052e16" stroke="#22c55e" stroke-width="4.5"/>
         <circle cx="72" cy="46" r="26" fill="#15803d" stroke="#86efac" stroke-width="3"/>
         <path d="M58 46 L68 56 L86 38" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
         <text x="72" y="115" fill="#f0fdf4" font-size="23" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">APPROVE</text>
@@ -189,16 +233,21 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 4: Physical HITL REJECT Key
+   * Key 4: Physical HITL REJECT Key (Only visible & active when awaiting review)
    */
   static renderRejectKey(isAwaiting: boolean): string {
-    if (!isAwaiting) return CyberIcons["p1_reject"];
-    const strokeColor = isAwaiting ? "#ef4444" : "#dc2626";
-    const fillColor = isAwaiting ? "#450a0a" : "#2a0505";
+    if (!isAwaiting) {
+      return this.svgToDataUri(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+          <rect width="144" height="144" rx="26" fill="#070b14" stroke="#1e293b" stroke-width="2"/>
+          <circle cx="72" cy="72" r="4" fill="#334155"/>
+        </svg>
+      `);
+    }
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${isAwaiting ? '5' : '3.5'}"/>
+        <rect width="144" height="144" rx="26" fill="#450a0a" stroke="#ef4444" stroke-width="4.5"/>
         <circle cx="72" cy="46" r="26" fill="#b91c1c" stroke="#fca5a5" stroke-width="3"/>
         <line x1="57" y1="31" x2="87" y2="61" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round"/>
         <line x1="87" y1="31" x2="57" y2="61" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round"/>

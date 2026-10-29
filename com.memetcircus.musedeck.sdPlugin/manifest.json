@@ -50,10 +50,10 @@
       "States": [{ "Image": "imgs/actions/task/key" }]
     },
     {
-      "Name": "Diff Summary",
+      "Name": "Prompt Snippets",
       "UUID": "com.memetcircus.musedeck.diff",
       "Icon": "imgs/actions/diff/icon",
-      "Tooltip": "Displays git diff metrics (+lines / -lines). Tap to open diff inspector.",
+      "Tooltip": "Quick prompt snippets sub-dashboard (Be Honest, Don't Code, Show Opts, Explain Why, Keep Short, No Tests).",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/diff/key" }]
     },

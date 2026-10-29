@@ -266,6 +266,45 @@ end tell
   }
 
   /**
+   * Type a prompt snippet directly into active Muse Terminal prompt at the cursor
+   */
+  static async typeSnippetIntoTerminal(snippetText: string): Promise<void> {
+    const cleanText = snippetText.trim();
+    const textToInsert = ` ${cleanText} `;
+
+    // 1. Bring active Muse Terminal to front
+    await this.focusMuseTerminalWindow();
+
+    // 2. Type text directly via native mac-type helper
+    const macTypeBin = this.getMacTypeBin();
+    if (macTypeBin) {
+      try {
+        await execAsync(`"${macTypeBin}" text "${this.escapeForShell(textToInsert)}"`);
+        console.log(`📝 [Terminal] Typed prompt snippet at cursor: "${cleanText}"`);
+        return;
+      } catch (err: any) {
+        console.warn("Native mac-type typing failed, attempting fallback:", err.message);
+      }
+    }
+
+    // Fallback: AppleScript System Events
+    const appleScript = `
+tell application "Terminal" to activate
+delay 0.05
+tell application "System Events"
+  keystroke "${this.escapeForAppleScript(textToInsert)}"
+end tell
+    `.trim();
+
+    try {
+      await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      console.log(`📝 [Terminal] Typed snippet via AppleScript`);
+    } catch (err: any) {
+      console.error("Failed to type snippet:", err.message);
+    }
+  }
+
+  /**
    * Check if the active Terminal window running Muse is currently in the "Thinking..." state
    */
   static async checkTerminalThinkingState(): Promise<"THINKING" | "IDLE" | "UNKNOWN"> {

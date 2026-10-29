@@ -1,4 +1,5 @@
 import { telemetrySubmenuManager } from "../ui/telemetry-submenu.js";
+import { snippetsSubmenuManager } from "../ui/snippets-submenu.js";
 import {
   action,
   SingletonAction,
@@ -19,10 +20,16 @@ import { museBeamAnimator } from "../ui/muse-beam-animator.js";
 // Global Thinking Listener across Stream Deck
 let isThinkingListenerAttached = false;
 function checkSubmenuKeyDown(ev: any): boolean {
+  const payload = ev.payload as any;
+  const col = payload?.coordinates?.column ?? 0;
+  const row = payload?.coordinates?.row ?? 0;
+
+  if (snippetsSubmenuManager.isActive) {
+    void snippetsSubmenuManager.handleKeyDown(col, row);
+    return true;
+  }
+
   if (telemetrySubmenuManager.isActive) {
-    const payload = ev.payload as any;
-    const col = payload?.coordinates?.column ?? 0;
-    const row = payload?.coordinates?.row ?? 0;
     return telemetrySubmenuManager.handleKeyDown(col, row);
   }
   return false;
@@ -74,6 +81,9 @@ function registerDeckKey(
 
 function unregisterDeckKey(ev: WillDisappearEvent): void {
   keyRegistry.remove(ev.action.id);
+  if (snippetsSubmenuManager.isActive) {
+    snippetsSubmenuManager.forceClose();
+  }
   if (telemetrySubmenuManager.isActive) {
     console.log("⚠️ [Submenu] Key disappearing while submenu active -> force-closing submenu to prevent stuck state");
     telemetrySubmenuManager.forceClose();
@@ -178,21 +188,13 @@ export class ActiveTaskAction extends SingletonAction {
   }
 }
 
-// --- KEY 2: DIFF SUMMARY KEY ---
+// --- KEY 2: SNIPPETS SUBMENU KEY ---
 @action({ UUID: "com.memetcircus.musedeck.diff" })
 export class DiffSummaryAction extends SingletonAction {
   private activeKeys = new Set<KeyAction>();
 
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
-    this.bridge.onTelemetry((telemetry) => {
-      const img = SvgKeyRenderer.renderDiffKey(telemetry);
-      for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning) {
-          void key.setImage(img);
-        }
-      }
-    });
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
@@ -202,7 +204,8 @@ export class DiffSummaryAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderDiffKey(this.bridge.getTelemetry()));
+          void ev.action.setImage(SvgKeyRenderer.renderSnippetsKey());
+          void ev.action.setTitle("");
         },
         false,
         2,
@@ -220,7 +223,11 @@ export class DiffSummaryAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    exec("open http://localhost:3456/api/diff");
+    if (snippetsSubmenuManager.isActive) {
+      snippetsSubmenuManager.close();
+    } else {
+      snippetsSubmenuManager.open();
+    }
   }
 }
 
@@ -235,7 +242,7 @@ export class ApproveAction extends SingletonAction {
       const isAwaiting = telemetry.state === AgentState.WAITING_APPROVAL;
       const img = SvgKeyRenderer.renderApproveKey(isAwaiting);
       for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning) {
+        if (!museBeamAnimator.isRunning && !snippetsSubmenuManager.isActive && !telemetrySubmenuManager.isActive) {
           void key.setImage(img);
         }
       }
@@ -268,6 +275,11 @@ export class ApproveAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
+    const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
+    if (!isAwaiting) {
+      console.log("[Approve] Ignored: Agent is not awaiting approval");
+      return;
+    }
     await TerminalAutomation.sendApprovalKeystroke("y");
     await this.bridge.approve();
   }
@@ -284,7 +296,7 @@ export class RejectAction extends SingletonAction {
       const isAwaiting = telemetry.state === AgentState.WAITING_APPROVAL;
       const img = SvgKeyRenderer.renderRejectKey(isAwaiting);
       for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning) {
+        if (!museBeamAnimator.isRunning && !snippetsSubmenuManager.isActive && !telemetrySubmenuManager.isActive) {
           void key.setImage(img);
         }
       }
@@ -317,6 +329,11 @@ export class RejectAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
+    const isAwaiting = this.bridge.getTelemetry().state === AgentState.WAITING_APPROVAL;
+    if (!isAwaiting) {
+      console.log("[Reject] Ignored: Agent is not awaiting approval");
+      return;
+    }
     await TerminalAutomation.sendApprovalKeystroke("n");
     await this.bridge.reject();
   }
