@@ -86,37 +86,47 @@ export class SvgKeyRenderer {
     if (isRecording) {
       return this.svgToDataUri(`
         <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-          <rect width="144" height="144" rx="26" fill="#2a0505" stroke="#ef4444" stroke-width="4.5"/>
-          <circle cx="72" cy="48" r="30" fill="#7f1d1d" fill-opacity="0.4" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6, 4"/>
-          <!-- Active Recording Glowing Dot & Radials -->
-          <circle cx="72" cy="48" r="14" fill="#ef4444" stroke="#fee2e2" stroke-width="2.5"/>
-          <path d="M42 40 C38 45 38 51 42 56" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
-          <path d="M102 40 C106 45 106 51 102 56" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
-          <path d="M34 34 C28 42 28 54 34 62" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M110 34 C116 42 116 54 110 62" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round"/>
-          <text x="72" y="104" fill="#fee2e2" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">RECORDING</text>
-          <text x="72" y="124" fill="#fca5a5" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">⌥+V TO STOP</text>
+          <rect width="144" height="144" rx="26" fill="#070b14" stroke="#ef4444" stroke-width="3"/>
+          <circle cx="72" cy="48" r="32" fill="#7f1d1d" fill-opacity="0.35" stroke="#ef4444" stroke-width="2" stroke-dasharray="6, 5"/>
+          <!-- Active Recording Glow & Soundwaves -->
+          <circle cx="94" cy="20" r="5" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>
+          <path d="M30 32 C23 42 23 54 30 64" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M114 32 C121 42 121 54 114 64" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M38 38 C33 44 33 52 38 58" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M106 38 C111 44 111 52 106 58" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Studio Microphone Capsule -->
+          <rect x="60" y="20" width="24" height="38" rx="12" fill="#991b1b" stroke="#f87171" stroke-width="2.5"/>
+          <line x1="64" y1="28" x2="80" y2="28" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          <line x1="64" y1="34" x2="80" y2="34" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          <line x1="64" y1="40" x2="80" y2="40" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          <line x1="60" y1="45" x2="84" y2="45" stroke="#fca5a5" stroke-width="2"/>
+          <!-- Suspension U-Cradle & Stand Base -->
+          <path d="M48 38 C48 68 96 68 96 38" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="72" y1="67" x2="72" y2="80" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
+          <line x1="54" y1="80" x2="90" y2="80" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
+          <text x="72" y="118" fill="#fca5a5" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">RECORDING</text>
         </svg>
       `);
     }
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#081a30" stroke="#0ea5e9" stroke-width="3.5"/>
-        <!-- Microphone Body -->
-        <rect x="64" y="26" width="16" height="30" rx="8" fill="#0284c7" stroke="#38bdf8" stroke-width="2.5"/>
-        <line x1="68" y1="34" x2="76" y2="34" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/>
-        <line x1="68" y1="40" x2="76" y2="40" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/>
-        <line x1="68" y1="46" x2="76" y2="46" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/>
-        <!-- Mic Cradle -->
-        <path d="M54 44 C54 60 90 60 90 44" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
-        <line x1="72" y1="60" x2="72" y2="72" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
-        <line x1="60" y1="72" x2="84" y2="72" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
-        <!-- Sound waves -->
-        <path d="M44 42 C41 46 41 50 44 54" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M100 42 C103 46 103 50 100 54" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round"/>
-        <text x="72" y="104" fill="#f0f9ff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">VOICE</text>
-        <text x="72" y="124" fill="#38bdf8" font-size="14" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">⌥+V</text>
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#0ea5e9" stroke-width="3"/>
+        <circle cx="72" cy="48" r="32" fill="#0c4a6e" fill-opacity="0.35" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6, 5"/>
+        <!-- Acoustic Radial Waves -->
+        <path d="M38 38 C33 44 33 52 38 58" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M106 38 C111 44 111 52 106 58" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Studio Microphone Capsule -->
+        <rect x="60" y="20" width="24" height="38" rx="12" fill="#0369a1" stroke="#38bdf8" stroke-width="2.5"/>
+        <line x1="64" y1="28" x2="80" y2="28" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="64" y1="34" x2="80" y2="34" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="64" y1="40" x2="80" y2="40" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="60" y1="45" x2="84" y2="45" stroke="#7dd3fc" stroke-width="2"/>
+        <!-- Suspension U-Cradle & Stand Base -->
+        <path d="M48 38 C48 68 96 68 96 38" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="72" y1="67" x2="72" y2="80" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+        <line x1="54" y1="80" x2="90" y2="80" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+        <text x="72" y="118" fill="#7dd3fc" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">VOICE</text>
       </svg>
     `);
   }
