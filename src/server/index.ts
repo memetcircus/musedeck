@@ -27,6 +27,9 @@ async function main() {
   const HTTP_PORT = Number(process.env.PORT) || 3456;
   const WS_PORT = Number(process.env.WS_PORT) || 3457;
 
+  // Ensure runtime temp directory exists
+  fs.mkdirSync("/tmp/musedeck", { recursive: true });
+
   // 1. Initialize State Machine
   const stateMachine = new AgentStateMachine();
 
@@ -429,6 +432,7 @@ async function main() {
         );
 
         const videoPath = "/tmp/musedeck/flow.mp4";
+        fs.mkdirSync(path.dirname(videoPath), { recursive: true });
         if (fs.existsSync(videoPath)) {
           try { fs.unlinkSync(videoPath); } catch {}
         }
