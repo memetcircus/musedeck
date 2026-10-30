@@ -22,6 +22,17 @@ import { museBeamAnimator } from "../ui/muse-beam-animator.js";
 
 // Global Thinking Listener across Stream Deck
 let isThinkingListenerAttached = false;
+
+export function isAnySubmenuActive(): boolean {
+  return (
+    snippetsSubmenuManager.isActive ||
+    reviewSubmenuManager.isActive ||
+    sessionsSubmenuManager.isActive ||
+    telemetrySubmenuManager.isActive ||
+    imgToCodeSubmenuManager.isActive
+  );
+}
+
 function checkSubmenuKeyDown(ev: any): boolean {
   const payload = ev.payload as any;
   const col = payload?.coordinates?.column ?? 0;
@@ -175,7 +186,7 @@ export class AgentStatusAction extends SingletonAction {
         this.stopFlashing();
       }
 
-      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || sessionsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
+      if (isAnySubmenuActive()) return;
       const img = SvgKeyRenderer.renderStatusKey(telemetry);
       for (const key of this.activeKeys) {
         if (!museBeamAnimator.isRunning) {
@@ -191,7 +202,7 @@ export class AgentStatusAction extends SingletonAction {
     this.flashPhase = false;
     this.flashTimer = setInterval(() => {
       this.flashPhase = !this.flashPhase;
-      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || sessionsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
+      if (isAnySubmenuActive()) return;
       const img = SvgKeyRenderer.renderFlashingApprovalKey(this.flashPhase);
       for (const key of this.activeKeys) {
         void key.setImage(img);
@@ -395,13 +406,7 @@ export class SessionsAction extends SingletonAction {
     super();
     if (this.bridge) {
       this.bridge.onTelemetry(() => {
-        if (
-          snippetsSubmenuManager.isActive ||
-          reviewSubmenuManager.isActive ||
-          sessionsSubmenuManager.isActive ||
-          telemetrySubmenuManager.isActive
-        )
-          return;
+        if (isAnySubmenuActive()) return;
         const img = SvgKeyRenderer.renderSessionsPageKey(
           sessionsSubmenuManager.sessionCount || 1,
           sessionsSubmenuManager.hasThinkingSession
@@ -464,7 +469,7 @@ export class SamSnipAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
     this.bridge.onTelemetry(() => {
-      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || sessionsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
+      if (isAnySubmenuActive()) return;
       const img = SvgKeyRenderer.renderSamSnipKey("idle");
       for (const key of this.activeKeys) {
         if (!museBeamAnimator.isRunning) {
@@ -531,14 +536,7 @@ export class SparkCodeAction extends SingletonAction {
     super();
     imgToCodeSubmenuManager.setBridge(this.bridge);
     this.bridge.onTelemetry(() => {
-      if (
-        snippetsSubmenuManager.isActive ||
-        reviewSubmenuManager.isActive ||
-        sessionsSubmenuManager.isActive ||
-        telemetrySubmenuManager.isActive ||
-        imgToCodeSubmenuManager.isActive
-      )
-        return;
+      if (isAnySubmenuActive()) return;
       const img = SvgKeyRenderer.renderImgToCodeKey("idle");
       for (const key of this.activeKeys) {
         if (!museBeamAnimator.isRunning) {
@@ -622,7 +620,7 @@ export class HaltAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
     this.bridge.onTelemetry((telemetry) => {
-      if (snippetsSubmenuManager.isActive || reviewSubmenuManager.isActive || sessionsSubmenuManager.isActive || telemetrySubmenuManager.isActive) return;
+      if (isAnySubmenuActive()) return;
       const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
       const img = SvgKeyRenderer.renderHaltKey(isThinking);
       for (const key of this.activeKeys) {
@@ -673,7 +671,7 @@ export class ResetAction extends SingletonAction {
       const usage = telemetry.apiUsage;
       const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
       for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning && !telemetrySubmenuManager.isActive && !sessionsSubmenuManager.isActive && !snippetsSubmenuManager.isActive && !reviewSubmenuManager.isActive && !imgToCodeSubmenuManager.isActive) {
+        if (!museBeamAnimator.isRunning && !isAnySubmenuActive()) {
           void key.setImage(img);
           void key.setTitle("");
         }
@@ -1343,7 +1341,7 @@ export class ApiStatusAction extends SingletonAction {
         const usage = telemetry.apiUsage;
         const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
         for (const key of this.activeKeys) {
-          if (!museBeamAnimator.isRunning && !telemetrySubmenuManager.isActive) {
+          if (!museBeamAnimator.isRunning && !isAnySubmenuActive()) {
             void key.setImage(img);
             void key.setTitle("");
           }

@@ -11,6 +11,11 @@ export type SurfaceMessage =
   | { type: "open_code" }
   | { type: "runTask"; prompt: string }
   | { type: "toggle_submenu" }
+  | { type: "toggle_snippets" }
+  | { type: "toggle_img_to_code" }
+  | { type: "open_img_to_code" }
+  | { type: "close_img_to_code" }
+  | { type: "toggle_sessions" }
   | { type: "subscribe" };
 
 export class MuseWsServer {

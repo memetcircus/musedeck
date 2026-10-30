@@ -174,6 +174,12 @@ async function main() {
         wsServer.broadcast({ type: "toggle_submenu" });
         break;
 
+      case "toggle_img_to_code":
+      case "open_img_to_code":
+      case "close_img_to_code":
+        wsServer.broadcast({ type: msg.type });
+        break;
+
       case "subscribe":
         wsServer.broadcastTelemetry(stateMachine.getTelemetry());
         break;
