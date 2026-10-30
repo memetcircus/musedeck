@@ -1007,7 +1007,9 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
             if (!fs.existsSync(path.join(projectDir, "pubspec.yaml"))) {
               await execAsync(`${flutterBin} create --project-name=flutter_preview --platforms=web "${projectDir}"`);
             }
-            await fs.promises.copyFile(filePath, path.join(projectDir, "lib/main.dart"));
+            let dartCode = await fs.promises.readFile(filePath, "utf8");
+            dartCode = TerminalAutomation.healDartCode(dartCode);
+            await fs.promises.writeFile(path.join(projectDir, "lib/main.dart"), dartCode, "utf8");
             await execAsync(`cd "${projectDir}" && ${flutterBin} build web --base-href=/flutter/ --no-pub`);
             try {
               await execAsync(`open -a "Google Chrome" "http://localhost:3456/flutter/"`);
@@ -1048,6 +1050,36 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       console.warn("Live preview failed:", err.message);
       return false;
     }
+  }
+
+  /**
+   * Auto-heals common Flutter Dart LLM synthesis bugs (e.g. List<num> vs double type mismatch)
+   */
+  static healDartCode(code: string): string {
+    // 1. Convert any mixed/integer number lists like final men = [62.0, 52, ...] to <double>[...]
+    code = code.replace(/(\bfinal\s+([a-zA-Z0-9_]+)\s*=\s*)\[([\d\s.,]+)\]/g, (match, prefix, _varName, numbers) => {
+      const converted = numbers
+        .split(",")
+        .map((n: string) => {
+          const trimmed = n.trim();
+          if (!trimmed) return trimmed;
+          if (/^\d+$/.test(trimmed)) return trimmed + ".0";
+          return trimmed;
+        })
+        .join(", ");
+      return `${prefix}<double>[${converted}]`;
+    });
+
+    // 2. Also ensure if main() is missing, wrap with runApp
+    if (!code.includes("void main()")) {
+      const classMatch = code.match(/class\s+([A-Za-z0-9_]+)\s+extends\s+StatelessWidget/);
+      if (classMatch) {
+        const rootWidget = classMatch[1];
+        code = `void main() => runApp(const MaterialApp(home: ${rootWidget}(), debugShowCheckedModeBanner: false));\n\n` + code;
+      }
+    }
+
+    return code;
   }
 
   /**
