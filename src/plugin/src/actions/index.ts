@@ -989,7 +989,7 @@ export class RecordToFixAction extends SingletonAction {
   }
 }
 
-// --- PAGE 2 KEY 1: VIDEO TO CODE ---
+// --- PAGE 2 KEY 1: BLANK / UNASSIGNED (REMOVED VID-TO-CODE FROM PAGE 2) ---
 @action({ UUID: "com.memetcircus.musedeck.vid-to-code" })
 export class VidToCodeAction extends SingletonAction {
   constructor(private readonly bridge?: StreamDeckCoreBridge) {
@@ -1001,7 +1001,7 @@ export class VidToCodeAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderVidToCodeKey());
+          void ev.action.setImage(SvgKeyRenderer.renderEmptyTile());
           void ev.action.setTitle("");
         },
         false,
@@ -1016,12 +1016,7 @@ export class VidToCodeAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    if (checkSubmenuKeyDown(_ev)) return;
-    console.log("🎥 [Page 2] VID-TO-CODE triggered");
-    await TerminalAutomation.launchMuseCodeTerminal(
-      process.cwd(),
-      "Convert latest multimodal video recording into a complete React Tailwind component using Meta Files API"
-    );
+    // Blank slot per user request
   }
 }
 
@@ -1061,7 +1056,7 @@ export class UploadFileAction extends SingletonAction {
   }
 }
 
-// --- PAGE 2 KEY 3: AUDIO TRANSCRIPTION ---
+// --- PAGE 2 KEY 3: BLANK / UNASSIGNED (REMOVED AUDIO-TRANS FROM PAGE 2) ---
 @action({ UUID: "com.memetcircus.musedeck.audio-trans" })
 export class AudioTransAction extends SingletonAction {
   constructor(private readonly bridge?: StreamDeckCoreBridge) {
@@ -1073,7 +1068,7 @@ export class AudioTransAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderAudioTransKey());
+          void ev.action.setImage(SvgKeyRenderer.renderEmptyTile());
           void ev.action.setTitle("");
         },
         false,
@@ -1088,12 +1083,7 @@ export class AudioTransAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    if (checkSubmenuKeyDown(_ev)) return;
-    console.log("🎙️ [Page 2] AUDIO TRANS triggered");
-    await TerminalAutomation.launchMuseCodeTerminal(
-      process.cwd(),
-      "Transcribe latest audio recording and convert speech instructions into formal product specifications"
-    );
+    // Blank slot per user request
   }
 }
 

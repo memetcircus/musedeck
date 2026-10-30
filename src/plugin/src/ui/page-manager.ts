@@ -79,12 +79,7 @@ export class PageManager {
         );
         break;
 
-      case 1: // [1] VID-TO-CODE (Meta Files API)
-        console.log("🎥 [Page 2] VID-TO-CODE triggered");
-        await TerminalAutomation.launchMuseCodeTerminal(
-          process.cwd(),
-          "Convert latest multimodal video recording into a complete React Tailwind component using Meta Files API"
-        );
+      case 1: // [1] Blank for now
         break;
 
       case 2: // [2] UPLOAD FILE (file_id)
@@ -95,12 +90,7 @@ export class PageManager {
         );
         break;
 
-      case 3: // [3] AUDIO TRANS (Speech to Spec)
-        console.log("🎙️ [Page 2] AUDIO TRANS triggered");
-        await TerminalAutomation.launchMuseCodeTerminal(
-          process.cwd(),
-          "Transcribe latest audio recording and convert speech instructions into formal product specifications"
-        );
+      case 3: // [3] Blank for now
         break;
 
       case 4: // [4] RE-INSPECT (Diff Inspector)

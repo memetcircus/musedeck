@@ -1271,9 +1271,9 @@ export class SvgKeyRenderer {
   static renderPage2Key(slotIndex: number): string {
     switch (slotIndex) {
       case 0: return this.renderRecordToFixKey(false);
-      case 1: return this.renderVidToCodeKey();
+      case 1: return this.renderEmptyTile(); // Left blank for now per user request
       case 2: return this.renderUploadFileKey();
-      case 3: return this.renderAudioTransKey();
+      case 3: return this.renderEmptyTile(); // Left blank for now per user request
       case 4: return this.renderReInspectKey();
       case 5: return this.renderPhoneRecKey();
       case 6: return this.renderStyleTransKey();
