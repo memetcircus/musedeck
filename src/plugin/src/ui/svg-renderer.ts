@@ -25,15 +25,15 @@ export class SvgKeyRenderer {
             <rect width="144" height="144" rx="26" fill="#10b981" fill-opacity="0.04"/>
 
             <!-- Glowing Checkmark Icon -->
-            <circle cx="72" cy="42" r="26" fill="#064e3b" fill-opacity="0.4" stroke="#34d399" stroke-width="2.5" stroke-dasharray="8, 5"/>
-            <circle cx="72" cy="42" r="17" fill="#065f46" stroke="#10b981" stroke-width="2"/>
-            <path d="M64 42 L69 47 L80 35" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="72" cy="40" r="25" fill="#064e3b" fill-opacity="0.4" stroke="#34d399" stroke-width="2.5" stroke-dasharray="8, 5"/>
+            <circle cx="72" cy="40" r="16" fill="#065f46" stroke="#10b981" stroke-width="2"/>
+            <path d="M64 40 L69 45 L80 33" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 
-            <!-- State Title: READY -->
-            <text x="72" y="98" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">READY</text>
+            <!-- Primary Action Title: NEW SESSION -->
+            <text x="72" y="95" fill="#ffffff" font-size="15.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">NEW SESSION</text>
 
-            <!-- Action Subtitle: NEW SESSION ↗ -->
-            <text x="72" y="122" fill="#34d399" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">NEW SESSION ↗</text>
+            <!-- State Subtitle: READY -->
+            <text x="72" y="121" fill="#34d399" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">READY ↗</text>
           </svg>
         `);
 
