@@ -10,7 +10,14 @@ export type TargetFramework =
   | "SWIFTUI"
   | "COMPOSE"
   | "FLUTTER"
-  | "PYTHON";
+  | "PYTHON"
+  | "FRAMER"
+  | "TAILWIND_ANIM"
+  | "SWIFTUI_SPRING"
+  | "COMPOSE_ANIM"
+  | "FLUTTER_ANIM"
+  | "VUE_ANIM"
+  | "GSAP";
 
 export interface SparkCodeResult {
   code: string;
@@ -128,7 +135,7 @@ export class MuseSparkClient {
     }
 
     // Ensure SwiftUI has valid parameters and standalone @main App runner for Live Preview
-    if (resolvedFramework === "SWIFTUI") {
+    if (resolvedFramework === "SWIFTUI" || resolvedFramework === "SWIFTUI_SPRING") {
       code = code.replace(/dampingFactor:/g, "dampingFraction:");
       code = code.replace(/\.padding\(\.horizontal,\s*(\d+),\s*vertical:\s*(\d+)\)/g, ".padding(.horizontal, $1).padding(.vertical, $2)");
       code = code.replace(/\.padding\(\.vertical,\s*(\d+),\s*horizontal:\s*(\d+)\)/g, ".padding(.vertical, $1).padding(.horizontal, $2)");
@@ -176,6 +183,62 @@ export class MuseSparkClient {
           frameworkName: "Apple SwiftUI",
           systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready, idiomatic Apple SwiftUI components with modern styling, SF Symbols, and smooth animations. The file must be 100% complete and self-contained so that swiftc compiles it cleanly.",
           prompt: "Convert this UI design into a complete, self-contained Apple SwiftUI View with @State and SF Symbols. Include all subviews and helpers inline in the same file so the code compiles with zero external dependencies.",
+        };
+
+      case "SWIFTUI_SPRING":
+        return {
+          filename: "AnimatedComponent.swift",
+          frameworkName: "SwiftUI Spring Physics",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready Apple SwiftUI Views with spring animations (.animation(.spring(response: 0.45, dampingFraction: 0.7)), withAnimation, and interactive @State). The file must be 100% complete and self-contained with a preview App so swiftc compiles it cleanly.",
+          prompt: "Convert this UI screen flow into a SwiftUI View with realistic spring animations, gesture/toggle triggers, and interactive state.",
+        };
+
+      case "FRAMER":
+        return {
+          filename: "AnimatedComponent.tsx",
+          frameworkName: "React + Framer Motion",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-grade, accessible React + TypeScript components with Framer Motion (motion.div, AnimatePresence, spring transition physics, and layout animations).",
+          prompt: "Convert this UI screen interaction flow into a React component animated with Framer Motion and Tailwind CSS.",
+        };
+
+      case "TAILWIND_ANIM":
+        return {
+          filename: "AnimatedComponent.tsx",
+          frameworkName: "Tailwind CSS Keyframes",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-grade React + Tailwind CSS components with keyframes, transition utilities (transition-all duration-300 ease-out), and interactive hover/active states.",
+          prompt: "Convert this UI screen interaction flow into a React component with smooth Tailwind CSS animations.",
+        };
+
+      case "COMPOSE_ANIM":
+        return {
+          filename: "AnimatedComponent.kt",
+          frameworkName: "Compose AnimatedVisibility",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate idiomatic Android Jetpack Compose @Composable code using AnimatedVisibility, animateFloatAsState, and spring transitionSpec.",
+          prompt: "Convert this UI screen flow into an animated Android Jetpack Compose component.",
+        };
+
+      case "FLUTTER_ANIM":
+        return {
+          filename: "animated_component.dart",
+          frameworkName: "Flutter Animation",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate Flutter StatefulWidget widgets using AnimatedContainer, CurvedAnimation(Curves.easeInOut), or Hero transitions.",
+          prompt: "Convert this UI screen flow into an animated Flutter widget with smooth curves.",
+        };
+
+      case "VUE_ANIM":
+        return {
+          filename: "AnimatedComponent.vue",
+          frameworkName: "Vue 3 <Transition>",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate Vue 3 Single File Components using <script setup lang=\"ts\"> and <Transition> wrappers with Tailwind CSS enter/leave classes.",
+          prompt: "Convert this UI screen flow into a Vue 3 component with smooth <Transition> animations.",
+        };
+
+      case "GSAP":
+        return {
+          filename: "animated_component.html",
+          frameworkName: "HTML + GSAP Timelines",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate clean HTML5 + CSS3 with GSAP (GreenSock) CDN and interactive timeline animations.",
+          prompt: "Convert this UI screen flow into a standalone HTML file with GSAP timeline animations.",
         };
 
       case "COMPOSE":
@@ -231,6 +294,109 @@ export class MuseSparkClient {
 
   private getFallbackCode(target: TargetFramework): string {
     switch (target) {
+      case "SWIFTUI_SPRING":
+        return `import SwiftUI
+
+public struct AnimatedComponent: View {
+    @State private var isExpanded: Bool = false
+    @State private var isPressed: Bool = false
+    @State private var count: Int = 12
+
+    public var body: some View {
+        VStack(spacing: 20) {
+            // Animated Header Badge
+            HStack {
+                ZStack {
+                    Circle()
+                        .fill(isExpanded ? Color.purple : Color.blue)
+                        .frame(width: 48, height: 48)
+                        .scaleEffect(isPressed ? 0.92 : 1.0)
+                    Image(systemName: isExpanded ? "waveform.path.ecg" : "sparkles")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.white)
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Interactive Flow Card")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                    Text(isExpanded ? "Live Spring Physics Active" : "Tap Card to Expand")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                Spacer()
+            }
+
+            // Expanding Content Card with Spring Animation
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Synthesized from Video Flow")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.9))
+                    
+                    HStack {
+                        Label("Spring Physics", systemImage: "bolt.fill")
+                            .font(.caption)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.purple.opacity(0.3))
+                            .cornerRadius(8)
+                            .foregroundColor(.purple)
+                        
+                        Label("Fluid UI", systemImage: "sparkle")
+                            .font(.caption)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.3))
+                            .cornerRadius(8)
+                            .foregroundColor(.cyan)
+                    }
+                }
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.85).combined(with: .opacity),
+                    removal: .opacity
+                ))
+            }
+
+            // Interactive Trigger Button
+            Button(action: {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.65)) {
+                    isExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Text(isExpanded ? "Collapse View" : "Trigger Flow Animation")
+                        .font(.system(size: 15, weight: .semibold))
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                }
+                .padding()
+                .background(isExpanded ? Color.purple : Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(14)
+                .scaleEffect(isPressed ? 0.96 : 1.0)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in isPressed = true }
+                    .onEnded { _ in isPressed = false }
+            )
+        }
+        .padding(22)
+        .background(Color(red: 0.08, green: 0.10, blue: 0.16))
+        .cornerRadius(22)
+        .overlay(
+            RoundedRectangle(cornerRadius: 22)
+                .stroke(isExpanded ? Color.purple.opacity(0.6) : Color.white.opacity(0.12), lineWidth: 1.5)
+        )
+        .frame(maxWidth: 360)
+        .shadow(color: isExpanded ? Color.purple.opacity(0.25) : Color.black.opacity(0.3), radius: 20, y: 10)
+    }
+}
+`;
+
       case "SWIFTUI":
         return `import SwiftUI
 

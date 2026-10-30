@@ -3,6 +3,7 @@ import { snippetsSubmenuManager } from "../ui/snippets-submenu.js";
 import { reviewSubmenuManager } from "../ui/review-submenu.js";
 import { sessionsSubmenuManager } from "../ui/sessions-submenu.js";
 import { imgToCodeSubmenuManager } from "../ui/img-to-code-submenu.js";
+import { vidToCodeSubmenuManager } from "../ui/vid-to-code-submenu.js";
 import {
   action,
   SingletonAction,
@@ -29,7 +30,8 @@ export function isAnySubmenuActive(): boolean {
     reviewSubmenuManager.isActive ||
     sessionsSubmenuManager.isActive ||
     telemetrySubmenuManager.isActive ||
-    imgToCodeSubmenuManager.isActive
+    imgToCodeSubmenuManager.isActive ||
+    vidToCodeSubmenuManager.isActive
   );
 }
 
@@ -45,6 +47,11 @@ function checkSubmenuKeyDown(ev: any): boolean {
 
   if (imgToCodeSubmenuManager.isActive) {
     void imgToCodeSubmenuManager.handleKeyDown(col, row);
+    return true;
+  }
+
+  if (vidToCodeSubmenuManager.isActive) {
+    void vidToCodeSubmenuManager.handleKeyDown(col, row);
     return true;
   }
 
@@ -92,6 +99,9 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
       return;
     }
     if (imgToCodeSubmenuManager.isActive) {
+      return;
+    }
+    if (vidToCodeSubmenuManager.isActive) {
       return;
     }
     if (sessionsSubmenuManager.isActive) {
@@ -142,6 +152,8 @@ function registerDeckKey(
     snippetsSubmenuManager.render();
   } else if (imgToCodeSubmenuManager.isActive) {
     imgToCodeSubmenuManager.render();
+  } else if (vidToCodeSubmenuManager.isActive) {
+    vidToCodeSubmenuManager.render();
   } else if (telemetrySubmenuManager.isActive) {
     telemetrySubmenuManager.render();
   } else if (!museBeamAnimator.isRunning || excludeFromAnimation) {
@@ -156,6 +168,9 @@ function unregisterDeckKey(ev: WillDisappearEvent): void {
   }
   if (imgToCodeSubmenuManager.isActive) {
     imgToCodeSubmenuManager.forceClose();
+  }
+  if (vidToCodeSubmenuManager.isActive) {
+    vidToCodeSubmenuManager.forceClose();
   }
   if (reviewSubmenuManager.isActive) {
     reviewSubmenuManager.forceClose();
@@ -593,17 +608,30 @@ export class SparkCodeAction extends SingletonAction {
 // --- KEY 7: VID TO CODE KEY (REPLACES LEGACY RUN MUSE) ---
 @action({ UUID: "com.memetcircus.musedeck.run-muse" })
 export class RunMuseAction extends SingletonAction {
+  private activeKeys = new Set<KeyAction>();
+
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
+    vidToCodeSubmenuManager.setBridge(this.bridge);
+    this.bridge.onTelemetry(() => {
+      if (isAnySubmenuActive()) return;
+      const img = SvgKeyRenderer.renderVidToCodeKey("idle");
+      for (const key of this.activeKeys) {
+        if (!museBeamAnimator.isRunning) {
+          void key.setImage(img);
+        }
+      }
+    });
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
       attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderVidToCodeKey());
+          void ev.action.setImage(SvgKeyRenderer.renderVidToCodeKey("idle"));
         },
         false,
         2,
@@ -614,12 +642,18 @@ export class RunMuseAction extends SingletonAction {
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
   }
 
-  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    if (checkSubmenuKeyDown(_ev)) return;
-    console.log("🎥 [VidToCode] Vid to Code tapped");
-    await TerminalAutomation.sendSystemNotification("Video-to-Code: Screen interaction recording & synthesis ready", "MuseDeck");
+  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(ev)) return;
+    if (vidToCodeSubmenuManager.isActive) {
+      vidToCodeSubmenuManager.close();
+    } else {
+      vidToCodeSubmenuManager.open();
+    }
   }
 }
 

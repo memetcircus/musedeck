@@ -849,6 +849,15 @@ export class SvgKeyRenderer {
     `);
   }
 
+  static renderVidToCodeOptionKey(
+    title: string,
+    subtitle: string,
+    borderColor = "#a855f7",
+    textColor = "#ffffff"
+  ): string {
+    return this.renderImgToCodeOptionKey(title, subtitle, borderColor, textColor);
+  }
+
   static renderOpenCodeKey(isReady = false): string {
     const borderColor = isReady ? "#22c55e" : "#a855f7";
     const subColor = isReady ? "#4ade80" : "#c084fc";
@@ -911,8 +920,9 @@ export class SvgKeyRenderer {
    */
   static renderBottomBannerTile(
     index: number,
-    mode: "idle" | "spark" | "preview" | "success" | "failed",
-    activeStep = 0
+    mode: "idle" | "spark" | "preview" | "success" | "failed" | "recording",
+    activeStep = 0,
+    countdownSeconds = 5
   ): string {
     if (mode === "idle") {
       return this.renderEmptyTile();
@@ -925,7 +935,19 @@ export class SvgKeyRenderer {
     let subColor = "#fbbf24";
     const isStepActive = index === activeStep;
 
-    if (mode === "spark") {
+    if (mode === "recording") {
+      borderColor = isStepActive ? "#ef4444" : "#991b1b";
+      bgOpacity = isStepActive ? "0.32" : "0.08";
+      subColor = isStepActive ? "#fca5a5" : "#ef4444";
+      const bannerData = [
+        { main: "● REC", sub: "RECORDING" },
+        { main: "FLOW", sub: "SCREEN" },
+        { main: `0:0${Math.max(1, countdownSeconds)}`, sub: "REMAINING" },
+        { main: "STOP ⏹", sub: "FINISH EARLY" },
+      ];
+      mainText = bannerData[index].main;
+      subText = bannerData[index].sub;
+    } else if (mode === "spark") {
       borderColor = isStepActive ? "#f59e0b" : "#78350f";
       bgOpacity = isStepActive ? "0.26" : "0.04";
       subColor = isStepActive ? "#fde047" : "#d97706";

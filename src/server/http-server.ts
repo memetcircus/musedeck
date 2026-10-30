@@ -198,6 +198,33 @@ export class MuseHttpServer {
       }
     });
 
+    // Vid To Code Submenu & Execution Endpoints
+    this.app.post("/api/vid/toggle", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "toggle_vid_to_code" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/vid/open", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "open_vid_to_code" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/vid/close", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "close_vid_to_code" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/vid/record", (req: Request, res: Response) => {
+      const target = req.body?.target || "AUTO";
+      wsServer?.broadcast({ type: "vid_record", target } as any);
+      res.json({ ok: true, target });
+    });
+
+    this.app.post("/api/vid/stop", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "vid_stop" as any });
+      res.json({ ok: true });
+    });
+
     this.app.post("/api/review/trigger-review", (_req: Request, res: Response) => {
       stateMachine.setWaitingApproval(
         {

@@ -3,6 +3,7 @@ dotenv.config();
 
 import fs from "node:fs";
 import path from "node:path";
+import { spawn, exec, type ChildProcess } from "node:child_process";
 import { AgentStateMachine } from "../agent/state-machine.js";
 import { AgentState } from "../agent/types.js";
 import { MuseRunner } from "../agent/muse-runner.js";
@@ -62,6 +63,78 @@ async function main() {
   museRunner.on("log", (type, msg) => {
     wsServer.broadcastLog(type, msg);
   });
+
+  // Vid To Code recording state
+  let activeRecordingProcess: ChildProcess | null = null;
+  let activeCountdownTimer: NodeJS.Timeout | null = null;
+  let activeRecordingTarget = "AUTO";
+
+  const finishRecordingAndSynthesize = async (targetFramework: string) => {
+    if (activeCountdownTimer) {
+      clearInterval(activeCountdownTimer);
+      activeCountdownTimer = null;
+    }
+    if (activeRecordingProcess) {
+      try {
+        activeRecordingProcess.kill("SIGINT");
+      } catch {}
+      activeRecordingProcess = null;
+    }
+
+    // Step 2: Native macOS Notification (Strictly English, no emojis!)
+    await TerminalAutomation.sendSystemNotification(
+      "Flow captured. Synthesizing animated code with Meta Muse Spark...",
+      "MuseDeck"
+    );
+
+    // Notify surfaces of synthesis phase
+    wsServer.broadcast({ type: "vid_synthesizing", target: targetFramework } as any);
+
+    try {
+      const videoPath = "/tmp/musedeck/flow.mp4";
+      const framePath = "/tmp/musedeck/flow_thumb.png";
+
+      // Extract high quality keyframe from the recording with ffmpeg
+      await new Promise<void>((resolve) => {
+        exec(
+          `/opt/homebrew/bin/ffmpeg -y -i "${videoPath}" -ss 00:00:01 -vframes 1 "${framePath}" || /usr/bin/ffmpeg -y -i "${videoPath}" -ss 00:00:01 -vframes 1 "${framePath}"`,
+          () => resolve()
+        );
+      });
+
+      let thumbBase64 = "";
+      if (fs.existsSync(framePath)) {
+        thumbBase64 = fs.readFileSync(framePath).toString("base64");
+      } else {
+        thumbBase64 = stateMachine.getTelemetry().lastThumbnail || "";
+      }
+
+      console.log(`🎬 [VidToCode] Synthesizing ${targetFramework} animated component...`);
+      const res = await sparkClient.generateCodeFromImage(thumbBase64, targetFramework as any);
+      stateMachine.setLastSparkCode(res.code);
+
+      // Open in developer's active editor
+      await TerminalAutomation.openFileInEditor(res.filePath);
+
+      // Feed prompt into active Muse terminal
+      const prompt = `Synthesized animated ${res.frameworkName} component (${res.filename}): ${res.filePath}. Integrate this interactive animation into our workspace.`;
+      await TerminalAutomation.typeSnippetIntoTerminal(prompt, false);
+
+      // Broadcast completion to Stream Deck
+      wsServer.broadcast({
+        type: "vid_spark_completed",
+        filename: res.filename,
+        filePath: res.filePath,
+        framework: res.frameworkName,
+      } as any);
+    } catch (err: any) {
+      console.error("VidToCode synthesis error:", err.message);
+      wsServer.broadcast({
+        type: "vid_spark_failed",
+        error: err.message,
+      } as any);
+    }
+  };
 
   // Handle incoming commands from physical Stream Deck or Web Surface
   wsServer.onMessage(async (msg: SurfaceMessage) => {
@@ -203,12 +276,69 @@ async function main() {
         wsServer.broadcast({ type: "toggle_submenu" });
         break;
 
+      case "vid_record": {
+        const target = (msg.target as string) || "AUTO";
+        activeRecordingTarget = target;
+        console.log(`🎬 [Bridge] Starting 5s screen recording for target: ${target}`);
+
+        // Step 1: Native macOS Notification (Strictly English, no emojis!)
+        await TerminalAutomation.sendSystemNotification(
+          "Recording UI screen flow (5 seconds)...",
+          "MuseDeck Vid to Code"
+        );
+
+        const videoPath = "/tmp/musedeck/flow.mp4";
+        if (fs.existsSync(videoPath)) {
+          try { fs.unlinkSync(videoPath); } catch {}
+        }
+
+        // Spawn screencapture -v -V 5
+        activeRecordingProcess = spawn("screencapture", ["-v", "-V", "5", videoPath]);
+        wsServer.broadcast({ type: "vid_recording_started", duration: 5 } as any);
+
+        let countdown = 5;
+        if (activeCountdownTimer) clearInterval(activeCountdownTimer);
+        activeCountdownTimer = setInterval(() => {
+          countdown--;
+          if (countdown > 0) {
+            wsServer.broadcast({ type: "vid_countdown", seconds: countdown } as any);
+          } else {
+            clearInterval(activeCountdownTimer!);
+            activeCountdownTimer = null;
+          }
+        }, 1000);
+
+        activeRecordingProcess.on("exit", () => {
+          activeRecordingProcess = null;
+          void finishRecordingAndSynthesize(activeRecordingTarget);
+        });
+        break;
+      }
+
+      case "vid_stop": {
+        console.log("⏹️ [Bridge] Early stop requested for screen recording");
+        if (activeRecordingProcess) {
+          activeRecordingProcess.kill("SIGINT");
+        } else {
+          void finishRecordingAndSynthesize(activeRecordingTarget);
+        }
+        break;
+      }
+
       case "toggle_img_to_code":
       case "open_img_to_code":
       case "close_img_to_code":
+      case "toggle_vid_to_code":
+      case "open_vid_to_code":
+      case "close_vid_to_code":
       case "spark_completed":
       case "spark_synthesizing":
       case "spark_failed":
+      case "vid_recording_started":
+      case "vid_countdown":
+      case "vid_synthesizing":
+      case "vid_spark_completed":
+      case "vid_spark_failed":
       case "preview_launching":
       case "preview_launched":
       case "preview_failed":

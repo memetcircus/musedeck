@@ -22,6 +22,16 @@ export type SurfaceMessage =
   | { type: "toggle_img_to_code" }
   | { type: "open_img_to_code" }
   | { type: "close_img_to_code" }
+  | { type: "toggle_vid_to_code" }
+  | { type: "open_vid_to_code" }
+  | { type: "close_vid_to_code" }
+  | { type: "vid_record"; target?: string }
+  | { type: "vid_stop" }
+  | { type: "vid_recording_started"; duration: number }
+  | { type: "vid_countdown"; seconds: number }
+  | { type: "vid_synthesizing"; target?: string }
+  | { type: "vid_spark_completed"; filename?: string; filePath?: string; framework?: string }
+  | { type: "vid_spark_failed"; reason?: string; error?: string }
   | { type: "toggle_sessions" }
   | { type: "switch_page"; page?: number }
   | { type: "launch_session"; projectDir?: string }

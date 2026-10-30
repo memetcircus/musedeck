@@ -6,6 +6,7 @@ import { snippetsSubmenuManager } from "./ui/snippets-submenu.js";
 import { reviewSubmenuManager } from "./ui/review-submenu.js";
 import { sessionsSubmenuManager } from "./ui/sessions-submenu.js";
 import { imgToCodeSubmenuManager } from "./ui/img-to-code-submenu.js";
+import { vidToCodeSubmenuManager } from "./ui/vid-to-code-submenu.js";
 
 export class StreamDeckCoreBridge {
   private ws: WebSocket | null = null;
@@ -147,12 +148,33 @@ export class StreamDeckCoreBridge {
             imgToCodeSubmenuManager.notifySynthesizing();
           } else if (msg.type === "spark_failed") {
             imgToCodeSubmenuManager.notifyCodeFailed(msg.reason);
+          } else if (msg.type === "toggle_vid_to_code") {
+            if (vidToCodeSubmenuManager.isActive) {
+              vidToCodeSubmenuManager.close();
+            } else {
+              vidToCodeSubmenuManager.open();
+            }
+          } else if (msg.type === "open_vid_to_code") {
+            vidToCodeSubmenuManager.open();
+          } else if (msg.type === "close_vid_to_code") {
+            vidToCodeSubmenuManager.close();
+          } else if (msg.type === "vid_recording_started") {
+            vidToCodeSubmenuManager.notifyRecordingStarted(msg.duration);
+          } else if (msg.type === "vid_countdown") {
+            vidToCodeSubmenuManager.notifyCountdown(msg.seconds);
+          } else if (msg.type === "vid_synthesizing") {
+            vidToCodeSubmenuManager.notifySynthesizing();
+          } else if (msg.type === "vid_spark_completed") {
+            vidToCodeSubmenuManager.notifyCodeGenerated();
           } else if (msg.type === "preview_launching") {
             imgToCodeSubmenuManager.notifyPreviewLaunching();
+            vidToCodeSubmenuManager.notifyPreviewLaunching();
           } else if (msg.type === "preview_launched") {
             imgToCodeSubmenuManager.notifyPreviewLaunched();
+            vidToCodeSubmenuManager.notifyPreviewLaunched();
           } else if (msg.type === "preview_failed") {
             imgToCodeSubmenuManager.notifyPreviewFailed(msg.error);
+            vidToCodeSubmenuManager.notifyPreviewFailed(msg.error);
           } else if (msg.type === "switch_page") {
             const page = typeof msg.page === "number" ? msg.page : 1;
             console.log(`[Bridge] Received switch_page command to page ${page}`);
@@ -259,6 +281,14 @@ export class StreamDeckCoreBridge {
 
   async runPreview(): Promise<void> {
     await this.dispatch({ type: "run_preview" }, "run-preview");
+  }
+
+  async recordVid(target = "AUTO"): Promise<void> {
+    await this.dispatch({ type: "vid_record", target }, "vid/record", { target });
+  }
+
+  async stopVidRecording(): Promise<void> {
+    await this.dispatch({ type: "vid_stop" }, "vid/stop");
   }
 
   async runTask(prompt: string): Promise<void> {
