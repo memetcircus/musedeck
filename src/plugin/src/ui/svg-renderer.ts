@@ -822,7 +822,7 @@ export class SvgKeyRenderer {
     borderColor = "#0284c7",
     textColor = "#ffffff"
   ): string {
-    const badgeWidth = Math.max(54, badge.length * 8 + 14);
+    const badgeWidth = Math.min(128, Math.max(62, Math.round(badge.length * 9.2 + 24)));
     const badgeX = Math.round((144 - badgeWidth) / 2);
 
     return this.svgToDataUri(`
@@ -830,19 +830,19 @@ export class SvgKeyRenderer {
         <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
         <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
 
-        <!-- Centered Pill Badge -->
-        <rect x="${badgeX}" y="14" width="${badgeWidth}" height="20" rx="6" fill="#0f172a" stroke="${borderColor}" stroke-width="1.2"/>
-        <text x="72" y="28" fill="${borderColor}" font-size="10.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${badge}</text>
+        <!-- High-Legibility Top Category Badge -->
+        <rect x="${badgeX}" y="9" width="${badgeWidth}" height="26" rx="7" fill="${borderColor}" fill-opacity="0.25" stroke="${borderColor}" stroke-width="1.6"/>
+        <text x="72" y="26.5" fill="#ffffff" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.9">${badge}</text>
 
-        <!-- Title Lines -->
-        <text x="72" y="${line2 ? '59' : '68'}" fill="#ffffff" font-size="${line2 ? '19' : '22'}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
-        ${line2 ? `<text x="72" y="79" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>` : ''}
+        <!-- Main Framework Title -->
+        <text x="72" y="${line2 ? '62' : '72'}" fill="#ffffff" font-size="${line2 ? '22' : '26'}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
+        ${line2 ? `<text x="72" y="84" fill="#ffffff" font-size="18.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>` : ''}
 
         <!-- Divider Line -->
-        <line x1="16" y1="${line2 ? '92' : '88'}" x2="128" y2="${line2 ? '92' : '88'}" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.5"/>
+        <line x1="16" y1="${line2 ? '96' : '91'}" x2="128" y2="${line2 ? '96' : '91'}" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.5"/>
 
         <!-- Subtitle -->
-        <text x="72" y="119" fill="${textColor}" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subtitle}</text>
+        <text x="72" y="123" fill="${textColor}" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subtitle}</text>
       </svg>
     `);
   }
