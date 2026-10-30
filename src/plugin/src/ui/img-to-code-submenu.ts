@@ -3,10 +3,8 @@ import { SvgKeyRenderer } from "./svg-renderer.js";
 import type { StreamDeckCoreBridge } from "../core-bridge.js";
 
 export interface ImgToCodeOption {
-  line1: string;
-  line2: string;
+  title: string;
   subtitle: string;
-  badge: string;
   target: string;
   borderColor: string;
   textColor: string;
@@ -15,78 +13,62 @@ export interface ImgToCodeOption {
 export const IMG_TO_CODE_OPTIONS: Record<string, ImgToCodeOption> = {
   // Row 0: Web & Auto
   "1,0": {
-    line1: "AUTO",
-    line2: "DETECT",
-    subtitle: "SMART STACK",
-    badge: "PROJECT",
+    title: "AUTO",
+    subtitle: "DETECT",
     target: "AUTO",
     borderColor: "#10b981",
-    textColor: "#ecfdf5",
+    textColor: "#a7f3d0",
   },
   "2,0": {
-    line1: "REACT",
-    line2: "TSX",
+    title: "REACT",
     subtitle: "TAILWIND",
-    badge: "WEB",
     target: "REACT",
     borderColor: "#06b6d4",
-    textColor: "#f0f9ff",
+    textColor: "#67e8f9",
   },
   "3,0": {
-    line1: "HTML",
-    line2: "+ CSS",
-    subtitle: "VANILLA",
-    badge: "WEB",
+    title: "HTML",
+    subtitle: "+ CSS",
     target: "HTML_CSS",
     borderColor: "#f59e0b",
-    textColor: "#fef3c7",
+    textColor: "#fde047",
   },
   "4,0": {
-    line1: "VUE 3",
-    line2: "SFC",
-    subtitle: "TAILWIND",
-    badge: "WEB",
+    title: "VUE",
+    subtitle: "3 SFC",
     target: "VUE",
     borderColor: "#22c55e",
-    textColor: "#f0fdf4",
+    textColor: "#86efac",
   },
 
   // Row 1: Mobile & Desktop
   "0,1": {
-    line1: "SWIFTUI",
-    line2: "NATIVE",
-    subtitle: "APPLE",
-    badge: "iOS / MAC",
+    title: "SWIFTUI",
+    subtitle: "NATIVE",
     target: "SWIFTUI",
     borderColor: "#f97316",
-    textColor: "#fff7ed",
+    textColor: "#fdba74",
   },
   "1,1": {
-    line1: "COMPOSE",
-    line2: "KOTLIN",
-    subtitle: "MATERIAL 3",
-    badge: "ANDROID",
+    title: "COMPOSE",
+    subtitle: "KOTLIN",
     target: "COMPOSE",
     borderColor: "#818cf8",
-    textColor: "#e0e7ff",
+    textColor: "#c7d2fe",
   },
   "2,1": {
-    line1: "FLUTTER",
-    line2: "DART",
-    subtitle: "CROSS-PLAT",
-    badge: "MOBILE",
+    title: "FLUTTER",
+    subtitle: "DART",
     target: "FLUTTER",
     borderColor: "#38bdf8",
-    textColor: "#f0f9ff",
+    textColor: "#7dd3fc",
   },
   "3,1": {
-    line1: "PYTHON",
-    line2: "UI",
-    subtitle: "STREAMLIT",
-    badge: "DESKTOP",
+    title: "PYTHON",
+    subtitle: "UI",
     target: "PYTHON",
     borderColor: "#eab308",
-    textColor: "#fefce8",
+    textColor: "#fef08a",
   },
 };
 
@@ -177,10 +159,8 @@ class ImgToCodeSubmenuManager {
       if (keyObj && option) {
         void keyObj.action.setImage(
           SvgKeyRenderer.renderImgToCodeOptionKey(
-            "SPARKING...",
-            "",
+            "SPARKING",
             "WAITING API",
-            option.badge,
             "#f59e0b",
             "#fde047"
           )
@@ -215,9 +195,7 @@ class ImgToCodeSubmenuManager {
         void keyObj.action.setImage(
           SvgKeyRenderer.renderImgToCodeOptionKey(
             "NO UI",
-            "FOUND",
             "SKIPPED",
-            "EMPTY",
             "#ef4444",
             "#fca5a5"
           )
@@ -299,10 +277,8 @@ class ImgToCodeSubmenuManager {
         const option = IMG_TO_CODE_OPTIONS[keyCoord];
         if (option) {
           image = SvgKeyRenderer.renderImgToCodeOptionKey(
-            option.line1,
-            option.line2,
+            option.title,
             option.subtitle,
-            option.badge,
             option.borderColor,
             option.textColor
           );
@@ -365,17 +341,15 @@ class ImgToCodeSubmenuManager {
       this.bannerMode = "idle";
       this.render();
 
-      console.log(`🎨 [ImgToCode] Selected framework: ${option.target} (${option.line1})`);
+      console.log(`🎨 [ImgToCode] Selected framework: ${option.target} (${option.title})`);
 
       // Feedback on tapped key
       const keyObj = keyRegistry.all().find((k) => k.column === col && k.row === row);
       if (keyObj) {
         void keyObj.action.setImage(
           SvgKeyRenderer.renderImgToCodeOptionKey(
-            "SNIPPING...",
-            "",
+            "SNIP UI",
             "SELECT REGION",
-            option.badge,
             "#f59e0b",
             "#fbbf24"
           )

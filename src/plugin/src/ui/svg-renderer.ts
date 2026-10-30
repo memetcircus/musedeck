@@ -815,34 +815,28 @@ export class SvgKeyRenderer {
   }
 
   static renderImgToCodeOptionKey(
-    line1: string,
-    line2: string,
+    title: string,
     subtitle: string,
-    badge: string,
     borderColor = "#0284c7",
     textColor = "#ffffff"
   ): string {
-    const badgeWidth = Math.min(128, Math.max(62, Math.round(badge.length * 9.2 + 24)));
-    const badgeX = Math.round((144 - badgeWidth) / 2);
+    const fontSize = title.length > 7 ? "23" : title.length > 5 ? "26" : "29";
+    const subFontSize = subtitle.length > 8 ? "15" : "17";
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <!-- Minimal Cyber Card -->
         <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
-        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
+        <rect width="144" height="144" rx="24" fill="${borderColor}" fill-opacity="0.05"/>
 
-        <!-- High-Legibility Top Category Badge -->
-        <rect x="${badgeX}" y="9" width="${badgeWidth}" height="26" rx="7" fill="${borderColor}" fill-opacity="0.25" stroke="${borderColor}" stroke-width="1.6"/>
-        <text x="72" y="26.5" fill="#ffffff" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.9">${badge}</text>
+        <!-- Large Crisp Framework Title -->
+        <text x="72" y="65" fill="#ffffff" font-size="${fontSize}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.2">${title}</text>
 
-        <!-- Main Framework Title -->
-        <text x="72" y="${line2 ? '62' : '72'}" fill="#ffffff" font-size="${line2 ? '22' : '26'}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
-        ${line2 ? `<text x="72" y="84" fill="#ffffff" font-size="18.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>` : ''}
+        <!-- Accent Divider Line -->
+        <line x1="18" y1="82" x2="126" y2="82" stroke="${borderColor}" stroke-width="2" stroke-opacity="0.6"/>
 
-        <!-- Divider Line -->
-        <line x1="16" y1="${line2 ? '96' : '91'}" x2="128" y2="${line2 ? '96' : '91'}" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.5"/>
-
-        <!-- Subtitle -->
-        <text x="72" y="123" fill="${textColor}" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subtitle}</text>
+        <!-- High-Contrast Subtitle -->
+        <text x="72" y="117" fill="${textColor}" font-size="${subFontSize}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subtitle}</text>
       </svg>
     `);
   }
