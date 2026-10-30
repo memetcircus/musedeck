@@ -789,6 +789,26 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
 
       if (ext === ".vue") {
         const vueCode = await fs.promises.readFile(filePath, "utf8");
+        const tsModule: any = await import("typescript");
+        const ts = tsModule.default || tsModule;
+
+        let cleanVue = vueCode;
+        const scriptMatch = vueCode.match(/<script\s+setup(?:\s+lang="ts")?>([\s\S]*?)<\/script>/);
+        if (scriptMatch) {
+          const transpiled = ts.transpileModule(scriptMatch[1], {
+            compilerOptions: {
+              target: ts.ScriptTarget.ES2020,
+              module: ts.ModuleKind.ESNext,
+            },
+          });
+          cleanVue = vueCode.replace(
+            /<script\s+setup(?:\s+lang="ts")?>[\s\S]*?<\/script>/,
+            `<script setup>\n${transpiled.outputText}\n</script>`
+          );
+        }
+
+        const safeVueJson = JSON.stringify(cleanVue).replace(/<\/script>/gi, "<\\/script>");
+
         const htmlWrapper = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -800,16 +820,14 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
   <script src="https://unpkg.com/vue3-sfc-loader"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-6">
-  <div id="app" class="w-full max-w-5xl"></div>
-  <script type="text/vue" id="vue-component">
-${vueCode}
-  </script>
+  <div id="app" class="w-full max-w-6xl"></div>
   <script>
+    const vueSource = ${safeVueJson};
     const { loadModule } = window["vue3-sfc-loader"];
     const options = {
       moduleCache: { vue: Vue },
       async getFile(url) {
-        return document.getElementById("vue-component").textContent;
+        return vueSource;
       },
       addStyle(textContent) {
         const style = document.createElement("style");
@@ -821,7 +839,7 @@ ${vueCode}
       const app = Vue.createApp(Vue.defineAsyncComponent(() => loadModule("component.vue", options)));
       app.mount("#app");
     } catch (err) {
-      document.getElementById("app").innerHTML = '<div style="color:red;padding:20px;">Render Error: ' + err.message + '</div>';
+      document.getElementById("app").innerHTML = '<div style="color:red;padding:20px;font-family:monospace;">Render Error: ' + err.message + '</div>';
     }
   </script>
 </body>
