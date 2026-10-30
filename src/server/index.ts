@@ -83,7 +83,7 @@ async function main() {
     const tempDir = "/tmp/musedeck";
     if (!fs.existsSync(tempDir)) return null;
 
-    const validExts = [".swift", ".tsx", ".jsx", ".html", ".vue", ".kt"];
+    const validExts = [".swift", ".tsx", ".jsx", ".html", ".vue", ".kt", ".dart"];
     const candidateFiles = fs.readdirSync(tempDir)
       .filter((f) => {
         const ext = path.extname(f).toLowerCase();

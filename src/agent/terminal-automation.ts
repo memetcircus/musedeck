@@ -859,10 +859,22 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       }
 
       if (ext === ".kt") {
+        const hasAndroidStudio = fs.existsSync("/Applications/Android Studio.app");
+        if (hasAndroidStudio) {
+          try {
+            await execAsync(`open -a "Android Studio" "${filePath}"`);
+            await TerminalAutomation.sendSystemNotification(
+              "Opening Compose component in Android Studio Preview...",
+              "Compose Preview"
+            );
+            return true;
+          } catch {}
+        }
+
         await this.openFileInEditor(filePath);
         await TerminalAutomation.sendSystemNotification(
-          "Jetpack Compose component opened in VS Code. Inspect @Preview block.",
-          "Compose Component"
+          "Android Studio is not installed. Jetpack Compose preview requires Android Studio. File opened in VS Code instead.",
+          "MuseDeck - Compose Preview"
         );
         return true;
       }
@@ -870,8 +882,8 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       if (ext === ".dart") {
         await this.openFileInEditor(filePath);
         await TerminalAutomation.sendSystemNotification(
-          "Flutter widget opened in VS Code. Inspect Widget build method.",
-          "Flutter Component"
+          "Flutter widget opened in VS Code. Use Flutter device runner for live preview.",
+          "Flutter Preview"
         );
         return true;
       }
