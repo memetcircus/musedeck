@@ -21,11 +21,19 @@ export class SvgKeyRenderer {
       case AgentState.IDLE:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#10b981" stroke-width="3"/>
-            <circle cx="72" cy="48" r="30" fill="#064e3b" fill-opacity="0.35" stroke="#34d399" stroke-width="3" stroke-dasharray="8, 6"/>
-            <circle cx="72" cy="48" r="20" fill="#065f46" stroke="#10b981" stroke-width="2"/>
-            <path d="M62 48 L69 55 L83 39" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="72" y="118" fill="#a7f3d0" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">READY</text>
+            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#10b981" stroke-width="2.8"/>
+            <rect width="144" height="144" rx="26" fill="#10b981" fill-opacity="0.04"/>
+
+            <!-- Glowing Checkmark Icon -->
+            <circle cx="72" cy="42" r="26" fill="#064e3b" fill-opacity="0.4" stroke="#34d399" stroke-width="2.5" stroke-dasharray="8, 5"/>
+            <circle cx="72" cy="42" r="17" fill="#065f46" stroke="#10b981" stroke-width="2"/>
+            <path d="M64 42 L69 47 L80 35" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- State Title: READY -->
+            <text x="72" y="98" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">READY</text>
+
+            <!-- Action Subtitle: NEW SESSION ↗ -->
+            <text x="72" y="122" fill="#34d399" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">NEW SESSION ↗</text>
           </svg>
         `);
 
