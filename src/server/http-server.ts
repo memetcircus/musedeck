@@ -17,6 +17,8 @@ export interface HttpServerDependencies {
   samClient: SamClient;
   sparkClient: MuseSparkClient;
   wsServer?: any;
+  onRunPreview?: () => Promise<boolean>;
+  onOpenCode?: () => Promise<boolean>;
 }
 
 export class MuseHttpServer {
@@ -39,6 +41,7 @@ export class MuseHttpServer {
     // Serve web dashboard console from public directory
     const publicPath = path.resolve(__dirname, "../../public");
     this.app.use(express.static(publicPath));
+    this.app.use("/flutter", express.static("/tmp/musedeck/FlutterPreview/build/web"));
   }
 
   private configureRoutes(): void {
@@ -270,6 +273,24 @@ export class MuseHttpServer {
         res.json({ ok: true, ...result });
       } catch (err: any) {
         res.status(500).json({ error: err.message });
+      }
+    });
+
+    this.app.post("/api/run-preview", async (_req: Request, res: Response) => {
+      if (this.deps.onRunPreview) {
+        const ok = await this.deps.onRunPreview();
+        res.json({ ok });
+      } else {
+        res.status(501).json({ error: "Preview not implemented" });
+      }
+    });
+
+    this.app.post("/api/open-code", async (_req: Request, res: Response) => {
+      if (this.deps.onOpenCode) {
+        const ok = await this.deps.onOpenCode();
+        res.json({ ok });
+      } else {
+        res.status(501).json({ error: "Open code not implemented" });
       }
     });
 

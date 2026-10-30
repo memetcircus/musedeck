@@ -1,6 +1,29 @@
+import fs from "node:fs";
+import path from "node:path";
 import { keyRegistry } from "./key-registry.js";
 import { SvgKeyRenderer } from "./svg-renderer.js";
 import type { StreamDeckCoreBridge } from "../core-bridge.js";
+
+function hasExistingComponent(): boolean {
+  try {
+    const tempDir = "/tmp/musedeck";
+    if (!fs.existsSync(tempDir)) return false;
+    const validExts = [".swift", ".tsx", ".jsx", ".html", ".vue", ".kt", ".dart"];
+    const files = fs.readdirSync(tempDir);
+    return files.some((f) => {
+      const ext = path.extname(f).toLowerCase();
+      return (
+        validExts.includes(ext) &&
+        (f.startsWith("Animated") ||
+          f.startsWith("animated") ||
+          f.startsWith("Extracted") ||
+          f.startsWith("extracted"))
+      );
+    });
+  } catch {
+    return false;
+  }
+}
 
 export interface VidToCodeOption {
   title: string;
@@ -138,7 +161,7 @@ class VidToCodeSubmenuManager {
     this.isProcessing = false;
     this.isRecording = false;
     this.countdownSeconds = 5;
-    this.hasGeneratedCode = false;
+    this.hasGeneratedCode = hasExistingComponent();
     this.bannerMode = "idle";
     this.stopBannerAnimation();
     this.render();
@@ -345,7 +368,6 @@ class VidToCodeSubmenuManager {
 
     // 3. (4, 1): OPEN CODE
     if (col === 4 && row === 1) {
-      if (!this.hasGeneratedCode) return true;
       console.log("👁️ [VidToCode] Open Code tapped -> Launching editor");
       if (this.bridge) {
         await this.bridge.openCode();
@@ -355,7 +377,6 @@ class VidToCodeSubmenuManager {
 
     // 4. (4, 2): LIVE PREVIEW
     if (col === 4 && row === 2) {
-      if (!this.hasGeneratedCode) return true;
       console.log("▶️ [VidToCode] Live Preview tapped -> Compiling & launching live preview");
       this.startBannerAnimation("preview", 200);
       if (this.bridge) {

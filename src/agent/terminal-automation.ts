@@ -995,10 +995,31 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
 
       if (ext === ".dart") {
         let hasFlutter = false;
-        try {
-          await execAsync("which flutter");
+        const flutterBin = fs.existsSync("/opt/homebrew/bin/flutter")
+          ? "/opt/homebrew/bin/flutter"
+          : (fs.existsSync("/opt/homebrew/share/flutter/bin/flutter") ? "/opt/homebrew/share/flutter/bin/flutter" : null);
+
+        if (flutterBin) {
           hasFlutter = true;
-        } catch {}
+          try {
+            await TerminalAutomation.sendSystemNotification("Building Flutter Web Live Preview...", "Flutter Preview");
+            const projectDir = "/tmp/musedeck/FlutterPreview";
+            if (!fs.existsSync(path.join(projectDir, "pubspec.yaml"))) {
+              await execAsync(`${flutterBin} create --project-name=flutter_preview --platforms=web "${projectDir}"`);
+            }
+            await fs.promises.copyFile(filePath, path.join(projectDir, "lib/main.dart"));
+            await execAsync(`cd "${projectDir}" && ${flutterBin} build web --base-href=/flutter/ --no-pub`);
+            try {
+              await execAsync(`open -a "Google Chrome" "http://localhost:3456/flutter/"`);
+            } catch {
+              await execAsync(`open "http://localhost:3456/flutter/"`);
+            }
+            await TerminalAutomation.sendSystemNotification("Flutter Web Live Preview launched in Chrome!", "Flutter Preview");
+            return true;
+          } catch (err: any) {
+            console.warn("Flutter web build failed, falling back to VS Code:", err.message);
+          }
+        }
 
         await this.openFileInEditor(filePath);
 

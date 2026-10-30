@@ -45,34 +45,6 @@ async function main() {
   const wsServer = new MuseWsServer(WS_PORT);
   await wsServer.start();
 
-  // 5. Initialize Express HTTP Server & Web Console
-  const httpServer = new MuseHttpServer(HTTP_PORT, {
-    stateMachine,
-    museRunner,
-    samClient,
-    sparkClient,
-    wsServer,
-  });
-  await httpServer.start();
-
-  // 6. Initialize Live Terminal Session Watcher (Tails external Terminal.app Muse sessions)
-  const sessionWatcher = new TerminalSessionWatcher(stateMachine);
-  sessionWatcher.start();
-
-  // Wire Telemetry Events to WebSocket Broadcast
-  stateMachine.on("telemetry", (telemetry) => {
-    wsServer.broadcastTelemetry(telemetry);
-  });
-
-  museRunner.on("log", (type, msg) => {
-    wsServer.broadcastLog(type, msg);
-  });
-
-  // Vid To Code recording state
-  let activeRecordingProcess: ChildProcess | null = null;
-  let activeCountdownTimer: NodeJS.Timeout | null = null;
-  let activeRecordingTarget = "AUTO";
-
   // Track the most recently synthesized component file path (img-to-code or vid-to-code)
   let lastGeneratedFilePath: string | null = null;
 
@@ -103,6 +75,79 @@ async function main() {
 
     return candidateFiles.length > 0 ? candidateFiles[0].path : null;
   };
+
+  const handleRunPreview = async (): Promise<boolean> => {
+    console.log("▶️ [Bridge] Launching RUN_PREVIEW");
+    try {
+      wsServer.broadcast({ type: "preview_launching" });
+      const target = getActiveComponentFile();
+      let success = false;
+      if (target) {
+        console.log(`▶️ [Bridge] Launching live preview for latest component: ${target}`);
+        success = await TerminalAutomation.runLivePreview(target);
+      } else {
+        console.warn("No generated component found for live preview.");
+      }
+      if (success) {
+        wsServer.broadcast({ type: "preview_launched" });
+      } else {
+        wsServer.broadcast({ type: "preview_failed", error: "Preview build failed" });
+      }
+      return success;
+    } catch (err: any) {
+      console.warn("Could not launch live preview:", err.message);
+      wsServer.broadcast({ type: "preview_failed", error: err.message });
+      return false;
+    }
+  };
+
+  const handleOpenCode = async (): Promise<boolean> => {
+    console.log("👁️ [Bridge] Launching OPEN_CODE");
+    try {
+      const target = getActiveComponentFile();
+      if (target) {
+        console.log(`👁️ [Bridge] Opening latest generated component: ${target}`);
+        await TerminalAutomation.openFileInEditor(target);
+        return true;
+      } else {
+        console.warn("No generated component found to open.");
+        return false;
+      }
+    } catch (err: any) {
+      console.warn("Could not open code:", err.message);
+      return false;
+    }
+  };
+
+  // 5. Initialize Express HTTP Server & Web Console
+  const httpServer = new MuseHttpServer(HTTP_PORT, {
+    stateMachine,
+    museRunner,
+    samClient,
+    sparkClient,
+    wsServer,
+    onRunPreview: handleRunPreview,
+    onOpenCode: handleOpenCode,
+  });
+  await httpServer.start();
+
+  // 6. Initialize Live Terminal Session Watcher (Tails external Terminal.app Muse sessions)
+  const sessionWatcher = new TerminalSessionWatcher(stateMachine);
+  sessionWatcher.start();
+
+  // Wire Telemetry Events to WebSocket Broadcast
+  stateMachine.on("telemetry", (telemetry) => {
+    wsServer.broadcastTelemetry(telemetry);
+  });
+
+  museRunner.on("log", (type, msg) => {
+    wsServer.broadcastLog(type, msg);
+  });
+
+  // Vid To Code recording state
+  let activeRecordingProcess: ChildProcess | null = null;
+  let activeCountdownTimer: NodeJS.Timeout | null = null;
+  let activeRecordingTarget = "AUTO";
 
   const finishRecordingAndSynthesize = async (targetFramework: string) => {
     if (activeCountdownTimer) {
@@ -387,40 +432,12 @@ async function main() {
 
       case "open_code":
         console.log("👁️ [Bridge] Received OPEN_CODE command from surface");
-        try {
-          const target = getActiveComponentFile();
-          if (target) {
-            console.log(`👁️ [Bridge] Opening latest generated component: ${target}`);
-            await TerminalAutomation.openFileInEditor(target);
-          } else {
-            console.warn("No generated component found to open.");
-          }
-        } catch (err: any) {
-          console.warn("Could not open code:", err.message);
-        }
+        await handleOpenCode();
         break;
 
       case "run_preview":
         console.log("▶️ [Bridge] Received RUN_PREVIEW command from surface");
-        try {
-          wsServer.broadcast({ type: "preview_launching" });
-          const target = getActiveComponentFile();
-          let success = false;
-          if (target) {
-            console.log(`▶️ [Bridge] Launching live preview for latest component: ${target}`);
-            success = await TerminalAutomation.runLivePreview(target);
-          } else {
-            console.warn("No generated component found for live preview.");
-          }
-          if (success) {
-            wsServer.broadcast({ type: "preview_launched" });
-          } else {
-            wsServer.broadcast({ type: "preview_failed", error: "Preview build failed" });
-          }
-        } catch (err: any) {
-          console.warn("Could not launch live preview:", err.message);
-          wsServer.broadcast({ type: "preview_failed", error: err.message });
-        }
+        await handleRunPreview();
         break;
 
       case "runTask":

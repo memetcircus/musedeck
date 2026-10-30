@@ -1,6 +1,29 @@
+import fs from "node:fs";
+import path from "node:path";
 import { keyRegistry } from "./key-registry.js";
 import { SvgKeyRenderer } from "./svg-renderer.js";
 import type { StreamDeckCoreBridge } from "../core-bridge.js";
+
+function hasExistingComponent(): boolean {
+  try {
+    const tempDir = "/tmp/musedeck";
+    if (!fs.existsSync(tempDir)) return false;
+    const validExts = [".swift", ".tsx", ".jsx", ".html", ".vue", ".kt", ".dart"];
+    const files = fs.readdirSync(tempDir);
+    return files.some((f) => {
+      const ext = path.extname(f).toLowerCase();
+      return (
+        validExts.includes(ext) &&
+        (f.startsWith("Animated") ||
+          f.startsWith("animated") ||
+          f.startsWith("Extracted") ||
+          f.startsWith("extracted"))
+      );
+    });
+  } catch {
+    return false;
+  }
+}
 
 export interface ImgToCodeOption {
   title: string;
@@ -123,7 +146,7 @@ class ImgToCodeSubmenuManager {
   open(): void {
     console.log("🎨 [ImgToCode] Opening Multi-Language UI-to-Code Submenu");
     this.active = true;
-    this.hasGeneratedCode = false; // Always start with clean slate: NO preview or open buttons until synthesized!
+    this.hasGeneratedCode = hasExistingComponent();
     this.isProcessing = false;
     this.stopBannerAnimation();
     this.bannerMode = "idle";
@@ -318,9 +341,8 @@ class ImgToCodeSubmenuManager {
       return true;
     }
 
-    // 2. (4, 1): OPEN CODE in developer editor (only active after code generated)
+    // 2. (4, 1): OPEN CODE in developer editor
     if (col === 4 && row === 1) {
-      if (!this.hasGeneratedCode) return true;
       console.log("👁️ [ImgToCode] Open Code tapped -> Launching editor");
       if (this.bridge) {
         await this.bridge.openCode();
@@ -328,10 +350,9 @@ class ImgToCodeSubmenuManager {
       return true;
     }
 
-    // 3. (4, 2): LIVE PREVIEW in native macOS app (only active after code generated)
+    // 3. (4, 2): LIVE PREVIEW in native macOS app / browser
     if (col === 4 && row === 2) {
-      if (!this.hasGeneratedCode) return true;
-      console.log("▶️ [ImgToCode] Live Preview tapped -> Compiling & launching live app");
+      console.log("▶️ [ImgToCode] Live Preview tapped -> Compiling & launching live preview");
       this.startBannerAnimation("preview", 200);
       if (this.bridge) {
         await this.bridge.runPreview();
