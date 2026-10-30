@@ -1111,6 +1111,12 @@ dependencies {
       await fs.promises.writeFile(path.join(projectDir, "local.properties"), `sdk.dir=${sdkPath}\n`, "utf8");
     }
 
+    // 5.1 gradle.properties (Enable AndroidX and limit JVM memory)
+    const gradleProps = `android.useAndroidX=true
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+`;
+    await fs.promises.writeFile(path.join(projectDir, "gradle.properties"), gradleProps, "utf8");
+
     // 6. gradle-wrapper.properties
     const wrapperProp = `distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
