@@ -80,7 +80,7 @@ class VidToCodeSubmenuManager {
   private isRecording = false;
   private countdownSeconds = 5;
   private lastTappedCoord: { col: number; row: number } | null = null;
-  private bannerMode: "idle" | "aiming" | "recording" | "spark" | "preview" | "success" | "failed" = "idle";
+  private bannerMode: "idle" | "aiming" | "recording" | "spark" | "preview" | "success" | "failed" | "too_small" | "static_screen" = "idle";
   private bannerStep = 0;
   private bannerTimer: NodeJS.Timeout | null = null;
 
@@ -221,6 +221,38 @@ class VidToCodeSubmenuManager {
         this.updateBannerKeys();
       }
     }, 3000);
+  }
+
+  notifyAreaTooSmall(width?: number, height?: number): void {
+    if (!this.active) return;
+    console.warn(`⚠️ [VidToCode] Area too small (${width}x${height}px)`);
+    this.stopBannerAnimation();
+    this.bannerMode = "too_small";
+    this.isProcessing = false;
+    this.isRecording = false;
+    this.updateBannerKeys();
+    setTimeout(() => {
+      if (this.active) {
+        this.bannerMode = "idle";
+        this.render();
+      }
+    }, 3500);
+  }
+
+  notifyStaticScreen(): void {
+    if (!this.active) return;
+    console.warn("⚠️ [VidToCode] Static screen detected — no motion");
+    this.stopBannerAnimation();
+    this.bannerMode = "static_screen";
+    this.isProcessing = false;
+    this.isRecording = false;
+    this.updateBannerKeys();
+    setTimeout(() => {
+      if (this.active) {
+        this.bannerMode = "idle";
+        this.render();
+      }
+    }, 4000);
   }
 
   notifyPreviewFailed(error?: string): void {

@@ -188,57 +188,57 @@ export class MuseSparkClient {
       case "SWIFTUI_SPRING":
         return {
           filename: "AnimatedComponent.swift",
-          frameworkName: "SwiftUI Spring Physics",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready Apple SwiftUI Views with spring animations (.animation(.spring(response: 0.45, dampingFraction: 0.7)), withAnimation, and interactive @State). The file must be 100% complete and self-contained with a preview App so swiftc compiles it cleanly.",
-          prompt: "Convert this UI screen flow into a SwiftUI View with realistic spring animations, gesture/toggle triggers, and interactive state.",
+          frameworkName: "SwiftUI Interactive Flow",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready Apple SwiftUI Views for interactive UI flows (modals, drawers, multi-step steppers, tab transitions, accordions, gesture interactions, and smooth animations with .animation(.spring()), TimelineView(.animation), and interactive @State). The file must be 100% complete and self-contained with a preview App so swiftc compiles it cleanly.",
+          prompt: "The image shows a 4-step sequential UI interaction flow captured from a screen recording (t=0.5s -> t=1.8s -> t=3.2s -> t=4.6s). Analyze the sequence to identify UI transitions, state changes, and interactive elements. Recreate this complete interactive UI flow in SwiftUI with interactive state, spring/timeline animations, and realistic controls.",
         };
 
       case "FRAMER":
         return {
           filename: "AnimatedComponent.tsx",
-          frameworkName: "React + Framer Motion",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-grade, accessible React + TypeScript components with Framer Motion (motion.div, AnimatePresence, spring transition physics, and layout animations).",
-          prompt: "Convert this UI screen interaction flow into a React component animated with Framer Motion and Tailwind CSS.",
+          frameworkName: "React + Framer Motion Flow",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-grade, accessible React + TypeScript components for interactive UI flows (modals, sheet drawers, multi-step wizards, accordion expands) with Framer Motion (motion.div, AnimatePresence, spring transition physics, and layout animations).",
+          prompt: "The image shows a 4-step sequential UI interaction flow from a screen recording. Analyze the state transitions and recreate this complete interactive UI flow in React with Framer Motion and Tailwind CSS.",
         };
 
       case "TAILWIND_ANIM":
         return {
           filename: "AnimatedComponent.tsx",
-          frameworkName: "Tailwind CSS Keyframes",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-grade React + Tailwind CSS components with keyframes, transition utilities (transition-all duration-300 ease-out), and interactive hover/active states.",
-          prompt: "Convert this UI screen interaction flow into a React component with smooth Tailwind CSS animations.",
+          frameworkName: "Tailwind CSS Interaction Flow",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-grade React + Tailwind CSS components with keyframes, transition utilities (transition-all duration-300 ease-out), and interactive hover/active states for UI flows.",
+          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this interactive UI component with smooth Tailwind CSS transitions and state management.",
         };
 
       case "COMPOSE_ANIM":
         return {
           filename: "AnimatedComponent.kt",
-          frameworkName: "Compose AnimatedVisibility",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate idiomatic Android Jetpack Compose @Composable code using AnimatedVisibility, animateFloatAsState, and spring transitionSpec.",
-          prompt: "Convert this UI screen flow into an animated Android Jetpack Compose component.",
+          frameworkName: "Compose Interactive Flow",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate idiomatic Android Jetpack Compose @Composable code using AnimatedVisibility, animateFloatAsState, and spring transitionSpec for interactive UI flows.",
+          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this animated flow in Jetpack Compose.",
         };
 
       case "FLUTTER_ANIM":
         return {
           filename: "animated_component.dart",
-          frameworkName: "Flutter Animation",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate Flutter StatefulWidget widgets using AnimatedContainer, CurvedAnimation(Curves.easeInOut), or Hero transitions.",
-          prompt: "Convert this UI screen flow into an animated Flutter widget with smooth curves.",
+          frameworkName: "Flutter Interactive Flow",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate Flutter StatefulWidget widgets using AnimatedContainer, CurvedAnimation(Curves.easeInOut), or Hero transitions for interactive UI flows.",
+          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this interactive flow in Flutter.",
         };
 
       case "VUE_ANIM":
         return {
           filename: "AnimatedComponent.vue",
-          frameworkName: "Vue 3 <Transition>",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate Vue 3 Single File Components using <script setup lang=\"ts\"> and <Transition> wrappers with Tailwind CSS enter/leave classes.",
-          prompt: "Convert this UI screen flow into a Vue 3 component with smooth <Transition> animations.",
+          frameworkName: "Vue 3 Transition Flow",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate Vue 3 Single File Components using <script setup lang=\"ts\"> and <Transition> wrappers with Tailwind CSS enter/leave classes for interactive flows.",
+          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this interactive component in Vue 3.",
         };
 
       case "GSAP":
         return {
           filename: "animated_component.html",
           frameworkName: "HTML + GSAP Timelines",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate clean HTML5 + CSS3 with GSAP (GreenSock) CDN and interactive timeline animations.",
-          prompt: "Convert this UI screen flow into a standalone HTML file with GSAP timeline animations.",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate clean HTML5 + CSS3 with GSAP (GreenSock) CDN and interactive timeline animations for UI flows.",
+          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this flow in standalone HTML with GSAP.",
         };
 
       case "COMPOSE":

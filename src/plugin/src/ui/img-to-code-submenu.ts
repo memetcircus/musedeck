@@ -78,7 +78,7 @@ class ImgToCodeSubmenuManager {
   private hasGeneratedCode = false;
   private isProcessing = false;
   private lastTappedCoord: { col: number; row: number } | null = null;
-  private bannerMode: "idle" | "spark" | "preview" | "success" | "failed" = "idle";
+  private bannerMode: "idle" | "spark" | "preview" | "success" | "failed" | "too_small" = "idle";
   private bannerStep = 0;
   private bannerTimer: NodeJS.Timeout | null = null;
 
@@ -227,6 +227,21 @@ class ImgToCodeSubmenuManager {
         this.updateBannerKeys();
       }
     }, 3000);
+  }
+
+  notifyAreaTooSmall(width?: number, height?: number): void {
+    if (!this.active) return;
+    console.warn(`⚠️ [ImgToCode] Area too small (${width}x${height}px)`);
+    this.stopBannerAnimation();
+    this.bannerMode = "too_small";
+    this.isProcessing = false;
+    this.updateBannerKeys();
+    setTimeout(() => {
+      if (this.active) {
+        this.bannerMode = "idle";
+        this.render();
+      }
+    }, 3500);
   }
 
   notifyPreviewFailed(error?: string): void {

@@ -4,6 +4,7 @@ dotenv.config();
 import fs from "node:fs";
 import path from "node:path";
 import { spawn, exec, execSync, type ChildProcess } from "node:child_process";
+import sharp from "sharp";
 import { AgentStateMachine } from "../agent/state-machine.js";
 import { AgentState } from "../agent/types.js";
 import { MuseRunner } from "../agent/muse-runner.js";
@@ -112,35 +113,132 @@ async function main() {
       activeRecordingProcess = null;
     }
 
-    // Step 2: Native macOS Notification (Strictly English, no emojis!)
-    await TerminalAutomation.sendSystemNotification(
-      "Flow captured. Synthesizing animated code with Meta Muse Spark...",
-      "MuseDeck"
-    );
-
-    // Notify surfaces of synthesis phase
-    wsServer.broadcast({ type: "vid_synthesizing", target: targetFramework } as any);
-
     try {
       const videoPath = "/tmp/musedeck/flow.mp4";
-      const framePath = "/tmp/musedeck/flow_thumb.png";
+      if (!fs.existsSync(videoPath) || fs.statSync(videoPath).size === 0) {
+        console.log("ℹ️ [VidToCode] No recording file found.");
+        wsServer.broadcast({ type: "vid_recording_cancelled" } as any);
+        return;
+      }
 
-      // Extract high quality keyframe from the recording with ffmpeg
+      // Check minimum video dimensions (must be at least 120x120 px)
+      let vidWidth = 0;
+      let vidHeight = 0;
+      try {
+        const dimOut = execSync(
+          `/opt/homebrew/bin/ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "${videoPath}" || ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "${videoPath}"`
+        ).toString().trim();
+        const parts = dimOut.split("x");
+        if (parts.length >= 2) {
+          vidWidth = parseInt(parts[0], 10) || 0;
+          vidHeight = parseInt(parts[1], 10) || 0;
+        }
+      } catch {}
+
+      if (vidWidth > 0 && vidHeight > 0 && (vidWidth < 120 || vidHeight < 120)) {
+        console.warn(`⚠️ [VidToCode] Selected area too small: ${vidWidth}x${vidHeight}px (minimum is 120x120px)`);
+        await TerminalAutomation.sendSystemNotification(
+          `Selected area too small (${vidWidth}x${vidHeight}px). Minimum is 120x120px.`,
+          "MuseDeck Vid to Code"
+        );
+        wsServer.broadcast({ type: "area_too_small", width: vidWidth, height: vidHeight } as any);
+        return;
+      }
+
+      // Extract 4 sequential keyframes from the 5-second recording
+      const f1Path = "/tmp/musedeck/flow_f1.png";
+      const f2Path = "/tmp/musedeck/flow_f2.png";
+      const f3Path = "/tmp/musedeck/flow_f3.png";
+      const f4Path = "/tmp/musedeck/flow_f4.png";
+
       await new Promise<void>((resolve) => {
         exec(
-          `/opt/homebrew/bin/ffmpeg -y -i "${videoPath}" -ss 00:00:01 -vframes 1 "${framePath}" || /usr/bin/ffmpeg -y -i "${videoPath}" -ss 00:00:01 -vframes 1 "${framePath}"`,
+          `/opt/homebrew/bin/ffmpeg -y -i "${videoPath}" -vf "fps=1" -vframes 4 /tmp/musedeck/flow_f%01d.png || /usr/bin/ffmpeg -y -i "${videoPath}" -vf "fps=1" -vframes 4 /tmp/musedeck/flow_f%01d.png`,
           () => resolve()
         );
       });
 
+      // Smart Motion Detection: check if frames are static/identical
+      let motionPercent = 0;
+      let isStatic = false;
+      try {
+        if (fs.existsSync(f1Path) && fs.existsSync(f4Path)) {
+          const b1 = await sharp(f1Path).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
+          const b4 = await sharp(f4Path).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
+          let diffSum = 0;
+          for (let i = 0; i < b1.length; i++) {
+            diffSum += Math.abs(b1[i] - b4[i]);
+          }
+          motionPercent = (diffSum / (b1.length * 255)) * 100;
+          console.log(`📊 [VidToCode] Motion difference detected: ${motionPercent.toFixed(2)}%`);
+          if (motionPercent < 1.5) {
+            isStatic = true;
+          }
+        }
+      } catch (motionErr: any) {
+        console.warn("Motion detection check skipped:", motionErr.message);
+      }
+
+      if (isStatic) {
+        console.warn(`⚠️ [VidToCode] Static screen detected (${motionPercent.toFixed(2)}% change). Prompting user to use IMG TO CODE.`);
+        await TerminalAutomation.sendSystemNotification(
+          "Static screen detected. No motion found — please use IMG TO CODE instead.",
+          "MuseDeck Vid to Code"
+        );
+        wsServer.broadcast({ type: "vid_static_detected", diffPercent: motionPercent } as any);
+        return;
+      }
+
+      // Step 2: Native macOS Notification (Strictly English, no emojis!)
+      await TerminalAutomation.sendSystemNotification(
+        "Flow captured. Synthesizing animated code with Meta Muse Spark...",
+        "MuseDeck"
+      );
+
+      // Notify surfaces of synthesis phase
+      wsServer.broadcast({ type: "vid_synthesizing", target: targetFramework } as any);
+
+      // Assemble 4-frame horizontal progression strip (flow_montage.png)
+      const montagePath = "/tmp/musedeck/flow_montage.png";
+      const frameW = 280;
+      const frameH = 280;
+      try {
+        const [buf1, buf2, buf3, buf4] = await Promise.all([
+          sharp(f1Path).resize(frameW, frameH, { fit: "inside" }).toBuffer(),
+          sharp(f2Path).resize(frameW, frameH, { fit: "inside" }).toBuffer(),
+          sharp(f3Path).resize(frameW, frameH, { fit: "inside" }).toBuffer(),
+          sharp(f4Path).resize(frameW, frameH, { fit: "inside" }).toBuffer(),
+        ]);
+
+        await sharp({
+          create: {
+            width: frameW * 4,
+            height: frameH,
+            channels: 4,
+            background: { r: 14, g: 20, b: 35, alpha: 1 },
+          },
+        })
+          .composite([
+            { input: buf1, left: 0, top: 0 },
+            { input: buf2, left: frameW, top: 0 },
+            { input: buf3, left: frameW * 2, top: 0 },
+            { input: buf4, left: frameW * 3, top: 0 },
+          ])
+          .png()
+          .toFile(montagePath);
+      } catch (montageErr: any) {
+        console.warn("Could not create multi-frame montage:", montageErr.message);
+      }
+
+      const chosenPath = fs.existsSync(montagePath) ? montagePath : f1Path;
       let thumbBase64 = "";
-      if (fs.existsSync(framePath)) {
-        thumbBase64 = fs.readFileSync(framePath).toString("base64");
+      if (fs.existsSync(chosenPath)) {
+        thumbBase64 = fs.readFileSync(chosenPath).toString("base64");
       } else {
         thumbBase64 = stateMachine.getTelemetry().lastThumbnail || "";
       }
 
-      console.log(`🎬 [VidToCode] Synthesizing ${targetFramework} animated component...`);
+      console.log(`🎬 [VidToCode] Synthesizing ${targetFramework} interactive UI flow component...`);
       const res = await sparkClient.generateCodeFromImage(thumbBase64, targetFramework as any);
       lastGeneratedFilePath = res.filePath;
       stateMachine.setLastSparkCode(res.code);
@@ -149,7 +247,7 @@ async function main() {
       await TerminalAutomation.openFileInEditor(res.filePath);
 
       // Feed prompt into active Muse terminal
-      const prompt = `Synthesized animated ${res.frameworkName} component (${res.filename}): ${res.filePath}. Integrate this interactive animation into our workspace.`;
+      const prompt = `Synthesized interactive ${res.frameworkName} UI flow component (${res.filename}): ${res.filePath}. Integrate this flow into our workspace.`;
       await TerminalAutomation.typeSnippetIntoTerminal(prompt, false);
 
       // Broadcast completion to Stream Deck
@@ -247,9 +345,18 @@ async function main() {
           const errMsg = err.message || "Failed to process image";
           console.warn(`⚠️ [Spark] Image synthesis skipped: ${errMsg}`);
 
-          // Trigger native macOS alert if user didn't intentionally press Escape
-          if (!errMsg.includes("cancelled") && !errMsg.includes("Escape")) {
-            await TerminalAutomation.sendSystemNotification("No recognizable UI component detected in selection.");
+          if (err.code === "AREA_TOO_SMALL") {
+            await TerminalAutomation.sendSystemNotification(
+              `Selected area too small (${err.width}x${err.height}px). Minimum is 120x120px.`,
+              "MuseDeck Img to Code"
+            );
+            wsServer.broadcast({
+              type: "area_too_small",
+              width: err.width,
+              height: err.height,
+            } as any);
+          } else if (!errMsg.includes("cancelled") && !errMsg.includes("Escape")) {
+            await TerminalAutomation.sendSystemNotification("No recognizable UI component detected in selection.", "MuseDeck Img to Code");
           }
 
           wsServer.broadcast({
@@ -428,6 +535,8 @@ async function main() {
       case "vid_recording_started":
       case "vid_aiming":
       case "vid_recording_cancelled":
+      case "area_too_small":
+      case "vid_static_detected":
       case "vid_countdown":
       case "vid_synthesizing":
       case "vid_spark_completed":

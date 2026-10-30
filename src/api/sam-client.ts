@@ -65,8 +65,12 @@ export class SamClient {
       if (hMatch) height = parseInt(hMatch[1], 10);
     } catch {}
 
-    if (width > 0 && height > 0 && (width < 35 || height < 35)) {
-      throw new Error("Selection is too small or empty to contain a UI component.");
+    if (width > 0 && height > 0 && (width < 120 || height < 120)) {
+      const err: any = new Error(`Selected area too small (${width}x${height}px). Minimum is 120x120px.`);
+      err.code = "AREA_TOO_SMALL";
+      err.width = width;
+      err.height = height;
+      throw err;
     }
 
     const rawBuffer = await fs.readFile(rawCapturePath);

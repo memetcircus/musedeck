@@ -920,7 +920,7 @@ export class SvgKeyRenderer {
    */
   static renderBottomBannerTile(
     index: number,
-    mode: "idle" | "spark" | "preview" | "success" | "failed" | "recording" | "aiming",
+    mode: "idle" | "spark" | "preview" | "success" | "failed" | "recording" | "aiming" | "too_small" | "static_screen",
     activeStep = 0,
     countdownSeconds = 5
   ): string {
@@ -956,6 +956,30 @@ export class SvgKeyRenderer {
         { main: "FLOW", sub: "SCREEN" },
         { main: `0:0${Math.max(1, countdownSeconds)}`, sub: "REMAINING" },
         { main: "STOP ⏹", sub: "FINISH EARLY" },
+      ];
+      mainText = bannerData[index].main;
+      subText = bannerData[index].sub;
+    } else if (mode === "too_small") {
+      borderColor = "#ef4444";
+      bgOpacity = "0.25";
+      subColor = "#fca5a5";
+      const bannerData = [
+        { main: "AREA", sub: "TOO SMALL" },
+        { main: "MINIMUM", sub: "120x120 PX" },
+        { main: "REJECTED", sub: "TRY AGAIN" },
+        { main: "DRAG", sub: "LARGER BOX" },
+      ];
+      mainText = bannerData[index].main;
+      subText = bannerData[index].sub;
+    } else if (mode === "static_screen") {
+      borderColor = "#f59e0b";
+      bgOpacity = "0.25";
+      subColor = "#fde047";
+      const bannerData = [
+        { main: "STATIC", sub: "NO MOTION" },
+        { main: "IDENTICAL", sub: "FRAMES" },
+        { main: "PLEASE USE", sub: "IMG TO CODE" },
+        { main: "CANCELLED", sub: "NO TOKENS" },
       ];
       mainText = bannerData[index].main;
       subText = bannerData[index].sub;

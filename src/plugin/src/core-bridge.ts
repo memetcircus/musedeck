@@ -164,6 +164,11 @@ export class StreamDeckCoreBridge {
             vidToCodeSubmenuManager.notifyRecordingStarted(msg.duration);
           } else if (msg.type === "vid_recording_cancelled") {
             vidToCodeSubmenuManager.notifyCancelled();
+          } else if (msg.type === "area_too_small") {
+            imgToCodeSubmenuManager.notifyAreaTooSmall((msg as any).width, (msg as any).height);
+            vidToCodeSubmenuManager.notifyAreaTooSmall((msg as any).width, (msg as any).height);
+          } else if (msg.type === "vid_static_detected") {
+            vidToCodeSubmenuManager.notifyStaticScreen();
           } else if (msg.type === "vid_countdown") {
             vidToCodeSubmenuManager.notifyCountdown(msg.seconds);
           } else if (msg.type === "vid_synthesizing") {
