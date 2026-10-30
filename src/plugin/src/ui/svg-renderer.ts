@@ -967,7 +967,7 @@ export class SvgKeyRenderer {
         { main: "WAIT", sub: "AI CODE" },
         { main: "FOR", sub: "GENERATION" },
         { main: "MUSE", sub: "SYNTHESIS" },
-        { main: "SPARK", sub: "~15 SEC" },
+        { main: "SPARK", sub: "~40 SEC" },
       ];
       mainText = bannerData[index].main;
       subText = bannerData[index].sub;

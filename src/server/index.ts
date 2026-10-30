@@ -69,6 +69,37 @@ async function main() {
   let activeCountdownTimer: NodeJS.Timeout | null = null;
   let activeRecordingTarget = "AUTO";
 
+  // Track the most recently synthesized component file path (img-to-code or vid-to-code)
+  let lastGeneratedFilePath: string | null = null;
+
+  const getActiveComponentFile = (): string | null => {
+    if (lastGeneratedFilePath && fs.existsSync(lastGeneratedFilePath)) {
+      return lastGeneratedFilePath;
+    }
+    const tempDir = "/tmp/musedeck";
+    if (!fs.existsSync(tempDir)) return null;
+
+    const validExts = [".swift", ".tsx", ".jsx", ".html", ".vue", ".kt"];
+    const candidateFiles = fs.readdirSync(tempDir)
+      .filter((f) => {
+        const ext = path.extname(f).toLowerCase();
+        return (
+          validExts.includes(ext) &&
+          (f.startsWith("Animated") ||
+            f.startsWith("animated") ||
+            f.startsWith("Extracted") ||
+            f.startsWith("extracted"))
+        );
+      })
+      .map((f) => {
+        const fullPath = path.join(tempDir, f);
+        return { path: fullPath, mtime: fs.statSync(fullPath).mtimeMs };
+      })
+      .sort((a, b) => b.mtime - a.mtime);
+
+    return candidateFiles.length > 0 ? candidateFiles[0].path : null;
+  };
+
   const finishRecordingAndSynthesize = async (targetFramework: string) => {
     if (activeCountdownTimer) {
       clearInterval(activeCountdownTimer);
@@ -111,6 +142,7 @@ async function main() {
 
       console.log(`🎬 [VidToCode] Synthesizing ${targetFramework} animated component...`);
       const res = await sparkClient.generateCodeFromImage(thumbBase64, targetFramework as any);
+      lastGeneratedFilePath = res.filePath;
       stateMachine.setLastSparkCode(res.code);
 
       // Open in developer's active editor
@@ -192,8 +224,9 @@ async function main() {
           await TerminalAutomation.sendSystemNotification("Synthesizing component with Meta Muse Spark...", "MuseDeck");
           wsServer.broadcast({ type: "spark_synthesizing", target: targetFramework } as any);
 
-          // Synthesize code using Meta Muse Spark (takes ~15s)
+          // Synthesize code using Meta Muse Spark (takes ~40s)
           const res = await sparkClient.generateCodeFromImage(thumb, targetFramework);
+          lastGeneratedFilePath = res.filePath;
           stateMachine.setLastSparkCode(res.code);
 
           // 1. Open generated component in developer's active editor (VS Code / default)
@@ -230,13 +263,12 @@ async function main() {
       case "open_code":
         console.log("👁️ [Bridge] Received OPEN_CODE command from surface");
         try {
-          const tempDir = "/tmp/musedeck";
-          if (fs.existsSync(tempDir)) {
-            const files = fs.readdirSync(tempDir).filter((f) => f.startsWith("Extracted") || f.startsWith("extracted"));
-            if (files.length > 0) {
-              const target = path.join(tempDir, files[0]);
-              await TerminalAutomation.openFileInEditor(target);
-            }
+          const target = getActiveComponentFile();
+          if (target) {
+            console.log(`👁️ [Bridge] Opening latest generated component: ${target}`);
+            await TerminalAutomation.openFileInEditor(target);
+          } else {
+            console.warn("No generated component found to open.");
           }
         } catch (err: any) {
           console.warn("Could not open code:", err.message);
@@ -247,14 +279,13 @@ async function main() {
         console.log("▶️ [Bridge] Received RUN_PREVIEW command from surface");
         try {
           wsServer.broadcast({ type: "preview_launching" });
-          const tempDir = "/tmp/musedeck";
+          const target = getActiveComponentFile();
           let success = false;
-          if (fs.existsSync(tempDir)) {
-            const files = fs.readdirSync(tempDir).filter((f) => f.startsWith("Extracted") || f.startsWith("extracted"));
-            if (files.length > 0) {
-              const target = path.join(tempDir, files[0]);
-              success = await TerminalAutomation.runLivePreview(target);
-            }
+          if (target) {
+            console.log(`▶️ [Bridge] Launching live preview for latest component: ${target}`);
+            success = await TerminalAutomation.runLivePreview(target);
+          } else {
+            console.warn("No generated component found for live preview.");
           }
           if (success) {
             wsServer.broadcast({ type: "preview_launched" });
@@ -313,7 +344,7 @@ async function main() {
 
           wsServer.broadcast({ type: "vid_recording_started", duration: 5 } as any);
           void TerminalAutomation.sendSystemNotification(
-            "Recording UI screen flow (5 seconds)...",
+            "Recording UI screen flow (5s remaining)...",
             "MuseDeck Vid to Code"
           );
 
@@ -323,6 +354,10 @@ async function main() {
             countdown--;
             if (countdown > 0) {
               wsServer.broadcast({ type: "vid_countdown", seconds: countdown } as any);
+              void TerminalAutomation.sendSystemNotification(
+                `Recording UI screen flow (${countdown}s remaining)...`,
+                "MuseDeck Vid to Code"
+              );
             } else {
               clearInterval(activeCountdownTimer!);
               activeCountdownTimer = null;
