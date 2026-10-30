@@ -1004,33 +1004,42 @@ export class SvgKeyRenderer {
     return this.renderVidToCodeKey();
   }
 
-  static renderVidToCodeKey(): string {
+  static renderVidToCodeKey(status: "idle" | "recording" | "generating" | "ready" = "idle"): string {
+    const borderColor = status === "recording" ? "#ef4444" : status === "generating" ? "#f59e0b" : status === "ready" ? "#22c55e" : "#a855f7";
+    const subText = status === "recording" ? "RECORDING..." : status === "generating" ? "SPARKING..." : status === "ready" ? "READY ↗" : "VID TO CODE";
+    const subColor = status === "recording" ? "#f87171" : status === "generating" ? "#fbbf24" : status === "ready" ? "#4ade80" : "#ffffff";
+
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <!-- Cyber container with violet neon border -->
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#a855f7" stroke-width="2.6"/>
-        <rect width="144" height="144" rx="24" fill="#a855f7" fill-opacity="0.05"/>
+        <!-- Matching ImgToCode edge-to-edge container with neon violet border -->
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
 
-        <!-- Video Camera & Recording Icon -->
-        <g transform="translate(35, 17)">
-          <!-- Camera Body -->
-          <rect x="0" y="4" width="48" height="34" rx="7" fill="#7e22ce" fill-opacity="0.3" stroke="#c084fc" stroke-width="2"/>
-          <!-- Lens Cone -->
-          <polygon points="50,13 74,4 74,38 50,29" fill="#9333ea" fill-opacity="0.4" stroke="#c084fc" stroke-width="2"/>
-          <!-- Red Recording Dot -->
-          <circle cx="14" cy="21" r="5" fill="#ef4444"/>
-          <!-- Play Triangle in Lens -->
-          <polygon points="26,15 38,21 26,27" fill="#f5d0fe"/>
+        <!-- Ambient Circle Glow -->
+        <circle cx="72" cy="46" r="32" fill="#581c87" fill-opacity="0.35" stroke="${borderColor}" stroke-width="2" stroke-dasharray="6, 5"/>
+
+        <!-- Video Card on left (matching ImgToCode card dimensions) -->
+        <g transform="translate(24, 30)">
+          <rect x="0" y="0" width="34" height="28" rx="6" fill="#6b21a8" fill-opacity="0.45" stroke="#c084fc" stroke-width="2.2"/>
+          <!-- Play triangle -->
+          <polygon points="12,8 23,14 12,20" fill="#f5d0fe"/>
+          <!-- Recording indicator dot -->
+          <circle cx="27" cy="7" r="2.8" fill="#ef4444"/>
         </g>
 
-        <!-- Main Title -->
-        <text x="72" y="80" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">VID TO CODE</text>
+        <!-- Transformation Arrow in center -->
+        <path d="M 66 44 L 78 44 M 73 39 L 78 44 L 73 49" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 
-        <!-- Divider Line -->
-        <line x1="18" y1="94" x2="126" y2="94" stroke="#a855f7" stroke-width="1.5" stroke-opacity="0.6"/>
+        <!-- Code Brackets Card on right -->
+        <g transform="translate(86, 30)">
+          <rect x="0" y="0" width="34" height="28" rx="6" fill="#042f2e" fill-opacity="0.5" stroke="#2dd4bf" stroke-width="2.2"/>
+          <path d="M 12 9 L 6 14 L 12 19" fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M 22 9 L 28 14 L 22 19" fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="18" y1="8" x2="16" y2="20" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+        </g>
 
-        <!-- Subtitle -->
-        <text x="72" y="122" fill="#d8b4fe" font-size="14.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">FLOW / REC ↗</text>
+        <!-- Single Line Crisp Label (NO redundant flow/rec text) -->
+        <text x="72" y="118" fill="${subColor}" font-size="16.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${subText}</text>
       </svg>
     `);
   }
