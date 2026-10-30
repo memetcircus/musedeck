@@ -148,15 +148,16 @@ async function main() {
         return;
       }
 
-      // Extract 4 sequential keyframes from the 5-second recording
-      const f1Path = "/tmp/musedeck/flow_f1.png";
-      const f2Path = "/tmp/musedeck/flow_f2.png";
-      const f3Path = "/tmp/musedeck/flow_f3.png";
-      const f4Path = "/tmp/musedeck/flow_f4.png";
+      // Extract 8 sequential keyframes from the 5-second recording (2 FPS storyboard)
+      const frameCount = 8;
+      const framePaths: string[] = [];
+      for (let i = 1; i <= frameCount; i++) {
+        framePaths.push(`/tmp/musedeck/flow_f${i}.png`);
+      }
 
       await new Promise<void>((resolve) => {
         exec(
-          `/opt/homebrew/bin/ffmpeg -y -i "${videoPath}" -vf "fps=1" -vframes 4 /tmp/musedeck/flow_f%01d.png || /usr/bin/ffmpeg -y -i "${videoPath}" -vf "fps=1" -vframes 4 /tmp/musedeck/flow_f%01d.png`,
+          `/opt/homebrew/bin/ffmpeg -y -i "${videoPath}" -vf "fps=1.6" -vframes 8 /tmp/musedeck/flow_f%01d.png || /usr/bin/ffmpeg -y -i "${videoPath}" -vf "fps=1.6" -vframes 8 /tmp/musedeck/flow_f%01d.png`,
           () => resolve()
         );
       });
@@ -165,12 +166,14 @@ async function main() {
       let motionPercent = 0;
       let isStatic = false;
       try {
-        if (fs.existsSync(f1Path) && fs.existsSync(f4Path)) {
-          const b1 = await sharp(f1Path).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
-          const b4 = await sharp(f4Path).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
+        const firstFrame = framePaths[0];
+        const lastFrame = framePaths[frameCount - 1];
+        if (fs.existsSync(firstFrame) && fs.existsSync(lastFrame)) {
+          const b1 = await sharp(firstFrame).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
+          const bLast = await sharp(lastFrame).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
           let diffSum = 0;
           for (let i = 0; i < b1.length; i++) {
-            diffSum += Math.abs(b1[i] - b4[i]);
+            diffSum += Math.abs(b1[i] - bLast[i]);
           }
           motionPercent = (diffSum / (b1.length * 255)) * 100;
           console.log(`📊 [VidToCode] Motion difference detected: ${motionPercent.toFixed(2)}%`);
@@ -201,39 +204,51 @@ async function main() {
       // Notify surfaces of synthesis phase
       wsServer.broadcast({ type: "vid_synthesizing", target: targetFramework } as any);
 
-      // Assemble 4-frame horizontal progression strip (flow_montage.png)
+      // Assemble 8-frame 2x4 storyboard grid (flow_montage.png)
       const montagePath = "/tmp/musedeck/flow_montage.png";
       const frameW = 280;
-      const frameH = 280;
+      const frameH = 210;
+      const cols = 4;
+      const rows = 2;
       try {
-        const [buf1, buf2, buf3, buf4] = await Promise.all([
-          sharp(f1Path).resize(frameW, frameH, { fit: "inside" }).toBuffer(),
-          sharp(f2Path).resize(frameW, frameH, { fit: "inside" }).toBuffer(),
-          sharp(f3Path).resize(frameW, frameH, { fit: "inside" }).toBuffer(),
-          sharp(f4Path).resize(frameW, frameH, { fit: "inside" }).toBuffer(),
-        ]);
+        const buffers = await Promise.all(
+          framePaths.map(async (fp) => {
+            if (fs.existsSync(fp)) {
+              return sharp(fp).resize(frameW, frameH, { fit: "inside" }).toBuffer();
+            }
+            return sharp({
+              create: { width: frameW, height: frameH, channels: 4, background: { r: 14, g: 20, b: 35, alpha: 1 } },
+            }).png().toBuffer();
+          })
+        );
+
+        const compositeList: Array<{ input: Buffer; left: number; top: number }> = [];
+        for (let idx = 0; idx < buffers.length; idx++) {
+          const col = idx % cols;
+          const row = Math.floor(idx / cols);
+          compositeList.push({
+            input: buffers[idx],
+            left: col * frameW,
+            top: row * frameH,
+          });
+        }
 
         await sharp({
           create: {
-            width: frameW * 4,
-            height: frameH,
+            width: frameW * cols,
+            height: frameH * rows,
             channels: 4,
-            background: { r: 14, g: 20, b: 35, alpha: 1 },
+            background: { r: 10, g: 15, b: 28, alpha: 1 },
           },
         })
-          .composite([
-            { input: buf1, left: 0, top: 0 },
-            { input: buf2, left: frameW, top: 0 },
-            { input: buf3, left: frameW * 2, top: 0 },
-            { input: buf4, left: frameW * 3, top: 0 },
-          ])
+          .composite(compositeList)
           .png()
           .toFile(montagePath);
       } catch (montageErr: any) {
         console.warn("Could not create multi-frame montage:", montageErr.message);
       }
 
-      const chosenPath = fs.existsSync(montagePath) ? montagePath : f1Path;
+      const chosenPath = fs.existsSync(montagePath) ? montagePath : framePaths[0];
       let thumbBase64 = "";
       if (fs.existsSync(chosenPath)) {
         thumbBase64 = fs.readFileSync(chosenPath).toString("base64");

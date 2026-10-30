@@ -190,7 +190,7 @@ export class MuseSparkClient {
           filename: "AnimatedComponent.swift",
           frameworkName: "SwiftUI Interactive Flow",
           systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready Apple SwiftUI Views for interactive UI flows (modals, drawers, multi-step steppers, tab transitions, accordions, gesture interactions, and smooth animations with .animation(.spring()), TimelineView(.animation), and interactive @State). The file must be 100% complete and self-contained with a preview App so swiftc compiles it cleanly.",
-          prompt: "The image shows a 4-step sequential UI interaction flow captured from a screen recording (t=0.5s -> t=1.8s -> t=3.2s -> t=4.6s). Analyze the sequence to identify UI transitions, state changes, and interactive elements. Recreate this complete interactive UI flow in SwiftUI with interactive state, spring/timeline animations, and realistic controls.",
+          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns, t=0.6s to t=5.0s) captured at high frame rate from a screen recording. Analyze the micro-interactions, state transitions, spring dynamics, and animated elements across all 8 frames. Recreate this complete interactive UI flow in SwiftUI with interactive state, spring/timeline animations, and realistic controls.",
         };
 
       case "FRAMER":
@@ -198,7 +198,7 @@ export class MuseSparkClient {
           filename: "AnimatedComponent.tsx",
           frameworkName: "React + Framer Motion Flow",
           systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-grade, accessible React + TypeScript components for interactive UI flows (modals, sheet drawers, multi-step wizards, accordion expands) with Framer Motion (motion.div, AnimatePresence, spring transition physics, and layout animations).",
-          prompt: "The image shows a 4-step sequential UI interaction flow from a screen recording. Analyze the state transitions and recreate this complete interactive UI flow in React with Framer Motion and Tailwind CSS.",
+          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns, t=0.6s to t=5.0s) from a screen recording. Analyze the state transitions and micro-interactions across the sequence and recreate this complete interactive UI flow in React with Framer Motion and Tailwind CSS.",
         };
 
       case "TAILWIND_ANIM":
@@ -206,7 +206,7 @@ export class MuseSparkClient {
           filename: "AnimatedComponent.tsx",
           frameworkName: "Tailwind CSS Interaction Flow",
           systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-grade React + Tailwind CSS components with keyframes, transition utilities (transition-all duration-300 ease-out), and interactive hover/active states for UI flows.",
-          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this interactive UI component with smooth Tailwind CSS transitions and state management.",
+          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns) from a screen recording. Recreate this interactive UI component with smooth Tailwind CSS transitions and state management.",
         };
 
       case "COMPOSE_ANIM":
@@ -214,7 +214,7 @@ export class MuseSparkClient {
           filename: "AnimatedComponent.kt",
           frameworkName: "Compose Interactive Flow",
           systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate idiomatic Android Jetpack Compose @Composable code using AnimatedVisibility, animateFloatAsState, and spring transitionSpec for interactive UI flows.",
-          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this animated flow in Jetpack Compose.",
+          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns). Recreate this animated flow in Jetpack Compose.",
         };
 
       case "FLUTTER_ANIM":
@@ -222,7 +222,7 @@ export class MuseSparkClient {
           filename: "animated_component.dart",
           frameworkName: "Flutter Interactive Flow",
           systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate Flutter StatefulWidget widgets using AnimatedContainer, CurvedAnimation(Curves.easeInOut), or Hero transitions for interactive UI flows.",
-          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this interactive flow in Flutter.",
+          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns). Recreate this interactive flow in Flutter.",
         };
 
       case "VUE_ANIM":
@@ -230,7 +230,7 @@ export class MuseSparkClient {
           filename: "AnimatedComponent.vue",
           frameworkName: "Vue 3 Transition Flow",
           systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate Vue 3 Single File Components using <script setup lang=\"ts\"> and <Transition> wrappers with Tailwind CSS enter/leave classes for interactive flows.",
-          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this interactive component in Vue 3.",
+          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns). Recreate this interactive component in Vue 3.",
         };
 
       case "GSAP":
@@ -238,7 +238,7 @@ export class MuseSparkClient {
           filename: "animated_component.html",
           frameworkName: "HTML + GSAP Timelines",
           systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate clean HTML5 + CSS3 with GSAP (GreenSock) CDN and interactive timeline animations for UI flows.",
-          prompt: "The image shows a 4-step sequential UI interaction flow. Recreate this flow in standalone HTML with GSAP.",
+          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns). Recreate this flow in standalone HTML with GSAP.",
         };
 
       case "COMPOSE":
