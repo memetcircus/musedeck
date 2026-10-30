@@ -773,8 +773,33 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
 <body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-6">
   <div id="root" class="w-full max-w-5xl"></div>
   <script>
-    const { useState, useEffect, useCallback, useRef, useMemo, createContext, useContext } = React;
+    Object.assign(window, React);
+    const { useState, useEffect, useCallback, useRef, useMemo, createContext, useContext, useReducer, useId, useLayoutEffect, useTransition, useDeferredValue } = React;
     const { motion, AnimatePresence, useReducedMotion, useAnimation, useMotionValue, useTransform, useSpring } = window.Motion || {};
+
+    class ErrorBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+      }
+      static getDerivedStateFromError(error) {
+        return { hasError: true, error: error };
+      }
+      componentDidCatch(error, errorInfo) {
+        console.error("Preview render error:", error, errorInfo);
+      }
+      render() {
+        if (this.state.hasError) {
+          return React.createElement("div", {
+            style: { color: "#f87171", background: "#1e1b4b", padding: "24px", borderRadius: "12px", border: "1px solid #ef4444", fontFamily: "sans-serif" }
+          }, [
+            React.createElement("h3", { key: "h3", style: { margin: "0 0 8px 0", fontSize: "16px", fontWeight: "bold" } }, "Component Render Error"),
+            React.createElement("pre", { key: "pre", style: { margin: 0, whiteSpace: "pre-wrap", fontSize: "13px" } }, this.state.error ? (this.state.error.message || String(this.state.error)) : "Unknown error")
+          ]);
+        }
+        return this.props.children;
+      }
+    }
 
     ${transpiled.outputText}
 
@@ -782,7 +807,7 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       const RootTarget = typeof ${rootComponentName} !== "undefined"
         ? ${rootComponentName}
         : (typeof ExtractedComponent !== "undefined" ? ExtractedComponent : (typeof App !== "undefined" ? App : () => React.createElement("div", { className: "text-amber-400 p-4" }, "Component rendered successfully")));
-      ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(RootTarget));
+      ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(ErrorBoundary, null, React.createElement(RootTarget)));
     } catch (renderErr) {
       document.getElementById("root").innerHTML = "<div style=\\"color:red;padding:20px;font-family:sans-serif;\\">Render Error: " + renderErr.message + "</div>";
     }
