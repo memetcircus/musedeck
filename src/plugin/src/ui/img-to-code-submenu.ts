@@ -95,6 +95,7 @@ class ImgToCodeSubmenuManager {
   private bridge?: StreamDeckCoreBridge;
   private hasGeneratedCode = false;
   private isProcessing = false;
+  private lastTappedCoord: { col: number; row: number } | null = null;
 
   get isActive(): boolean {
     return this.active;
@@ -127,6 +128,33 @@ class ImgToCodeSubmenuManager {
     if (this.active) {
       this.render();
     }
+  }
+
+  notifyCodeFailed(reason = "empty"): void {
+    this.isProcessing = false;
+    if (!this.active) return;
+
+    if (reason === "empty" && this.lastTappedCoord) {
+      const { col, row } = this.lastTappedCoord;
+      const keyObj = keyRegistry.all().find((k) => k.column === col && k.row === row);
+      if (keyObj) {
+        void keyObj.action.setImage(
+          SvgKeyRenderer.renderImgToCodeOptionKey(
+            "NO UI",
+            "FOUND",
+            "SKIPPED",
+            "EMPTY",
+            "#ef4444",
+            "#fca5a5"
+          )
+        );
+        setTimeout(() => {
+          this.render();
+        }, 1500);
+        return;
+      }
+    }
+    this.render();
   }
 
   render(): void {
@@ -192,6 +220,7 @@ class ImgToCodeSubmenuManager {
     if (option) {
       if (this.isProcessing) return true;
       this.isProcessing = true;
+      this.lastTappedCoord = { col, row };
 
       console.log(`🎨 [ImgToCode] Selected framework: ${option.target} (${option.line1})`);
 
@@ -229,3 +258,4 @@ class ImgToCodeSubmenuManager {
 }
 
 export const imgToCodeSubmenuManager = new ImgToCodeSubmenuManager();
+

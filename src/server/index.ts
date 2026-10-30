@@ -133,8 +133,19 @@ async function main() {
             framework: res.frameworkName,
           });
         } catch (err: any) {
-          console.error("Spark failed:", err.message);
-          wsServer.broadcast({ type: "spark_failed", error: err.message });
+          const errMsg = err.message || "Failed to process image";
+          console.warn(`⚠️ [Spark] Image synthesis skipped: ${errMsg}`);
+
+          // Trigger native macOS alert if user didn't intentionally press Escape
+          if (!errMsg.includes("cancelled") && !errMsg.includes("Escape")) {
+            await TerminalAutomation.sendSystemNotification("No recognizable UI component detected in selection.");
+          }
+
+          wsServer.broadcast({
+            type: "spark_failed",
+            reason: errMsg.includes("cancelled") || errMsg.includes("Escape") ? "cancelled" : "empty",
+            error: errMsg,
+          });
         }
         break;
 

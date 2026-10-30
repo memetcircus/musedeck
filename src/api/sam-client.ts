@@ -54,6 +54,21 @@ export class SamClient {
       throw new Error("No image was captured (user likely pressed Escape).");
     }
 
+    // Inspect image dimensions via macOS sips
+    let width = 0;
+    let height = 0;
+    try {
+      const { stdout } = await execAsync(`sips -g pixelWidth -g pixelHeight "${rawCapturePath}"`);
+      const wMatch = stdout.match(/pixelWidth:\s*(\d+)/);
+      const hMatch = stdout.match(/pixelHeight:\s*(\d+)/);
+      if (wMatch) width = parseInt(wMatch[1], 10);
+      if (hMatch) height = parseInt(hMatch[1], 10);
+    } catch {}
+
+    if (width > 0 && height > 0 && (width < 35 || height < 35)) {
+      throw new Error("Selection is too small or empty to contain a UI component.");
+    }
+
     const rawBuffer = await fs.readFile(rawCapturePath);
     const rawBase64 = rawBuffer.toString("base64");
 

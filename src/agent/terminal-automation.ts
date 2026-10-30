@@ -648,6 +648,18 @@ end tell
     }
   }
 
+  /**
+   * Displays a native macOS Notification Center alert
+   */
+  static async sendSystemNotification(message: string, title = "MuseDeck"): Promise<void> {
+    try {
+      const appleScript = `display notification "${this.escapeForAppleScript(message)}" with title "${this.escapeForAppleScript(title)}"`;
+      await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+    } catch (err: any) {
+      console.warn("Could not display macOS notification:", err.message);
+    }
+  }
+
   private static escapeForShell(str: string): string {
     return `"${str.replace(/(["\s'$`\\])/g, "\\$1")}"`;
   }

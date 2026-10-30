@@ -143,6 +143,8 @@ export class StreamDeckCoreBridge {
             imgToCodeSubmenuManager.close();
           } else if (msg.type === "spark_completed") {
             imgToCodeSubmenuManager.notifyCodeGenerated();
+          } else if (msg.type === "spark_failed") {
+            imgToCodeSubmenuManager.notifyCodeFailed(msg.reason);
           } else if (msg.type === "switch_page") {
             const page = typeof msg.page === "number" ? msg.page : 1;
             console.log(`[Bridge] Received switch_page command to page ${page}`);
