@@ -3,7 +3,6 @@ import { promisify } from "node:util";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
@@ -732,6 +731,8 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       }
 
       if (ext === ".tsx" || ext === ".jsx") {
+        const tsModule: any = await import("typescript");
+        const ts = tsModule.default || tsModule;
         const code = await fs.promises.readFile(filePath, "utf8");
         const defaultExportMatch = code.match(/export\s+default\s+(?:function\s+)?([A-Za-z0-9_]+)/);
         const functionMatches = [...code.matchAll(/function\s+([A-Z][A-Za-z0-9_]*)/g)].map(m => m[1]);

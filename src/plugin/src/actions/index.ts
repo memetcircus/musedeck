@@ -576,9 +576,11 @@ export class SparkCodeAction extends SingletonAction {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
       attachGlobalThinkingListener(this.bridge);
+      void ev.action.setTitle("");
       registerDeckKey(
         ev,
         () => {
+          void ev.action.setTitle("");
           void ev.action.setImage(SvgKeyRenderer.renderImgToCodeKey("idle"));
         },
         false,
@@ -628,9 +630,11 @@ export class RunMuseAction extends SingletonAction {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
       attachGlobalThinkingListener(this.bridge);
+      void ev.action.setTitle("");
       registerDeckKey(
         ev,
         () => {
+          void ev.action.setTitle("");
           void ev.action.setImage(SvgKeyRenderer.renderVidToCodeKey("idle"));
         },
         false,
