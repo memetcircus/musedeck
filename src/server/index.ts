@@ -193,7 +193,8 @@ async function main() {
       case "toggle_img_to_code":
       case "open_img_to_code":
       case "close_img_to_code":
-        wsServer.broadcast({ type: msg.type });
+      case "spark_completed":
+        wsServer.broadcast(msg as any);
         break;
 
       case "subscribe":

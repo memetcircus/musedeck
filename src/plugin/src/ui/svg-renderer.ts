@@ -875,34 +875,44 @@ export class SvgKeyRenderer {
     `);
   }
 
-  static renderLivePreviewKey(isReady = false, isFlashing = false): string {
-    const borderColor = isFlashing ? "#00f5ff" : isReady ? "#06b6d4" : "#334155";
-    const borderWidth = isFlashing ? "3.5" : "2.5";
-    const glowColor = isFlashing ? "#0284c7" : isReady ? "#0891b2" : "#1e293b";
-    const glowOpacity = isFlashing ? "0.6" : isReady ? "0.35" : "0.15";
-    const subColor = isFlashing ? "#38bdf8" : isReady ? "#22d3ee" : "#64748b";
-    const subText = isFlashing ? "CLICK ME ↗" : isReady ? "RUN LIVE ↗" : "STANDBY";
-    const playColor = isFlashing ? "#ffffff" : isReady ? "#38bdf8" : "#64748b";
+  static renderLivePreviewKey(isReady = false, breathStep = 0): string {
+    if (!isReady) {
+      return this.renderEmptyTile();
+    }
+
+    // 4-stage organic breathing animation (inhale -> peak -> exhale -> base)
+    const breathProfiles = [
+      // Step 0: Base calm glow
+      { border: "#0284c7", width: "2.2", glowR: "48", glowOp: "0.20", sub: "#38bdf8", play: "#38bdf8", subText: "RUN LIVE ↗" },
+      // Step 1: Inhaling (rising energy)
+      { border: "#0ea5e9", width: "2.8", glowR: "51", glowOp: "0.35", sub: "#7dd3fc", play: "#7dd3fc", subText: "RUN LIVE ↗" },
+      // Step 2: Peak Inhale (maximum radiant neon pulse)
+      { border: "#38bdf8", width: "3.5", glowR: "55", glowOp: "0.60", sub: "#ffffff", play: "#ffffff", subText: "CLICK ME ↗" },
+      // Step 3: Exhaling (descending energy)
+      { border: "#0ea5e9", width: "2.8", glowR: "51", glowOp: "0.35", sub: "#7dd3fc", play: "#7dd3fc", subText: "RUN LIVE ↗" },
+    ];
+
+    const p = breathProfiles[Math.abs(breathStep) % breathProfiles.length];
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="${borderWidth}"/>
-        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="${isFlashing ? '0.12' : '0.04'}"/>
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${p.border}" stroke-width="${p.width}"/>
+        <circle cx="72" cy="72" r="${p.glowR}" fill="${p.border}" fill-opacity="${p.glowOp}"/>
 
-        <!-- Play / Monitor Window Icon -->
+        <!-- Play / Monitor Window Icon with Breathing Glow -->
         <g transform="translate(48, 16)">
-          <rect x="0" y="0" width="48" height="38" rx="8" fill="${glowColor}" fill-opacity="${glowOpacity}" stroke="${borderColor}" stroke-width="${borderWidth}"/>
-          <polygon points="20,11 34,19 20,27" fill="${playColor}"/>
+          <rect x="0" y="0" width="48" height="38" rx="8" fill="#0369a1" fill-opacity="${p.glowOp}" stroke="${p.border}" stroke-width="${p.width}"/>
+          <polygon points="20,11 34,19 20,27" fill="${p.play}"/>
         </g>
 
         <!-- Main Title -->
         <text x="72" y="76" fill="#ffffff" font-size="16.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">PREVIEW</text>
 
         <!-- Divider Line -->
-        <line x1="16" y1="88" x2="128" y2="88" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.5"/>
+        <line x1="16" y1="88" x2="128" y2="88" stroke="${p.border}" stroke-width="1.5" stroke-opacity="0.6"/>
 
-        <!-- Subtitle -->
-        <text x="72" y="120" fill="${subColor}" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subText}</text>
+        <!-- Subtitle with Breathing Color -->
+        <text x="72" y="120" fill="${p.sub}" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${p.subText}</text>
       </svg>
     `);
   }

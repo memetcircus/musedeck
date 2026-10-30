@@ -665,7 +665,15 @@ end tell
         } catch {}
 
         console.log(`🔨 [LivePreview] Compiling SwiftUI component: ${filePath}...`);
-        await execAsync(`swiftc -parse-as-library -o "${binPath}" "${filePath}"`);
+        try {
+          await execAsync(`swiftc -parse-as-library -o "${binPath}" "${filePath}"`);
+        } catch (compileErr: any) {
+          console.warn(`⚠️ [LivePreview] swiftc compilation error: ${compileErr.message}`);
+          await TerminalAutomation.sendSystemNotification("Opening component in Xcode Canvas...", "MuseDeck Preview");
+          await execAsync(`open -a Xcode "${filePath}"`);
+          return false;
+        }
+
         console.log(`🚀 [LivePreview] Launching native macOS SwiftUI window...`);
         const child = spawn(binPath, [], { detached: true, stdio: "ignore" });
         child.unref();

@@ -111,7 +111,7 @@ export class MuseSparkClient {
               },
             ],
             temperature: 0.2,
-            max_tokens: 4096,
+            max_tokens: 12288,
           }),
         });
 
@@ -130,6 +130,8 @@ export class MuseSparkClient {
     // Ensure SwiftUI has valid parameters and standalone @main App runner for Live Preview
     if (resolvedFramework === "SWIFTUI") {
       code = code.replace(/dampingFactor:/g, "dampingFraction:");
+      code = code.replace(/\.padding\(\.horizontal,\s*(\d+),\s*vertical:\s*(\d+)\)/g, ".padding(.horizontal, $1).padding(.vertical, $2)");
+      code = code.replace(/\.padding\(\.vertical,\s*(\d+),\s*horizontal:\s*(\d+)\)/g, ".padding(.vertical, $1).padding(.horizontal, $2)");
       if (!code.includes("@main")) {
         const viewMatch = code.match(/struct\s+(\w+)\s*:\s*View/);
         const mainViewName = viewMatch ? viewMatch[1] : "ExtractedComponent";
@@ -162,8 +164,8 @@ export class MuseSparkClient {
         return {
           filename: "ExtractedComponent.swift",
           frameworkName: "Apple SwiftUI",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready, idiomatic Apple SwiftUI components with modern styling, SF Symbols, and smooth animations.",
-          prompt: "Convert this UI design into a clean, modern Apple SwiftUI View with @State and SF Symbols.",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready, idiomatic Apple SwiftUI components with modern styling, SF Symbols, and smooth animations. The file must be 100% complete and self-contained so that swiftc compiles it cleanly.",
+          prompt: "Convert this UI design into a complete, self-contained Apple SwiftUI View with @State and SF Symbols. Include all subviews and helpers inline in the same file so the code compiles with zero external dependencies.",
         };
 
       case "COMPOSE":
