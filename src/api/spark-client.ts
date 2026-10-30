@@ -126,6 +126,7 @@ export class MuseSparkClient {
         const rawContent = response.choices?.[0]?.message?.content || "";
         const codeMatch = rawContent.match(/```(?:tsx|jsx|typescript|javascript|swift|kotlin|dart|python|html|vue)?\n([\s\S]*?)```/);
         code = codeMatch ? codeMatch[1].trim() : rawContent.trim();
+        code = code.replace(/^```[a-zA-Z0-9_-]*\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
       } catch (err: any) {
         console.warn(`⚠️ [Muse Spark API] Remote generation failed (${err.message}). Using fallback synthesizer.`);
       }

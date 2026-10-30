@@ -1040,7 +1040,12 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       }
 
       if (ext === ".py") {
-        const content = await fs.promises.readFile(filePath, "utf8");
+        let content = await fs.promises.readFile(filePath, "utf8");
+        const healed = TerminalAutomation.healPythonCode(content);
+        if (healed !== content) {
+          await fs.promises.writeFile(filePath, healed, "utf8");
+          content = healed;
+        }
         const isStreamlit = content.includes("streamlit");
 
         if (isStreamlit) {
@@ -1111,6 +1116,25 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
         code = `void main() => runApp(const MaterialApp(home: ${rootWidget}(), debugShowCheckedModeBanner: false));\n\n` + code;
       }
     }
+
+    return code;
+  }
+
+  /**
+   * Auto-heals common Python/Streamlit synthesis bugs
+   */
+  static healPythonCode(code: string): string {
+    // 1. Strip markdown code fences if present
+    code = code.replace(/^```[a-zA-Z0-9_-]*\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+
+    // 2. Fix variable unpacking errors in activities loops:
+    // for av,name,status,oid,color,prod,extra in activities ...
+    code = code.replace(
+      /for\s+([a-zA-Z0-9_,\s]+)\s+in\s+activities(\s+if\s+[^\n:]+)?:\s*\n/g,
+      (_match) => {
+        return `for item in activities:\n                av, name, status, oid, color = item[0], item[1], item[2], item[3], item[4]\n                prod = item[5] if len(item) > 5 else ""\n                extra = item[6] if len(item) > 6 else ""\n`;
+      }
+    );
 
     return code;
   }
