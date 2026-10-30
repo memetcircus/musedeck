@@ -127,6 +127,16 @@ export class MuseSparkClient {
       code = this.getFallbackCode(resolvedFramework);
     }
 
+    // Ensure SwiftUI has valid parameters and standalone @main App runner for Live Preview
+    if (resolvedFramework === "SWIFTUI") {
+      code = code.replace(/dampingFactor:/g, "dampingFraction:");
+      if (!code.includes("@main")) {
+        const viewMatch = code.match(/struct\s+(\w+)\s*:\s*View/);
+        const mainViewName = viewMatch ? viewMatch[1] : "ExtractedComponent";
+        code += `\n\n@main\nstruct PreviewApp: App {\n    var body: some Scene {\n        WindowGroup {\n            ${mainViewName}()\n                .frame(width: 380, height: 780)\n        }\n        .windowResizability(.contentSize)\n    }\n}\n`;
+      }
+    }
+
     // Save to stable /tmp/musedeck/ directory
     const tempDir = "/tmp/musedeck";
     if (!fs.existsSync(tempDir)) {

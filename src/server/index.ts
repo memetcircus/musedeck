@@ -165,6 +165,22 @@ async function main() {
         }
         break;
 
+      case "run_preview":
+        console.log("▶️ [Bridge] Received RUN_PREVIEW command from surface");
+        try {
+          const tempDir = "/tmp/musedeck";
+          if (fs.existsSync(tempDir)) {
+            const files = fs.readdirSync(tempDir).filter((f) => f.startsWith("Extracted") || f.startsWith("extracted"));
+            if (files.length > 0) {
+              const target = path.join(tempDir, files[0]);
+              await TerminalAutomation.runLivePreview(target);
+            }
+          }
+        } catch (err: any) {
+          console.warn("Could not launch live preview:", err.message);
+        }
+        break;
+
       case "runTask":
         console.log(`🚀 [Bridge] Received RUN_TASK command: "${msg.prompt}"`);
         void museRunner.runTask(msg.prompt);

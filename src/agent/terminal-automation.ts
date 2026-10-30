@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { exec, spawn } from "node:child_process";
 import { promisify } from "node:util";
 import * as path from "node:path";
 import * as fs from "node:fs";
@@ -645,6 +645,93 @@ end tell
         console.warn("Failed to open file in editor:", err.message);
         return false;
       }
+    }
+  }
+
+  /**
+   * Compiles and runs live interactive preview of extracted UI components
+   */
+  static async runLivePreview(filePath: string): Promise<boolean> {
+    const ext = path.extname(filePath).toLowerCase();
+    try {
+      if (ext === ".swift") {
+        const binPath = "/tmp/musedeck/PreviewApp";
+        console.log(`🔨 [LivePreview] Compiling SwiftUI component: ${filePath}...`);
+        await execAsync(`swiftc -parse-as-library -o "${binPath}" "${filePath}"`);
+        console.log(`🚀 [LivePreview] Launching native macOS SwiftUI window...`);
+        const child = spawn(binPath, [], { detached: true, stdio: "ignore" });
+        child.unref();
+
+        setTimeout(async () => {
+          try {
+            await execAsync(`swift -e '
+import Cocoa
+guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: "").first(where: { $0.executableURL?.lastPathComponent == "PreviewApp" })
+    ?? NSWorkspace.shared.runningApplications.first(where: { $0.localizedName == "PreviewApp" }) else { exit(0) }
+let axApp = AXUIElementCreateApplication(app.processIdentifier)
+var windowsRef: CFTypeRef?
+if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &windowsRef) == .success,
+   let windows = windowsRef as? [AXUIElement], let window = windows.first {
+    var newPoint = CGPoint(x: 770, y: 150)
+    if let pointValue = AXValueCreate(.cgPoint, &newPoint) {
+        AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, pointValue)
+    }
+}
+'`);
+            await execAsync(`osascript -e 'tell application "System Events" to set frontmost of (first process whose name contains "PreviewApp") to true'`);
+          } catch {}
+        }, 800);
+        return true;
+      }
+
+      if (ext === ".html") {
+        await execAsync(`open "${filePath}"`);
+        return true;
+      }
+
+      if (ext === ".tsx" || ext === ".jsx") {
+        const code = await fs.promises.readFile(filePath, "utf8");
+        const cleanJsx = code
+          .replace(/import\s+.*?from\s+['"].*?['"];?/g, "")
+          .replace(/export\s+default\s+/g, "")
+          .replace(/export\s+/g, "");
+
+        const htmlWrapper = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MuseDeck • Component Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-6">
+  <div id="root"></div>
+  <script type="text/babel">
+    ${cleanJsx}
+    const Component = typeof ExtractedComponent !== "undefined" ? ExtractedComponent : (typeof App !== "undefined" ? App : () => <div>Mounted</div>);
+    ReactDOM.createRoot(document.getElementById("root")).render(<Component />);
+  </script>
+</body>
+</html>`;
+        const previewHtml = "/tmp/musedeck/preview.html";
+        await fs.promises.writeFile(previewHtml, htmlWrapper, "utf8");
+        await execAsync(`open "${previewHtml}"`);
+        return true;
+      }
+
+      if (ext === ".py") {
+        await execAsync(`python3 "${filePath}" &`);
+        return true;
+      }
+
+      await execAsync(`open "${filePath}"`);
+      return true;
+    } catch (err: any) {
+      console.warn("Live preview failed:", err.message);
+      return false;
     }
   }
 

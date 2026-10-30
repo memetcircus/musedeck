@@ -875,6 +875,35 @@ export class SvgKeyRenderer {
     `);
   }
 
+  static renderLivePreviewKey(isReady = false): string {
+    const borderColor = isReady ? "#06b6d4" : "#334155";
+    const glowColor = isReady ? "#0891b2" : "#1e293b";
+    const subColor = isReady ? "#22d3ee" : "#64748b";
+    const subText = isReady ? "RUN LIVE ↗" : "STANDBY";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
+
+        <!-- Play / Monitor Window Icon -->
+        <g transform="translate(48, 16)">
+          <rect x="0" y="0" width="48" height="38" rx="8" fill="${glowColor}" fill-opacity="${isReady ? '0.35' : '0.15'}" stroke="${borderColor}" stroke-width="2"/>
+          <polygon points="20,11 34,19 20,27" fill="${isReady ? '#38bdf8' : '#64748b'}"/>
+        </g>
+
+        <!-- Main Title -->
+        <text x="72" y="76" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">PREVIEW</text>
+
+        <!-- Divider Line -->
+        <line x1="16" y1="88" x2="128" y2="88" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.5"/>
+
+        <!-- Subtitle -->
+        <text x="72" y="120" fill="${subColor}" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subText}</text>
+      </svg>
+    `);
+  }
+
   /**
    * Key 7: Run Muse Task Key
    */

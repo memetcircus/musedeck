@@ -241,6 +241,10 @@ export class StreamDeckCoreBridge {
     await this.dispatch({ type: "open_code" }, "open-code");
   }
 
+  async runPreview(): Promise<void> {
+    await this.dispatch({ type: "run_preview" }, "run-preview");
+  }
+
   async runTask(prompt: string): Promise<void> {
     await this.dispatch({ type: "runTask", prompt }, "task", { prompt });
   }

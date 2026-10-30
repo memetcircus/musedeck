@@ -172,6 +172,9 @@ class ImgToCodeSubmenuManager {
       } else if (row === 1 && col === 4) {
         // (4, 1): OPEN CODE key
         image = SvgKeyRenderer.renderOpenCodeKey(this.hasGeneratedCode);
+      } else if (row === 2 && col === 4) {
+        // (4, 2): LIVE PREVIEW key
+        image = SvgKeyRenderer.renderLivePreviewKey(this.hasGeneratedCode);
       } else {
         const keyCoord = `${col},${row}`;
         const option = IMG_TO_CODE_OPTIONS[keyCoord];
@@ -210,6 +213,15 @@ class ImgToCodeSubmenuManager {
       console.log("👁️ [ImgToCode] Open Code tapped -> Launching editor");
       if (this.bridge) {
         await this.bridge.openCode();
+      }
+      return true;
+    }
+
+    // 3. (4, 2): LIVE PREVIEW in native macOS app or browser window
+    if (col === 4 && row === 2) {
+      console.log("▶️ [ImgToCode] Live Preview tapped -> Launching live app/browser window");
+      if (this.bridge) {
+        await this.bridge.runPreview();
       }
       return true;
     }

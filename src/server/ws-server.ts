@@ -9,6 +9,7 @@ export type SurfaceMessage =
   | { type: "snip" }
   | { type: "spark"; target?: string; prompt?: string }
   | { type: "open_code" }
+  | { type: "run_preview" }
   | { type: "runTask"; prompt: string }
   | { type: "toggle_submenu" }
   | { type: "toggle_snippets" }
