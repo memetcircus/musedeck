@@ -8,7 +8,7 @@ function hasExistingComponent(): boolean {
   try {
     const tempDir = "/tmp/musedeck";
     if (!fs.existsSync(tempDir)) return false;
-    const validExts = [".swift", ".tsx", ".jsx", ".html", ".vue", ".kt", ".dart"];
+    const validExts = [".swift", ".tsx", ".jsx", ".html", ".vue", ".kt", ".dart", ".py"];
     const files = fs.readdirSync(tempDir);
     return files.some((f) => {
       const ext = path.extname(f).toLowerCase();

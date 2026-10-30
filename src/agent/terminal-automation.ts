@@ -1040,6 +1040,39 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       }
 
       if (ext === ".py") {
+        const content = await fs.promises.readFile(filePath, "utf8");
+        const isStreamlit = content.includes("streamlit");
+
+        if (isStreamlit) {
+          const streamlitBin = fs.existsSync("/opt/homebrew/bin/streamlit")
+            ? "/opt/homebrew/bin/streamlit"
+            : "streamlit";
+
+          try {
+            // Kill any old streamlit instance
+            try {
+              await execAsync('pkill -f "streamlit run"');
+            } catch {}
+
+            await execAsync(
+              `${streamlitBin} run "${filePath}" --server.headless true --browser.gatherUsageStats false > /tmp/musedeck/streamlit.log 2>&1 &`
+            );
+            await new Promise((r) => setTimeout(r, 1500));
+            try {
+              await execAsync(`open -a "Google Chrome" "http://localhost:8501"`);
+            } catch {
+              await execAsync(`open "http://localhost:8501"`);
+            }
+            await TerminalAutomation.sendSystemNotification(
+              "Streamlit UI live preview launched in Chrome at http://localhost:8501",
+              "Python Streamlit Preview"
+            );
+            return true;
+          } catch (err: any) {
+            console.warn("Streamlit preview failed:", err.message);
+          }
+        }
+
         await execAsync(`python3 "${filePath}" &`);
         return true;
       }
