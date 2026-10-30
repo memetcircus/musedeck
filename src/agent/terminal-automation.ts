@@ -629,29 +629,44 @@ end tell
   }
 
   /**
-   * Opens a file in the developer's active editor (VS Code or system default)
+   * Opens a file in the developer's active editor (VS Code, Cursor, Antigravity, or TextEdit fallback)
    */
   static async openFileInEditor(filePath: string): Promise<boolean> {
+    const candidateEditors = [
+      "Visual Studio Code",
+      "Cursor",
+      "Antigravity IDE",
+      "Antigravity",
+      "Sublime Text",
+      "Zed",
+      "Xcode",
+    ];
+
+    for (const editor of candidateEditors) {
+      if (fs.existsSync(`/Applications/${editor}.app`)) {
+        try {
+          await execAsync(`open -a "${editor}" "${filePath}"`);
+          return true;
+        } catch {}
+      }
+    }
+
+    // Try system default application association
     try {
-      await execAsync(`open -a "Visual Studio Code" "${filePath}"`);
+      await execAsync(`open "${filePath}"`);
       return true;
     } catch {
+      // Universal macOS fallback: TextEdit
       try {
-        await execAsync(`open -a "Antigravity IDE" "${filePath}" || open -a "Antigravity" "${filePath}"`);
+        await execAsync(`open -e "${filePath}"`);
+        await TerminalAutomation.sendSystemNotification(
+          "No dedicated code editor detected. Opened file in TextEdit.",
+          "MuseDeck Editor"
+        );
         return true;
-      } catch {
-        try {
-          await execAsync(`open "${filePath}"`);
-          return true;
-        } catch {
-          try {
-            await execAsync(`open -e "${filePath}"`);
-            return true;
-          } catch (err: any) {
-            console.warn("Failed to open file in editor:", err.message);
-            return false;
-          }
-        }
+      } catch (err: any) {
+        console.warn("Failed to open file in editor:", err.message);
+        return false;
       }
     }
   }
