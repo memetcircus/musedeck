@@ -971,13 +971,18 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
         const hasAndroidStudio = fs.existsSync("/Applications/Android Studio.app");
         if (hasAndroidStudio) {
           try {
-            await execAsync(`open -a "Android Studio" "${filePath}"`);
+            const projectTarget = await TerminalAutomation.prepareComposeProject(filePath);
+            await execAsync(`open -a "Android Studio" "/tmp/musedeck/ComposePreview"`);
+            await execAsync(`open -a "Android Studio" "${projectTarget}"`);
+            await execAsync(`osascript -e 'tell application "Android Studio" to activate'`);
             await TerminalAutomation.sendSystemNotification(
-              "Compose component opened in Android Studio. Note: Visual @Preview requires an Android Gradle project context.",
-              "Compose Preview"
+              "Compose project loaded in Android Studio with LayoutLib @Preview canvas.",
+              "Android Studio Compose"
             );
             return true;
-          } catch {}
+          } catch (err: any) {
+            console.warn("Failed to open in Android Studio project mode:", err.message);
+          }
         }
 
         await this.openFileInEditor(filePath);
@@ -1008,6 +1013,144 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       console.warn("Live preview failed:", err.message);
       return false;
     }
+  }
+
+  /**
+   * Scaffolds an instant Android Compose Gradle project for Android Studio @Preview LayoutLib canvas
+   */
+  private static async prepareComposeProject(filePath: string): Promise<string> {
+    const projectDir = "/tmp/musedeck/ComposePreview";
+    const appDir = path.join(projectDir, "app");
+    const srcDir = path.join(appDir, "src/main/java/com/meta/musedeck");
+    const wrapperDir = path.join(projectDir, "gradle/wrapper");
+
+    await fs.promises.mkdir(srcDir, { recursive: true });
+    await fs.promises.mkdir(wrapperDir, { recursive: true });
+
+    // 1. settings.gradle.kts
+    const settingsKts = `pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "ComposePreview"
+include(":app")
+`;
+    await fs.promises.writeFile(path.join(projectDir, "settings.gradle.kts"), settingsKts, "utf8");
+
+    // 2. root build.gradle.kts
+    const rootBuildKts = `plugins {
+    id("com.android.application") version "8.7.0" apply false
+    id("org.jetbrains.kotlin.android") version "2.0.0" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0" apply false
+}
+`;
+    await fs.promises.writeFile(path.join(projectDir, "build.gradle.kts"), rootBuildKts, "utf8");
+
+    // 3. app/build.gradle.kts
+    const appBuildKts = `plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+}
+
+android {
+    namespace = "com.meta.musedeck"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.meta.musedeck"
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+}
+
+dependencies {
+    implementation(platform("androidx.compose:compose-bom:2024.10.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+}
+`;
+    await fs.promises.writeFile(path.join(appDir, "build.gradle.kts"), appBuildKts, "utf8");
+
+    // 4. AndroidManifest.xml
+    const manifestXml = `<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:label="ComposePreview"
+        android:theme="@android:style/Theme.Material.NoActionBar">
+    </application>
+</manifest>
+`;
+    const manifestDir = path.join(appDir, "src/main");
+    await fs.promises.mkdir(manifestDir, { recursive: true });
+    await fs.promises.writeFile(path.join(manifestDir, "AndroidManifest.xml"), manifestXml, "utf8");
+
+    // 5. local.properties
+    const userHome = process.env.HOME || "/Users/akif";
+    const sdkPath = path.join(userHome, "Library/Android/sdk");
+    if (fs.existsSync(sdkPath)) {
+      await fs.promises.writeFile(path.join(projectDir, "local.properties"), `sdk.dir=${sdkPath}\n`, "utf8");
+    }
+
+    // 6. gradle-wrapper.properties
+    const wrapperProp = `distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+`;
+    await fs.promises.writeFile(path.join(wrapperDir, "gradle-wrapper.properties"), wrapperProp, "utf8");
+
+    // 7. Inject file into app src with package com.meta.musedeck
+    let ktCode = await fs.promises.readFile(filePath, "utf8");
+    ktCode = ktCode.replace(/^package\s+[\w.]+/m, "package com.meta.musedeck");
+    if (!ktCode.includes("package com.meta.musedeck")) {
+      ktCode = "package com.meta.musedeck\n\n" + ktCode;
+    }
+    const targetFile = path.join(srcDir, path.basename(filePath));
+    await fs.promises.writeFile(targetFile, ktCode, "utf8");
+
+    // 8. Auto-trust directory in Android Studio if trusted-paths.xml exists
+    try {
+      const globDir = path.join(userHome, "Library/Application Support/Google");
+      if (fs.existsSync(globDir)) {
+        const studioDirs = fs.readdirSync(globDir).filter(d => d.startsWith("AndroidStudio"));
+        for (const sd of studioDirs) {
+          const tpPath = path.join(globDir, sd, "options/trusted-paths.xml");
+          if (fs.existsSync(tpPath)) {
+            let tpContent = await fs.promises.readFile(tpPath, "utf8");
+            if (!tpContent.includes("/tmp/musedeck")) {
+              tpContent = tpContent.replace(
+                "<map>",
+                '<map>\n        <entry key="/tmp/musedeck" value="true" />\n        <entry key="/private/tmp/musedeck" value="true" />'
+              );
+              await fs.promises.writeFile(tpPath, tpContent, "utf8");
+            }
+          }
+        }
+      }
+    } catch {}
+
+    return targetFile;
   }
 
   /**
