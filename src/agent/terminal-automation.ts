@@ -973,7 +973,7 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
           try {
             await execAsync(`open -a "Android Studio" "${filePath}"`);
             await TerminalAutomation.sendSystemNotification(
-              "Opening Compose component in Android Studio Preview...",
+              "Compose component opened in Android Studio. Note: Visual @Preview requires an Android Gradle project context.",
               "Compose Preview"
             );
             return true;
