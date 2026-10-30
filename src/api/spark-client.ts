@@ -28,7 +28,7 @@ export class MuseSparkClient {
     private readonly apiClient: MetaModelApiClient,
     modelName?: string
   ) {
-    this.modelName = modelName || process.env.SPARK_MODEL_NAME || "muse-spark";
+    this.modelName = modelName || process.env.SPARK_MODEL_NAME || "muse-spark-1.3";
   }
 
   /**
@@ -111,6 +111,7 @@ export class MuseSparkClient {
               },
             ],
             temperature: 0.2,
+            max_tokens: 4096,
           }),
         });
 
