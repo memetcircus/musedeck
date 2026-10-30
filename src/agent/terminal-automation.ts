@@ -633,17 +633,25 @@ end tell
    */
   static async openFileInEditor(filePath: string): Promise<boolean> {
     try {
-      // Try opening in VS Code first
-      await execAsync(`code -r "${filePath}"`);
+      await execAsync(`open -a "Visual Studio Code" "${filePath}"`);
       return true;
     } catch {
       try {
-        // Fallback to macOS default opener
-        await execAsync(`open "${filePath}"`);
+        await execAsync(`open -a "Antigravity IDE" "${filePath}" || open -a "Antigravity" "${filePath}"`);
         return true;
-      } catch (err: any) {
-        console.warn("Failed to open file in editor:", err.message);
-        return false;
+      } catch {
+        try {
+          await execAsync(`open "${filePath}"`);
+          return true;
+        } catch {
+          try {
+            await execAsync(`open -e "${filePath}"`);
+            return true;
+          } catch (err: any) {
+            console.warn("Failed to open file in editor:", err.message);
+            return false;
+          }
+        }
       }
     }
   }
@@ -850,12 +858,30 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
         return true;
       }
 
+      if (ext === ".kt") {
+        await this.openFileInEditor(filePath);
+        await TerminalAutomation.sendSystemNotification(
+          "Jetpack Compose component opened in VS Code. Inspect @Preview block.",
+          "Compose Component"
+        );
+        return true;
+      }
+
+      if (ext === ".dart") {
+        await this.openFileInEditor(filePath);
+        await TerminalAutomation.sendSystemNotification(
+          "Flutter widget opened in VS Code. Inspect Widget build method.",
+          "Flutter Component"
+        );
+        return true;
+      }
+
       if (ext === ".py") {
         await execAsync(`python3 "${filePath}" &`);
         return true;
       }
 
-      await execAsync(`open "${filePath}"`);
+      await this.openFileInEditor(filePath);
       return true;
     } catch (err: any) {
       console.warn("Live preview failed:", err.message);
