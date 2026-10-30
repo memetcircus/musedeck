@@ -920,7 +920,7 @@ export class SvgKeyRenderer {
    */
   static renderBottomBannerTile(
     index: number,
-    mode: "idle" | "spark" | "preview" | "success" | "failed" | "recording",
+    mode: "idle" | "spark" | "preview" | "success" | "failed" | "recording" | "aiming",
     activeStep = 0,
     countdownSeconds = 5
   ): string {
@@ -935,7 +935,19 @@ export class SvgKeyRenderer {
     let subColor = "#fbbf24";
     const isStepActive = index === activeStep;
 
-    if (mode === "recording") {
+    if (mode === "aiming") {
+      borderColor = isStepActive ? "#38bdf8" : "#0369a1";
+      bgOpacity = isStepActive ? "0.28" : "0.06";
+      subColor = isStepActive ? "#7dd3fc" : "#38bdf8";
+      const bannerData = [
+        { main: "SELECT", sub: "DRAG AREA" },
+        { main: "AIM", sub: "CROSSHAIR +" },
+        { main: "5 SEC", sub: "FLOW REC" },
+        { main: "CANCEL", sub: "ESC KEY" },
+      ];
+      mainText = bannerData[index].main;
+      subText = bannerData[index].sub;
+    } else if (mode === "recording") {
       borderColor = isStepActive ? "#ef4444" : "#991b1b";
       bgOpacity = isStepActive ? "0.32" : "0.08";
       subColor = isStepActive ? "#fca5a5" : "#ef4444";

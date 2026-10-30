@@ -6,4 +6,5 @@ dist/
 com.memetcircus.musedeck.sdPlugin/bin/
 com.memetcircus.musedeck.sdPlugin/logs/
 temp/
+bin/
 project_notes.md

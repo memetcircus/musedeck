@@ -158,8 +158,12 @@ export class StreamDeckCoreBridge {
             vidToCodeSubmenuManager.open();
           } else if (msg.type === "close_vid_to_code") {
             vidToCodeSubmenuManager.close();
+          } else if (msg.type === "vid_aiming") {
+            vidToCodeSubmenuManager.notifyAiming();
           } else if (msg.type === "vid_recording_started") {
             vidToCodeSubmenuManager.notifyRecordingStarted(msg.duration);
+          } else if (msg.type === "vid_recording_cancelled") {
+            vidToCodeSubmenuManager.notifyCancelled();
           } else if (msg.type === "vid_countdown") {
             vidToCodeSubmenuManager.notifyCountdown(msg.seconds);
           } else if (msg.type === "vid_synthesizing") {

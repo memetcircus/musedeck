@@ -3,7 +3,7 @@ dotenv.config();
 
 import fs from "node:fs";
 import path from "node:path";
-import { spawn, exec, type ChildProcess } from "node:child_process";
+import { spawn, exec, execSync, type ChildProcess } from "node:child_process";
 import { AgentStateMachine } from "../agent/state-machine.js";
 import { AgentState } from "../agent/types.js";
 import { MuseRunner } from "../agent/muse-runner.js";
@@ -279,11 +279,14 @@ async function main() {
       case "vid_record": {
         const target = (msg.target as string) || "AUTO";
         activeRecordingTarget = target;
-        console.log(`🎬 [Bridge] Starting 5s screen recording for target: ${target}`);
+        console.log(`🎬 [Bridge] Launching crosshair screen selection for target: ${target}`);
 
-        // Step 1: Native macOS Notification (Strictly English, no emojis!)
+        // Broadcast aiming mode to Stream Deck immediately
+        wsServer.broadcast({ type: "vid_aiming" } as any);
+
+        // Prompt user to select screen area with crosshair
         await TerminalAutomation.sendSystemNotification(
-          "Recording UI screen flow (5 seconds)...",
+          "Select screen area with crosshair to record UI flow...",
           "MuseDeck Vid to Code"
         );
 
@@ -292,24 +295,77 @@ async function main() {
           try { fs.unlinkSync(videoPath); } catch {}
         }
 
-        // Spawn screencapture -v -V 5
-        activeRecordingProcess = spawn("screencapture", ["-v", "-V", "5", videoPath]);
-        wsServer.broadcast({ type: "vid_recording_started", duration: 5 } as any);
+        // Spawn screencapture with interactive mouse selection (-i -s)
+        // -i: capture screen interactively
+        // -s: only allow mouse selection mode (crosshair '+')
+        // -v: capture video recording of the selected rectangle
+        // -V 5: 5 seconds recording limit
+        // -k: show clicks in video recording mode
+        activeRecordingProcess = spawn("screencapture", ["-i", "-s", "-v", "-V", "5", "-k", videoPath]);
 
-        let countdown = 5;
-        if (activeCountdownTimer) clearInterval(activeCountdownTimer);
-        activeCountdownTimer = setInterval(() => {
-          countdown--;
-          if (countdown > 0) {
-            wsServer.broadcast({ type: "vid_countdown", seconds: countdown } as any);
-          } else {
-            clearInterval(activeCountdownTimer!);
+        let recordingStarted = false;
+        let mouseWaiterProcess: any = null;
+
+        const startRecordingCountdown = () => {
+          if (recordingStarted) return;
+          recordingStarted = true;
+          console.log("🔴 [Bridge] Area selected. Starting 5s screen recording...");
+
+          wsServer.broadcast({ type: "vid_recording_started", duration: 5 } as any);
+          void TerminalAutomation.sendSystemNotification(
+            "Recording UI screen flow (5 seconds)...",
+            "MuseDeck Vid to Code"
+          );
+
+          let countdown = 5;
+          if (activeCountdownTimer) clearInterval(activeCountdownTimer);
+          activeCountdownTimer = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+              wsServer.broadcast({ type: "vid_countdown", seconds: countdown } as any);
+            } else {
+              clearInterval(activeCountdownTimer!);
+              activeCountdownTimer = null;
+            }
+          }, 1000);
+        };
+
+        const mouseWaiterPath = path.resolve(process.cwd(), "bin/wait-mouse-release");
+        const mouseWaiterSrc = path.resolve(process.cwd(), "scripts/wait-mouse-release.swift");
+        if (!fs.existsSync(mouseWaiterPath) && fs.existsSync(mouseWaiterSrc)) {
+          try {
+            fs.mkdirSync(path.dirname(mouseWaiterPath), { recursive: true });
+            execSync(`swiftc -O "${mouseWaiterSrc}" -o "${mouseWaiterPath}"`);
+          } catch {}
+        }
+        if (fs.existsSync(mouseWaiterPath)) {
+          mouseWaiterProcess = spawn(mouseWaiterPath);
+          mouseWaiterProcess.on("exit", (code: number) => {
+            mouseWaiterProcess = null;
+            if (code === 0 && activeRecordingProcess) {
+              startRecordingCountdown();
+            }
+          });
+        }
+
+        activeRecordingProcess.on("exit", (code: number) => {
+          activeRecordingProcess = null;
+          if (mouseWaiterProcess) {
+            try { mouseWaiterProcess.kill(); } catch {}
+            mouseWaiterProcess = null;
+          }
+          if (activeCountdownTimer) {
+            clearInterval(activeCountdownTimer);
             activeCountdownTimer = null;
           }
-        }, 1000);
 
-        activeRecordingProcess.on("exit", () => {
-          activeRecordingProcess = null;
+          // If user pressed ESC or cancelled, no valid video file exists
+          if (code !== 0 || !fs.existsSync(videoPath) || fs.statSync(videoPath).size === 0) {
+            console.log("ℹ️ [Bridge] Video selection was cancelled or no area selected.");
+            wsServer.broadcast({ type: "vid_recording_cancelled" } as any);
+            return;
+          }
+
           void finishRecordingAndSynthesize(activeRecordingTarget);
         });
         break;
@@ -335,6 +391,8 @@ async function main() {
       case "spark_synthesizing":
       case "spark_failed":
       case "vid_recording_started":
+      case "vid_aiming":
+      case "vid_recording_cancelled":
       case "vid_countdown":
       case "vid_synthesizing":
       case "vid_spark_completed":

@@ -27,6 +27,8 @@ export type SurfaceMessage =
   | { type: "close_vid_to_code" }
   | { type: "vid_record"; target?: string }
   | { type: "vid_stop" }
+  | { type: "vid_aiming" }
+  | { type: "vid_recording_cancelled" }
   | { type: "vid_recording_started"; duration: number }
   | { type: "vid_countdown"; seconds: number }
   | { type: "vid_synthesizing"; target?: string }

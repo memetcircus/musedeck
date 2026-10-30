@@ -80,7 +80,7 @@ class VidToCodeSubmenuManager {
   private isRecording = false;
   private countdownSeconds = 5;
   private lastTappedCoord: { col: number; row: number } | null = null;
-  private bannerMode: "idle" | "recording" | "spark" | "preview" | "success" | "failed" = "idle";
+  private bannerMode: "idle" | "aiming" | "recording" | "spark" | "preview" | "success" | "failed" = "idle";
   private bannerStep = 0;
   private bannerTimer: NodeJS.Timeout | null = null;
 
@@ -92,7 +92,7 @@ class VidToCodeSubmenuManager {
     this.bridge = bridge;
   }
 
-  private startBannerAnimation(mode: "recording" | "spark" | "preview", intervalMs: number): void {
+  private startBannerAnimation(mode: "aiming" | "recording" | "spark" | "preview", intervalMs: number): void {
     this.stopBannerAnimation();
     this.bannerMode = mode;
     this.bannerStep = 0;
@@ -108,6 +108,12 @@ class VidToCodeSubmenuManager {
       clearInterval(this.bannerTimer);
       this.bannerTimer = null;
     }
+  }
+
+  notifyAiming(): void {
+    if (!this.active) return;
+    this.isRecording = false;
+    this.startBannerAnimation("aiming", 350);
   }
 
   private updateBannerKeys(): void {
@@ -185,6 +191,16 @@ class VidToCodeSubmenuManager {
     if (this.active) {
       this.render();
     }
+  }
+
+  notifyCancelled(): void {
+    if (!this.active) return;
+    console.log("ℹ️ [VidToCode] Recording cancelled");
+    this.stopBannerAnimation();
+    this.bannerMode = "idle";
+    this.isProcessing = false;
+    this.isRecording = false;
+    this.render();
   }
 
   notifyPreviewLaunching(): void {
@@ -329,9 +345,6 @@ class VidToCodeSubmenuManager {
       this.isProcessing = true;
       this.lastTappedCoord = { col, row };
       this.hasGeneratedCode = false;
-      this.stopBannerAnimation();
-      this.bannerMode = "idle";
-      this.render();
 
       console.log(`🎬 [VidToCode] Selected target: ${option.target} (${option.title})`);
 
@@ -340,13 +353,15 @@ class VidToCodeSubmenuManager {
       if (keyObj) {
         void keyObj.action.setImage(
           SvgKeyRenderer.renderVidToCodeOptionKey(
-            "STARTING",
-            "PREPARING REC",
-            "#ef4444",
-            "#fca5a5"
+            "AIM +",
+            "DRAG RECT",
+            "#38bdf8",
+            "#7dd3fc"
           )
         );
       }
+
+      this.notifyAiming();
 
       try {
         if (this.bridge) {
@@ -355,6 +370,7 @@ class VidToCodeSubmenuManager {
       } catch (err: any) {
         console.error("VidToCode dispatch failed:", err.message);
         this.isProcessing = false;
+        this.notifyCancelled();
       }
       return true;
     }
@@ -364,3 +380,4 @@ class VidToCodeSubmenuManager {
 }
 
 export const vidToCodeSubmenuManager = new VidToCodeSubmenuManager();
+
