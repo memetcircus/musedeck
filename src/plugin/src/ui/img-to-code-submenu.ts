@@ -96,6 +96,8 @@ class ImgToCodeSubmenuManager {
   private hasGeneratedCode = false;
   private isProcessing = false;
   private lastTappedCoord: { col: number; row: number } | null = null;
+  private isFlashingPreview = false;
+  private flashTimer: NodeJS.Timeout | null = null;
 
   get isActive(): boolean {
     return this.active;
@@ -114,11 +116,13 @@ class ImgToCodeSubmenuManager {
   close(): void {
     if (!this.active) return;
     console.log("🔙 [ImgToCode] Closing Multi-Language UI-to-Code Submenu -> Restoring Page 1");
+    this.stopFlashingPreview();
     this.active = false;
     keyRegistry.restoreAll();
   }
 
   forceClose(): void {
+    this.stopFlashingPreview();
     this.active = false;
   }
 
@@ -127,6 +131,45 @@ class ImgToCodeSubmenuManager {
     this.isProcessing = false;
     if (this.active) {
       this.render();
+      this.startFlashingPreview();
+    }
+  }
+
+  private startFlashingPreview(): void {
+    this.stopFlashingPreview();
+    let count = 0;
+    this.isFlashingPreview = true;
+    this.flashTimer = setInterval(() => {
+      this.isFlashingPreview = !this.isFlashingPreview;
+      count++;
+      if (this.active && this.hasGeneratedCode) {
+        const keyObj = keyRegistry.all().find((k) => k.column === 4 && k.row === 2);
+        if (keyObj) {
+          void keyObj.action.setImage(
+            SvgKeyRenderer.renderLivePreviewKey(true, this.isFlashingPreview)
+          );
+        }
+      }
+      // Pulse for ~8 seconds then settle on solid active
+      if (count >= 18) {
+        this.stopFlashingPreview();
+      }
+    }, 450);
+  }
+
+  private stopFlashingPreview(): void {
+    if (this.flashTimer) {
+      clearInterval(this.flashTimer);
+      this.flashTimer = null;
+    }
+    this.isFlashingPreview = false;
+    if (this.active && this.hasGeneratedCode) {
+      const keyObj = keyRegistry.all().find((k) => k.column === 4 && k.row === 2);
+      if (keyObj) {
+        void keyObj.action.setImage(
+          SvgKeyRenderer.renderLivePreviewKey(true, false)
+        );
+      }
     }
   }
 
@@ -173,8 +216,12 @@ class ImgToCodeSubmenuManager {
         // (4, 1): OPEN CODE key
         image = SvgKeyRenderer.renderOpenCodeKey(this.hasGeneratedCode);
       } else if (row === 2 && col === 4) {
-        // (4, 2): LIVE PREVIEW key
-        image = SvgKeyRenderer.renderLivePreviewKey(this.hasGeneratedCode);
+        // (4, 2): PREVIEW key - ONLY SHOWN AFTER CODE IS SYNTHESIZED!
+        if (this.hasGeneratedCode) {
+          image = SvgKeyRenderer.renderLivePreviewKey(true, this.isFlashingPreview);
+        } else {
+          image = SvgKeyRenderer.renderEmptyTile();
+        }
       } else {
         const keyCoord = `${col},${row}`;
         const option = IMG_TO_CODE_OPTIONS[keyCoord];
@@ -219,6 +266,8 @@ class ImgToCodeSubmenuManager {
 
     // 3. (4, 2): LIVE PREVIEW in native macOS app or browser window
     if (col === 4 && row === 2) {
+      if (!this.hasGeneratedCode) return true;
+      this.stopFlashingPreview();
       console.log("▶️ [ImgToCode] Live Preview tapped -> Launching live app/browser window");
       if (this.bridge) {
         await this.bridge.runPreview();
@@ -226,13 +275,16 @@ class ImgToCodeSubmenuManager {
       return true;
     }
 
-    // 3. Language Target selected:
+    // 4. Language Target selected:
     const keyCoord = `${col},${row}`;
     const option = IMG_TO_CODE_OPTIONS[keyCoord];
     if (option) {
       if (this.isProcessing) return true;
       this.isProcessing = true;
       this.lastTappedCoord = { col, row };
+      this.hasGeneratedCode = false; // Reset so old preview button disappears during fresh capture
+      this.stopFlashingPreview();
+      this.render();
 
       console.log(`🎨 [ImgToCode] Selected framework: ${option.target} (${option.line1})`);
 

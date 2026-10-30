@@ -656,6 +656,14 @@ end tell
     try {
       if (ext === ".swift") {
         const binPath = "/tmp/musedeck/PreviewApp";
+        console.log(`🛑 [LivePreview] Terminating any existing PreviewApp instances...`);
+        try {
+          await execAsync("killall PreviewApp || true");
+          if (fs.existsSync(binPath)) {
+            fs.unlinkSync(binPath);
+          }
+        } catch {}
+
         console.log(`🔨 [LivePreview] Compiling SwiftUI component: ${filePath}...`);
         await execAsync(`swiftc -parse-as-library -o "${binPath}" "${filePath}"`);
         console.log(`🚀 [LivePreview] Launching native macOS SwiftUI window...`);
