@@ -1075,6 +1075,15 @@ android {
         versionName = "1.0"
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
     buildFeatures {
         compose = true
     }
@@ -1082,10 +1091,12 @@ android {
 
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.10.00"))
+    implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
 `;
@@ -1097,12 +1108,41 @@ dependencies {
     <application
         android:label="ComposePreview"
         android:theme="@android:style/Theme.Material.NoActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
 `;
     const manifestDir = path.join(appDir, "src/main");
     await fs.promises.mkdir(manifestDir, { recursive: true });
     await fs.promises.writeFile(path.join(manifestDir, "AndroidManifest.xml"), manifestXml, "utf8");
+
+    // 4.1 MainActivity.kt for direct running
+    const mainActivityKt = `package com.meta.musedeck
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                PreviewOverview()
+            }
+        }
+    }
+}
+`;
+    await fs.promises.writeFile(path.join(srcDir, "MainActivity.kt"), mainActivityKt, "utf8");
 
     // 5. local.properties
     const userHome = process.env.HOME || "/Users/akif";
@@ -1128,6 +1168,7 @@ zipStorePath=wrapper/dists
 
     // 7. Inject file into app src with package com.meta.musedeck
     let ktCode = await fs.promises.readFile(filePath, "utf8");
+    ktCode = ktCode.replace(/,\s*cap\s*=\s*StrokeCap\.\w+/g, "");
     ktCode = ktCode.replace(/^package\s+[\w.]+/m, "package com.meta.musedeck");
     if (!ktCode.includes("package com.meta.musedeck")) {
       ktCode = "package com.meta.musedeck\n\n" + ktCode;
