@@ -994,11 +994,25 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       }
 
       if (ext === ".dart") {
+        let hasFlutter = false;
+        try {
+          await execAsync("which flutter");
+          hasFlutter = true;
+        } catch {}
+
         await this.openFileInEditor(filePath);
-        await TerminalAutomation.sendSystemNotification(
-          "Flutter widget opened in VS Code. Use Flutter device runner for live preview.",
-          "Flutter Preview"
-        );
+
+        if (hasFlutter) {
+          await TerminalAutomation.sendSystemNotification(
+            "Flutter widget opened in VS Code. Use Flutter device runner for live preview.",
+            "Flutter Preview"
+          );
+        } else {
+          await TerminalAutomation.sendSystemNotification(
+            "Flutter SDK is not installed. Please install Flutter SDK ('brew install --cask flutter') for live preview. File opened in VS Code.",
+            "Flutter Preview"
+          );
+        }
         return true;
       }
 
