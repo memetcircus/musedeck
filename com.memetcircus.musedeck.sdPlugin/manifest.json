@@ -90,10 +90,10 @@
       "States": [{ "Image": "imgs/actions/spark-code/key" }]
     },
     {
-      "Name": "Run Muse",
+      "Name": "Video to Code",
       "UUID": "com.memetcircus.musedeck.run-muse",
       "Icon": "imgs/actions/run-muse/icon",
-      "Tooltip": "Start or execute the queued Meta Muse Code task.",
+      "Tooltip": "Record screen interaction or video and synthesize interactive animated UI code with Meta Muse Spark.",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/run-muse/key" }]
     },

@@ -131,7 +131,6 @@ class ImgToCodeSubmenuManager {
   }
 
   close(): void {
-    if (!this.active) return;
     console.log("🔙 [ImgToCode] Closing Multi-Language UI-to-Code Submenu -> Restoring Page 1");
     this.stopBannerAnimation();
     this.bannerMode = "idle";
@@ -147,6 +146,7 @@ class ImgToCodeSubmenuManager {
     this.hasGeneratedCode = false;
     this.isProcessing = false;
     this.active = false;
+    keyRegistry.restoreAll();
   }
 
   notifySynthesizing(): void {

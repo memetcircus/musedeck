@@ -212,6 +212,8 @@ async function main() {
       case "preview_launching":
       case "preview_launched":
       case "preview_failed":
+      case "switch_page":
+        console.log(`[Bridge] Relaying ${msg.type} to connected surfaces`);
         wsServer.broadcast(msg as any);
         break;
 

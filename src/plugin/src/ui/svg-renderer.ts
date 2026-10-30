@@ -990,10 +990,41 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 7: Run Muse Task Key
+   * Key 7: Vid to Code Key (Replaces legacy Run Muse)
    */
   static renderRunMuseKey(): string {
-    return CyberIcons["p1_run-muse"];
+    return this.renderVidToCodeKey();
+  }
+
+  static renderVidToCodeKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <!-- Cyber container with violet neon border -->
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#a855f7" stroke-width="2.6"/>
+        <rect width="144" height="144" rx="24" fill="#a855f7" fill-opacity="0.05"/>
+
+        <!-- Video Camera & Recording Icon -->
+        <g transform="translate(35, 17)">
+          <!-- Camera Body -->
+          <rect x="0" y="4" width="48" height="34" rx="7" fill="#7e22ce" fill-opacity="0.3" stroke="#c084fc" stroke-width="2"/>
+          <!-- Lens Cone -->
+          <polygon points="50,13 74,4 74,38 50,29" fill="#9333ea" fill-opacity="0.4" stroke="#c084fc" stroke-width="2"/>
+          <!-- Red Recording Dot -->
+          <circle cx="14" cy="21" r="5" fill="#ef4444"/>
+          <!-- Play Triangle in Lens -->
+          <polygon points="26,15 38,21 26,27" fill="#f5d0fe"/>
+        </g>
+
+        <!-- Main Title -->
+        <text x="72" y="80" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">VID TO CODE</text>
+
+        <!-- Divider Line -->
+        <line x1="18" y1="94" x2="126" y2="94" stroke="#a855f7" stroke-width="1.5" stroke-opacity="0.6"/>
+
+        <!-- Subtitle -->
+        <text x="72" y="122" fill="#d8b4fe" font-size="14.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">FLOW / REC ↗</text>
+      </svg>
+    `);
   }
 
   /**
@@ -1058,12 +1089,6 @@ export class SvgKeyRenderer {
     return this.renderNextPageKey();
   }
 
-  /**
-   * Page 2 Key 1: VID-TO-CODE (Meta Files API)
-   */
-  static renderVidToCodeKey(): string {
-    return CyberIcons["p2_vid-to-code"];
-  }
 
   /**
    * Page 2 Key 2: UPLOAD FILE (file_id)

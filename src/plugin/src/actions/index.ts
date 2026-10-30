@@ -255,9 +255,13 @@ export class AgentStatusAction extends SingletonAction {
       console.log("[StatusKey] Awaiting approval -> Opening Review Submenu");
       reviewSubmenuManager.open();
     } else {
-      // Normal states (READY, RUNNING, IDLE): Bring active Muse Terminal directly to the front!
-      console.log(`[StatusKey] Tapped (Current state: ${current.state}). Bringing active Muse Terminal to front...`);
-      await TerminalAutomation.bringTerminalToFront();
+      // Normal states (READY, RUNNING, IDLE): Bring active Muse Terminal to front, or launch fresh session if none exists!
+      console.log(`[StatusKey] Tapped (Current state: ${current.state}). Checking active Muse Terminal...`);
+      const focused = await TerminalAutomation.bringTerminalToFront();
+      if (!focused) {
+        console.log(`[StatusKey] No active Muse terminal found -> Launching new Muse session in Terminal.app...`);
+        await TerminalAutomation.launchMuseCodeTerminal(process.cwd());
+      }
     }
   }
 }
@@ -579,7 +583,7 @@ export class SparkCodeAction extends SingletonAction {
   }
 }
 
-// --- KEY 7: RUN MUSE KEY ---
+// --- KEY 7: VID TO CODE KEY (REPLACES LEGACY RUN MUSE) ---
 @action({ UUID: "com.memetcircus.musedeck.run-muse" })
 export class RunMuseAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
@@ -592,7 +596,7 @@ export class RunMuseAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderRunMuseKey());
+          void ev.action.setImage(SvgKeyRenderer.renderVidToCodeKey());
         },
         false,
         2,
@@ -607,8 +611,8 @@ export class RunMuseAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    await TerminalAutomation.launchMuseCodeTerminal(process.cwd());
-    await this.bridge.runTask("Optimize performance and add comprehensive test suite for agent state machine");
+    console.log("🎥 [VidToCode] Vid to Code tapped");
+    await TerminalAutomation.sendSystemNotification("Video-to-Code: Screen interaction recording & synthesis ready", "MuseDeck");
   }
 }
 
