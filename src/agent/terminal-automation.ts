@@ -702,6 +702,9 @@ end tell
           swiftCode = swiftCode.replace(/dampingFactor:/g, "dampingFraction:");
           swiftCode = swiftCode.replace(/\.padding\(\.horizontal,\s*(\d+),\s*vertical:\s*(\d+)\)/g, ".padding(.horizontal, $1).padding(.vertical, $2)");
           swiftCode = swiftCode.replace(/\.padding\(\.vertical,\s*(\d+),\s*horizontal:\s*(\d+)\)/g, ".padding(.vertical, $1).padding(.horizontal, $2)");
+          swiftCode = swiftCode.replace(/\.stroke\(([^,]+),\s*lineWidth:\s*([^,]+),\s*lineCap:\s*([^)]+)\)/g, ".stroke($1, style: StrokeStyle(lineWidth: $2, lineCap: $3))");
+          swiftCode = swiftCode.replace(/\.stroke\(([^,]+),\s*lineCap:\s*([^,]+),\s*lineWidth:\s*([^)]+)\)/g, ".stroke($1, style: StrokeStyle(lineWidth: $3, lineCap: $2))");
+          swiftCode = swiftCode.replace(/\.stroke\(([^,]+),\s*lineCap:\s*([^)]+)\)/g, ".stroke($1, style: StrokeStyle(lineCap: $2))");
           // Auto-heal iOS-only SwiftUI modifiers that break macOS swiftc compilation:
           swiftCode = swiftCode.replace(/\.navigationBarTitleDisplayMode\([^)]*\)/g, "");
           swiftCode = swiftCode.replace(/\.navigationBarHidden\([^)]*\)/g, "");

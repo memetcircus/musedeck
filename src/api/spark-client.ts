@@ -149,6 +149,9 @@ export class MuseSparkClient {
       code = code.replace(/weight:\s*\.?700\b/g, "weight: .bold");
       code = code.replace(/weight:\s*\.?800\b/g, "weight: .heavy");
       code = code.replace(/weight:\s*\.?900\b/g, "weight: .black");
+      code = code.replace(/\.stroke\(([^,]+),\s*lineWidth:\s*([^,]+),\s*lineCap:\s*([^)]+)\)/g, ".stroke($1, style: StrokeStyle(lineWidth: $2, lineCap: $3))");
+      code = code.replace(/\.stroke\(([^,]+),\s*lineCap:\s*([^,]+),\s*lineWidth:\s*([^)]+)\)/g, ".stroke($1, style: StrokeStyle(lineWidth: $3, lineCap: $2))");
+      code = code.replace(/\.stroke\(([^,]+),\s*lineCap:\s*([^)]+)\)/g, ".stroke($1, style: StrokeStyle(lineCap: $2))");
       if (!code.includes("@main")) {
         const viewMatch = code.match(/struct\s+(\w+)\s*:\s*View/);
         const mainViewName = viewMatch ? viewMatch[1] : "ExtractedComponent";
