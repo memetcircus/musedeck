@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
@@ -679,6 +680,15 @@ end tell
           swiftCode = swiftCode.replace(/dampingFactor:/g, "dampingFraction:");
           swiftCode = swiftCode.replace(/\.padding\(\.horizontal,\s*(\d+),\s*vertical:\s*(\d+)\)/g, ".padding(.horizontal, $1).padding(.vertical, $2)");
           swiftCode = swiftCode.replace(/\.padding\(\.vertical,\s*(\d+),\s*horizontal:\s*(\d+)\)/g, ".padding(.vertical, $1).padding(.horizontal, $2)");
+          // Auto-heal iOS-only SwiftUI modifiers that break macOS swiftc compilation:
+          swiftCode = swiftCode.replace(/\.navigationBarTitleDisplayMode\([^)]*\)/g, "");
+          swiftCode = swiftCode.replace(/\.navigationBarHidden\([^)]*\)/g, "");
+          swiftCode = swiftCode.replace(/\.navigationBarItems\([^)]*\)/g, "");
+          swiftCode = swiftCode.replace(/\.statusBarHidden\([^)]*\)/g, "");
+          swiftCode = swiftCode.replace(/\.statusBarStyle\([^)]*\)/g, "");
+          swiftCode = swiftCode.replace(/\.presentationDragIndicator\([^)]*\)/g, "");
+          swiftCode = swiftCode.replace(/\.keyboardType\([^)]*\)/g, "");
+          swiftCode = swiftCode.replace(/\.textInputAutocapitalization\([^)]*\)/g, "");
           await fs.promises.writeFile(filePath, swiftCode, "utf8");
 
           await execAsync(`swiftc -parse-as-library -o "${binPath}" "${filePath}"`);
@@ -699,6 +709,7 @@ end tell
 import Cocoa
 guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: "").first(where: { $0.executableURL?.lastPathComponent == "PreviewApp" })
     ?? NSWorkspace.shared.runningApplications.first(where: { $0.localizedName == "PreviewApp" }) else { exit(0) }
+app.activate(options: [.activateIgnoringOtherApps, .activateAllWindows])
 let axApp = AXUIElementCreateApplication(app.processIdentifier)
 var windowsRef: CFTypeRef?
 if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &windowsRef) == .success,
@@ -722,10 +733,22 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
 
       if (ext === ".tsx" || ext === ".jsx") {
         const code = await fs.promises.readFile(filePath, "utf8");
-        const cleanJsx = code
-          .replace(/import\s+.*?from\s+['"].*?['"];?/g, "")
+        const defaultExportMatch = code.match(/export\s+default\s+(?:function\s+)?([A-Za-z0-9_]+)/);
+        const functionMatches = [...code.matchAll(/function\s+([A-Z][A-Za-z0-9_]*)/g)].map(m => m[1]);
+        const rootComponentName = defaultExportMatch ? defaultExportMatch[1] : (functionMatches[functionMatches.length - 1] || "ExtractedComponent");
+
+        const cleanCode = code
+          .replace(/import\s+.*?from\s+[\x27"][^\x27"]*[\x27"];?/g, "")
           .replace(/export\s+default\s+/g, "")
           .replace(/export\s+/g, "");
+
+        const transpiled = ts.transpileModule(cleanCode, {
+          compilerOptions: {
+            jsx: ts.JsxEmit.React,
+            target: ts.ScriptTarget.ES2020,
+            module: ts.ModuleKind.None,
+          },
+        });
 
         const htmlWrapper = `<!DOCTYPE html>
 <html lang="en">
@@ -736,14 +759,24 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-6">
-  <div id="root"></div>
-  <script type="text/babel">
-    ${cleanJsx}
-    const Component = typeof ExtractedComponent !== "undefined" ? ExtractedComponent : (typeof App !== "undefined" ? App : () => <div>Mounted</div>);
-    ReactDOM.createRoot(document.getElementById("root")).render(<Component />);
+  <div id="root" class="w-full max-w-5xl"></div>
+  <script>
+    const { useState, useEffect, useCallback, useRef, useMemo, createContext, useContext } = React;
+    const { motion, AnimatePresence, useReducedMotion, useAnimation, useMotionValue, useTransform, useSpring } = window.Motion || {};
+
+    ${transpiled.outputText}
+
+    try {
+      const RootTarget = typeof ${rootComponentName} !== "undefined"
+        ? ${rootComponentName}
+        : (typeof ExtractedComponent !== "undefined" ? ExtractedComponent : (typeof App !== "undefined" ? App : () => React.createElement("div", { className: "text-amber-400 p-4" }, "Component rendered successfully")));
+      ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(RootTarget));
+    } catch (renderErr) {
+      document.getElementById("root").innerHTML = "<div style=\\"color:red;padding:20px;font-family:sans-serif;\\">Render Error: " + renderErr.message + "</div>";
+    }
   </script>
 </body>
 </html>`;
