@@ -10,8 +10,12 @@ export type SurfaceMessage =
   | { type: "spark"; target?: string; prompt?: string }
   | { type: "open_code" }
   | { type: "run_preview" }
+  | { type: "preview_launching" }
+  | { type: "preview_launched" }
+  | { type: "preview_failed"; error?: string }
   | { type: "spark_completed"; filename?: string; filePath?: string; framework?: string }
   | { type: "spark_synthesizing"; target?: string }
+  | { type: "spark_failed"; reason?: string; error?: string }
   | { type: "runTask"; prompt: string }
   | { type: "toggle_submenu" }
   | { type: "toggle_snippets" }

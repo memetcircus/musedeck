@@ -666,6 +666,21 @@ end tell
 
         console.log(`🔨 [LivePreview] Compiling SwiftUI component: ${filePath}...`);
         try {
+          let swiftCode = await fs.promises.readFile(filePath, "utf8");
+          swiftCode = swiftCode.replace(/weight:\s*\.?100\b/g, "weight: .ultraLight");
+          swiftCode = swiftCode.replace(/weight:\s*\.?200\b/g, "weight: .thin");
+          swiftCode = swiftCode.replace(/weight:\s*\.?300\b/g, "weight: .light");
+          swiftCode = swiftCode.replace(/weight:\s*\.?400\b/g, "weight: .regular");
+          swiftCode = swiftCode.replace(/weight:\s*\.?500\b/g, "weight: .medium");
+          swiftCode = swiftCode.replace(/weight:\s*\.?600\b/g, "weight: .semibold");
+          swiftCode = swiftCode.replace(/weight:\s*\.?700\b/g, "weight: .bold");
+          swiftCode = swiftCode.replace(/weight:\s*\.?800\b/g, "weight: .heavy");
+          swiftCode = swiftCode.replace(/weight:\s*\.?900\b/g, "weight: .black");
+          swiftCode = swiftCode.replace(/dampingFactor:/g, "dampingFraction:");
+          swiftCode = swiftCode.replace(/\.padding\(\.horizontal,\s*(\d+),\s*vertical:\s*(\d+)\)/g, ".padding(.horizontal, $1).padding(.vertical, $2)");
+          swiftCode = swiftCode.replace(/\.padding\(\.vertical,\s*(\d+),\s*horizontal:\s*(\d+)\)/g, ".padding(.vertical, $1).padding(.horizontal, $2)");
+          await fs.promises.writeFile(filePath, swiftCode, "utf8");
+
           await execAsync(`swiftc -parse-as-library -o "${binPath}" "${filePath}"`);
         } catch (compileErr: any) {
           console.warn(`⚠️ [LivePreview] swiftc compilation error: ${compileErr.message}`);

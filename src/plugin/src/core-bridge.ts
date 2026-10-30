@@ -147,6 +147,12 @@ export class StreamDeckCoreBridge {
             imgToCodeSubmenuManager.notifySynthesizing();
           } else if (msg.type === "spark_failed") {
             imgToCodeSubmenuManager.notifyCodeFailed(msg.reason);
+          } else if (msg.type === "preview_launching") {
+            imgToCodeSubmenuManager.notifyPreviewLaunching();
+          } else if (msg.type === "preview_launched") {
+            imgToCodeSubmenuManager.notifyPreviewLaunched();
+          } else if (msg.type === "preview_failed") {
+            imgToCodeSubmenuManager.notifyPreviewFailed(msg.error);
           } else if (msg.type === "switch_page") {
             const page = typeof msg.page === "number" ? msg.page : 1;
             console.log(`[Bridge] Received switch_page command to page ${page}`);

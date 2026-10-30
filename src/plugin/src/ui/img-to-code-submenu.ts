@@ -96,6 +96,9 @@ class ImgToCodeSubmenuManager {
   private hasGeneratedCode = false;
   private isProcessing = false;
   private lastTappedCoord: { col: number; row: number } | null = null;
+  private bannerMode: "idle" | "spark" | "preview" | "success" | "failed" = "idle";
+  private bannerStep = 0;
+  private bannerTimer: NodeJS.Timeout | null = null;
 
   get isActive(): boolean {
     return this.active;
@@ -105,17 +108,51 @@ class ImgToCodeSubmenuManager {
     this.bridge = bridge;
   }
 
+  private startBannerAnimation(mode: "spark" | "preview", intervalMs: number): void {
+    this.stopBannerAnimation();
+    this.bannerMode = mode;
+    this.bannerStep = 0;
+    this.updateBannerKeys();
+    this.bannerTimer = setInterval(() => {
+      this.bannerStep = (this.bannerStep + 1) % 4;
+      this.updateBannerKeys();
+    }, intervalMs);
+  }
+
+  private stopBannerAnimation(): void {
+    if (this.bannerTimer) {
+      clearInterval(this.bannerTimer);
+      this.bannerTimer = null;
+    }
+  }
+
+  private updateBannerKeys(): void {
+    if (!this.active) return;
+    for (let c = 0; c < 4; c++) {
+      const keyObj = keyRegistry.all().find((k) => k.column === c && k.row === 2);
+      if (keyObj) {
+        void keyObj.action.setImage(
+          SvgKeyRenderer.renderBottomBannerTile(c, this.bannerMode, this.bannerStep)
+        );
+      }
+    }
+  }
+
   open(): void {
     console.log("🎨 [ImgToCode] Opening Multi-Language UI-to-Code Submenu");
     this.active = true;
     this.hasGeneratedCode = false; // Always start with clean slate: NO preview or open buttons until synthesized!
     this.isProcessing = false;
+    this.stopBannerAnimation();
+    this.bannerMode = "idle";
     this.render();
   }
 
   close(): void {
     if (!this.active) return;
     console.log("🔙 [ImgToCode] Closing Multi-Language UI-to-Code Submenu -> Restoring Page 1");
+    this.stopBannerAnimation();
+    this.bannerMode = "idle";
     this.hasGeneratedCode = false;
     this.isProcessing = false;
     this.active = false;
@@ -123,32 +160,40 @@ class ImgToCodeSubmenuManager {
   }
 
   forceClose(): void {
+    this.stopBannerAnimation();
+    this.bannerMode = "idle";
     this.hasGeneratedCode = false;
     this.isProcessing = false;
     this.active = false;
   }
 
   notifySynthesizing(): void {
-    if (!this.active || !this.lastTappedCoord) return;
-    const { col, row } = this.lastTappedCoord;
-    const keyObj = keyRegistry.all().find((k) => k.column === col && k.row === row);
-    const keyCoord = `${col},${row}`;
-    const option = IMG_TO_CODE_OPTIONS[keyCoord];
-    if (keyObj && option) {
-      void keyObj.action.setImage(
-        SvgKeyRenderer.renderImgToCodeOptionKey(
-          "SPARKING...",
-          "GENERATING",
-          "WAITING API",
-          option.badge,
-          "#f59e0b",
-          "#fde047"
-        )
-      );
+    if (!this.active) return;
+    if (this.lastTappedCoord) {
+      const { col, row } = this.lastTappedCoord;
+      const keyObj = keyRegistry.all().find((k) => k.column === col && k.row === row);
+      const keyCoord = `${col},${row}`;
+      const option = IMG_TO_CODE_OPTIONS[keyCoord];
+      if (keyObj && option) {
+        void keyObj.action.setImage(
+          SvgKeyRenderer.renderImgToCodeOptionKey(
+            "SPARKING...",
+            "GENERATING",
+            "WAITING API",
+            option.badge,
+            "#f59e0b",
+            "#fde047"
+          )
+        );
+      }
     }
+    // Start sweeping animation on the bottom 4 keys (0..3, 2): WAIT FOR MUSE SPARK
+    this.startBannerAnimation("spark", 350);
   }
 
   notifyCodeGenerated(): void {
+    this.stopBannerAnimation();
+    this.bannerMode = "idle";
     this.hasGeneratedCode = true;
     this.isProcessing = false;
     if (this.active) {
@@ -157,6 +202,8 @@ class ImgToCodeSubmenuManager {
   }
 
   notifyCodeFailed(reason = "empty"): void {
+    this.stopBannerAnimation();
+    this.bannerMode = "idle";
     this.isProcessing = false;
     this.hasGeneratedCode = false;
     if (!this.active) return;
@@ -182,6 +229,39 @@ class ImgToCodeSubmenuManager {
       }
     }
     this.render();
+  }
+
+  notifyPreviewLaunching(): void {
+    if (!this.active) return;
+    console.log("🔨 [ImgToCode] Preview compilation in progress -> Animating bottom banner");
+    this.startBannerAnimation("preview", 200);
+  }
+
+  notifyPreviewLaunched(): void {
+    if (!this.active) return;
+    console.log("✅ [ImgToCode] PreviewApp launched on macOS! Displaying success banner and returning to Page 1");
+    this.stopBannerAnimation();
+    this.bannerMode = "success";
+    this.updateBannerKeys();
+    setTimeout(() => {
+      if (this.active) {
+        this.close();
+      }
+    }, 1500);
+  }
+
+  notifyPreviewFailed(error?: string): void {
+    if (!this.active) return;
+    console.warn("⚠️ [ImgToCode] Preview compilation failed:", error);
+    this.stopBannerAnimation();
+    this.bannerMode = "failed";
+    this.updateBannerKeys();
+    setTimeout(() => {
+      if (this.active) {
+        this.bannerMode = "idle";
+        this.updateBannerKeys();
+      }
+    }, 4000);
   }
 
   render(): void {
@@ -210,6 +290,9 @@ class ImgToCodeSubmenuManager {
         } else {
           image = SvgKeyRenderer.renderEmptyTile();
         }
+      } else if (row === 2 && col >= 0 && col < 4) {
+        // (0..3, 2): 4-Key Animated Marquee / Status Banner
+        image = SvgKeyRenderer.renderBottomBannerTile(col, this.bannerMode, this.bannerStep);
       } else {
         const keyCoord = `${col},${row}`;
         const option = IMG_TO_CODE_OPTIONS[keyCoord];
@@ -254,18 +337,23 @@ class ImgToCodeSubmenuManager {
       return true;
     }
 
-    // 3. (4, 2): LIVE PREVIEW in native macOS app or browser window (only active after code generated)
+    // 3. (4, 2): LIVE PREVIEW in native macOS app (only active after code generated)
     if (col === 4 && row === 2) {
       if (!this.hasGeneratedCode) return true;
-      console.log("▶️ [ImgToCode] Live Preview tapped -> Launching live app and returning to Page 1");
+      console.log("▶️ [ImgToCode] Live Preview tapped -> Compiling & launching live app");
+      this.startBannerAnimation("preview", 200);
       if (this.bridge) {
         await this.bridge.runPreview();
       }
-      this.close();
       return true;
     }
 
-    // 4. Language Target selected:
+    // 4. Banner keys (0..3, 2) ignore taps
+    if (row === 2 && col >= 0 && col < 4) {
+      return true;
+    }
+
+    // 5. Language Target selected:
     const keyCoord = `${col},${row}`;
     const option = IMG_TO_CODE_OPTIONS[keyCoord];
     if (option) {
@@ -273,6 +361,8 @@ class ImgToCodeSubmenuManager {
       this.isProcessing = true;
       this.lastTappedCoord = { col, row };
       this.hasGeneratedCode = false; // Reset so preview/open buttons are completely invisible
+      this.stopBannerAnimation();
+      this.bannerMode = "idle";
       this.render();
 
       console.log(`🎨 [ImgToCode] Selected framework: ${option.target} (${option.line1})`);
@@ -299,6 +389,8 @@ class ImgToCodeSubmenuManager {
       } catch (err: any) {
         console.error("Spark synthesis error:", err.message);
         this.isProcessing = false;
+        this.stopBannerAnimation();
+        this.bannerMode = "idle";
         this.render();
       }
       return true;

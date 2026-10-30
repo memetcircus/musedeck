@@ -173,16 +173,24 @@ async function main() {
       case "run_preview":
         console.log("▶️ [Bridge] Received RUN_PREVIEW command from surface");
         try {
+          wsServer.broadcast({ type: "preview_launching" });
           const tempDir = "/tmp/musedeck";
+          let success = false;
           if (fs.existsSync(tempDir)) {
             const files = fs.readdirSync(tempDir).filter((f) => f.startsWith("Extracted") || f.startsWith("extracted"));
             if (files.length > 0) {
               const target = path.join(tempDir, files[0]);
-              await TerminalAutomation.runLivePreview(target);
+              success = await TerminalAutomation.runLivePreview(target);
             }
+          }
+          if (success) {
+            wsServer.broadcast({ type: "preview_launched" });
+          } else {
+            wsServer.broadcast({ type: "preview_failed", error: "Preview build failed" });
           }
         } catch (err: any) {
           console.warn("Could not launch live preview:", err.message);
+          wsServer.broadcast({ type: "preview_failed", error: err.message });
         }
         break;
 
@@ -199,6 +207,11 @@ async function main() {
       case "open_img_to_code":
       case "close_img_to_code":
       case "spark_completed":
+      case "spark_synthesizing":
+      case "spark_failed":
+      case "preview_launching":
+      case "preview_launched":
+      case "preview_failed":
         wsServer.broadcast(msg as any);
         break;
 

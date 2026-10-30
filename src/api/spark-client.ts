@@ -132,6 +132,16 @@ export class MuseSparkClient {
       code = code.replace(/dampingFactor:/g, "dampingFraction:");
       code = code.replace(/\.padding\(\.horizontal,\s*(\d+),\s*vertical:\s*(\d+)\)/g, ".padding(.horizontal, $1).padding(.vertical, $2)");
       code = code.replace(/\.padding\(\.vertical,\s*(\d+),\s*horizontal:\s*(\d+)\)/g, ".padding(.vertical, $1).padding(.horizontal, $2)");
+      // Convert CSS-style numeric weights (e.g. weight: .800, weight: 700) to valid SwiftUI Font.Weight enum
+      code = code.replace(/weight:\s*\.?100\b/g, "weight: .ultraLight");
+      code = code.replace(/weight:\s*\.?200\b/g, "weight: .thin");
+      code = code.replace(/weight:\s*\.?300\b/g, "weight: .light");
+      code = code.replace(/weight:\s*\.?400\b/g, "weight: .regular");
+      code = code.replace(/weight:\s*\.?500\b/g, "weight: .medium");
+      code = code.replace(/weight:\s*\.?600\b/g, "weight: .semibold");
+      code = code.replace(/weight:\s*\.?700\b/g, "weight: .bold");
+      code = code.replace(/weight:\s*\.?800\b/g, "weight: .heavy");
+      code = code.replace(/weight:\s*\.?900\b/g, "weight: .black");
       if (!code.includes("@main")) {
         const viewMatch = code.match(/struct\s+(\w+)\s*:\s*View/);
         const mainViewName = viewMatch ? viewMatch[1] : "ExtractedComponent";
