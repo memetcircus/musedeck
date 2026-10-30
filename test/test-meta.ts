@@ -14,7 +14,7 @@ async function runMetaTests() {
   console.log("⚡ Testing Muse Spark image-to-code synthesis...");
   const dummyImage = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==", "base64");
   
-  const result = await sparkClient.generateCodeFromImage(dummyImage, "Create hero section");
+  const result = await sparkClient.generateCodeFromImage(dummyImage, "REACT");
 
   console.assert(Boolean(result.code), "Synthesized code should not be empty");
   console.assert(result.code.includes("React"), "Generated code should be a valid React component");

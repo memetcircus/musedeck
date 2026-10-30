@@ -7,7 +7,8 @@ export type SurfaceMessage =
   | { type: "halt" }
   | { type: "reset" }
   | { type: "snip" }
-  | { type: "spark"; prompt?: string }
+  | { type: "spark"; target?: string; prompt?: string }
+  | { type: "open_code" }
   | { type: "runTask"; prompt: string }
   | { type: "toggle_submenu" }
   | { type: "subscribe" };

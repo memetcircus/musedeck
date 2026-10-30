@@ -2,6 +2,7 @@ import { telemetrySubmenuManager } from "../ui/telemetry-submenu.js";
 import { snippetsSubmenuManager } from "../ui/snippets-submenu.js";
 import { reviewSubmenuManager } from "../ui/review-submenu.js";
 import { sessionsSubmenuManager } from "../ui/sessions-submenu.js";
+import { imgToCodeSubmenuManager } from "../ui/img-to-code-submenu.js";
 import {
   action,
   SingletonAction,
@@ -28,6 +29,11 @@ function checkSubmenuKeyDown(ev: any): boolean {
 
   if (snippetsSubmenuManager.isActive) {
     void snippetsSubmenuManager.handleKeyDown(col, row);
+    return true;
+  }
+
+  if (imgToCodeSubmenuManager.isActive) {
+    void imgToCodeSubmenuManager.handleKeyDown(col, row);
     return true;
   }
 
@@ -72,6 +78,9 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
     }
 
     if (snippetsSubmenuManager.isActive) {
+      return;
+    }
+    if (imgToCodeSubmenuManager.isActive) {
       return;
     }
     if (sessionsSubmenuManager.isActive) {
@@ -120,6 +129,8 @@ function registerDeckKey(
     reviewSubmenuManager.render();
   } else if (snippetsSubmenuManager.isActive) {
     snippetsSubmenuManager.render();
+  } else if (imgToCodeSubmenuManager.isActive) {
+    imgToCodeSubmenuManager.render();
   } else if (telemetrySubmenuManager.isActive) {
     telemetrySubmenuManager.render();
   } else if (!museBeamAnimator.isRunning || excludeFromAnimation) {
@@ -131,6 +142,9 @@ function unregisterDeckKey(ev: WillDisappearEvent): void {
   keyRegistry.remove(ev.action.id);
   if (snippetsSubmenuManager.isActive) {
     snippetsSubmenuManager.forceClose();
+  }
+  if (imgToCodeSubmenuManager.isActive) {
+    imgToCodeSubmenuManager.forceClose();
   }
   if (reviewSubmenuManager.isActive) {
     reviewSubmenuManager.forceClose();
@@ -511,17 +525,37 @@ export class SamSnipAction extends SingletonAction {
 // --- KEY 6: MUSE SPARK IMAGE-TO-CODE KEY ---
 @action({ UUID: "com.memetcircus.musedeck.spark-code" })
 export class SparkCodeAction extends SingletonAction {
+  private activeKeys = new Set<KeyAction>();
+
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
+    imgToCodeSubmenuManager.setBridge(this.bridge);
+    this.bridge.onTelemetry(() => {
+      if (
+        snippetsSubmenuManager.isActive ||
+        reviewSubmenuManager.isActive ||
+        sessionsSubmenuManager.isActive ||
+        telemetrySubmenuManager.isActive ||
+        imgToCodeSubmenuManager.isActive
+      )
+        return;
+      const img = SvgKeyRenderer.renderImgToCodeKey("idle");
+      for (const key of this.activeKeys) {
+        if (!museBeamAnimator.isRunning) {
+          void key.setImage(img);
+        }
+      }
+    });
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
       attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderSparkKey());
+          void ev.action.setImage(SvgKeyRenderer.renderImgToCodeKey("idle"));
         },
         false,
         1,
@@ -532,21 +566,17 @@ export class SparkCodeAction extends SingletonAction {
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(ev)) return;
-    try {
-      if (ev.action.isKey()) {
-        await ev.action.setImage(SvgKeyRenderer.renderGenericActionKey("SPARK...", "", "✨", "#c084fc"));
-      }
-      await this.bridge.spark();
-    } catch (err: any) {
-      console.error("Spark synthesis error:", err);
-    } finally {
-      if (ev.action.isKey()) {
-        await ev.action.setImage(SvgKeyRenderer.renderSparkKey());
-      }
+    if (imgToCodeSubmenuManager.isActive) {
+      imgToCodeSubmenuManager.close();
+    } else {
+      imgToCodeSubmenuManager.open();
     }
   }
 }
@@ -643,7 +673,7 @@ export class ResetAction extends SingletonAction {
       const usage = telemetry.apiUsage;
       const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
       for (const key of this.activeKeys) {
-        if (!museBeamAnimator.isRunning && !telemetrySubmenuManager.isActive && !sessionsSubmenuManager.isActive && !snippetsSubmenuManager.isActive && !reviewSubmenuManager.isActive) {
+        if (!museBeamAnimator.isRunning && !telemetrySubmenuManager.isActive && !sessionsSubmenuManager.isActive && !snippetsSubmenuManager.isActive && !reviewSubmenuManager.isActive && !imgToCodeSubmenuManager.isActive) {
           void key.setImage(img);
           void key.setTitle("");
         }

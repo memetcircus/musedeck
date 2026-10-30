@@ -5,6 +5,7 @@ import { telemetrySubmenuManager } from "./ui/telemetry-submenu.js";
 import { snippetsSubmenuManager } from "./ui/snippets-submenu.js";
 import { reviewSubmenuManager } from "./ui/review-submenu.js";
 import { sessionsSubmenuManager } from "./ui/sessions-submenu.js";
+import { imgToCodeSubmenuManager } from "./ui/img-to-code-submenu.js";
 
 export class StreamDeckCoreBridge {
   private ws: WebSocket | null = null;
@@ -130,6 +131,18 @@ export class StreamDeckCoreBridge {
             void sessionsSubmenuManager.open();
           } else if (msg.type === "close_sessions") {
             sessionsSubmenuManager.close();
+          } else if (msg.type === "toggle_img_to_code") {
+            if (imgToCodeSubmenuManager.isActive) {
+              imgToCodeSubmenuManager.close();
+            } else {
+              imgToCodeSubmenuManager.open();
+            }
+          } else if (msg.type === "open_img_to_code") {
+            imgToCodeSubmenuManager.open();
+          } else if (msg.type === "close_img_to_code") {
+            imgToCodeSubmenuManager.close();
+          } else if (msg.type === "spark_completed") {
+            imgToCodeSubmenuManager.notifyCodeGenerated();
           } else if (msg.type === "switch_page") {
             const page = typeof msg.page === "number" ? msg.page : 1;
             console.log(`[Bridge] Received switch_page command to page ${page}`);
@@ -218,8 +231,12 @@ export class StreamDeckCoreBridge {
     }
   }
 
-  async spark(): Promise<void> {
-    await this.dispatch({ type: "spark" }, "spark");
+  async spark(target = "AUTO"): Promise<void> {
+    await this.dispatch({ type: "spark", target }, "spark", { target });
+  }
+
+  async openCode(): Promise<void> {
+    await this.dispatch({ type: "open_code" }, "open-code");
   }
 
   async runTask(prompt: string): Promise<void> {

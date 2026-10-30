@@ -628,6 +628,26 @@ end tell
     }
   }
 
+  /**
+   * Opens a file in the developer's active editor (VS Code or system default)
+   */
+  static async openFileInEditor(filePath: string): Promise<boolean> {
+    try {
+      // Try opening in VS Code first
+      await execAsync(`code -r "${filePath}"`);
+      return true;
+    } catch {
+      try {
+        // Fallback to macOS default opener
+        await execAsync(`open "${filePath}"`);
+        return true;
+      } catch (err: any) {
+        console.warn("Failed to open file in editor:", err.message);
+        return false;
+      }
+    }
+  }
+
   private static escapeForShell(str: string): string {
     return `"${str.replace(/(["\s'$`\\])/g, "\\$1")}"`;
   }

@@ -770,10 +770,95 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 6: Muse Spark Image-to-Code Key
+   * Key 6: IMG TO CODE (formerly SPARK)
+   * Plain, high-legibility Cyber frame without reticle brackets
    */
-  static renderSparkKey(): string {
-    return CyberIcons["p1_spark-code"];
+  static renderSparkKey(status: "idle" | "snipping" | "generating" | "ready" = "idle"): string {
+    return this.renderImgToCodeKey(status);
+  }
+
+  static renderImgToCodeKey(status: "idle" | "snipping" | "generating" | "ready" = "idle"): string {
+    const borderColor = status === "generating" ? "#f59e0b" : status === "ready" ? "#22c55e" : "#0284c7";
+    const subText = status === "generating" ? "SPARKING..." : status === "snipping" ? "SNIP AREA..." : status === "ready" ? "READY ↗" : "MULTI-LANG";
+    const subColor = status === "generating" ? "#fbbf24" : status === "ready" ? "#4ade80" : "#38bdf8";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
+
+        <!-- Top Header / Main Title -->
+        <text x="72" y="44" fill="#ffffff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">IMG</text>
+        <text x="72" y="73" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">TO CODE</text>
+
+        <!-- Divider Line -->
+        <line x1="16" y1="87" x2="128" y2="87" stroke="${borderColor}" stroke-width="1.8" stroke-opacity="0.5"/>
+
+        <!-- Subtitle -->
+        <text x="72" y="119" fill="${subColor}" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subText}</text>
+      </svg>
+    `);
+  }
+
+  static renderImgToCodeOptionKey(
+    line1: string,
+    line2: string,
+    subtitle: string,
+    badge: string,
+    borderColor = "#0284c7",
+    textColor = "#ffffff"
+  ): string {
+    const badgeWidth = Math.max(54, badge.length * 8 + 14);
+    const badgeX = Math.round((144 - badgeWidth) / 2);
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
+
+        <!-- Centered Pill Badge -->
+        <rect x="${badgeX}" y="14" width="${badgeWidth}" height="20" rx="6" fill="#0f172a" stroke="${borderColor}" stroke-width="1.2"/>
+        <text x="72" y="28" fill="${borderColor}" font-size="10.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${badge}</text>
+
+        <!-- Title Lines -->
+        <text x="72" y="${line2 ? '59' : '68'}" fill="#ffffff" font-size="${line2 ? '19' : '22'}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
+        ${line2 ? `<text x="72" y="79" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>` : ''}
+
+        <!-- Divider Line -->
+        <line x1="16" y1="${line2 ? '92' : '88'}" x2="128" y2="${line2 ? '92' : '88'}" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.5"/>
+
+        <!-- Subtitle -->
+        <text x="72" y="119" fill="${textColor}" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subtitle}</text>
+      </svg>
+    `);
+  }
+
+  static renderOpenCodeKey(isReady = false): string {
+    const borderColor = isReady ? "#22c55e" : "#a855f7";
+    const subColor = isReady ? "#4ade80" : "#c084fc";
+    const subText = isReady ? "INSPECT ↗" : "NO CODE";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
+
+        <!-- Eye Icon -->
+        <g transform="translate(48, 16)">
+          <path d="M 0 18 Q 24 0 48 18 Q 24 36 0 18 Z" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+          <circle cx="24" cy="18" r="7" fill="${borderColor}"/>
+        </g>
+
+        <!-- Main Title -->
+        <text x="72" y="76" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">OPEN CODE</text>
+
+        <!-- Divider Line -->
+        <line x1="16" y1="88" x2="128" y2="88" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.5"/>
+
+        <!-- Subtitle -->
+        <text x="72" y="120" fill="${subColor}" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subText}</text>
+      </svg>
+    `);
   }
 
   /**

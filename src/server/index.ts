@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import fs from "node:fs";
+import path from "node:path";
 import { AgentStateMachine } from "../agent/state-machine.js";
 import { AgentState } from "../agent/types.js";
 import { MuseRunner } from "../agent/muse-runner.js";
@@ -104,22 +106,51 @@ async function main() {
         break;
 
       case "spark":
-        console.log("✨ [Bridge] Received SPARK command from surface");
+        console.log(`✨ [Bridge] Received SPARK (IMG TO CODE) command with target=${msg.target || "AUTO"}`);
         try {
-          let thumb = stateMachine.getTelemetry().lastThumbnail;
-          if (!thumb) {
-            console.log("📸 [Spark] No existing snip. Prompting interactive SAM 3.1 snip...");
-            const res = await samClient.snipScreenRegion();
-            thumb = res.thumbnailBase64;
-            stateMachine.setLastThumbnail(thumb);
-            await TerminalAutomation.pasteSnippetIntoTerminal(res.segmentedImagePath);
-          }
-          if (thumb) {
-            const res = await sparkClient.generateCodeFromImage(thumb, msg.prompt);
-            stateMachine.setLastSparkCode(res.code);
-          }
+          // Always prompt interactive screen capture for fresh target
+          const snipRes = await samClient.snipScreenRegion();
+          const thumb = snipRes.thumbnailBase64;
+          stateMachine.setLastThumbnail(thumb);
+
+          // Synthesize code using Meta Muse Spark
+          const targetFramework = (msg.target as any) || "AUTO";
+          const res = await sparkClient.generateCodeFromImage(thumb, targetFramework);
+          stateMachine.setLastSparkCode(res.code);
+
+          // 1. Open generated component in developer's active editor (VS Code / default)
+          await TerminalAutomation.openFileInEditor(res.filePath);
+
+          // 2. Feed prompt into active Muse terminal
+          const prompt = `Synthesized ${res.frameworkName} component (${res.filename}): ${res.filePath}. Integrate this into our workspace.`;
+          await TerminalAutomation.typeSnippetIntoTerminal(prompt, false);
+
+          // 3. Notify physical Stream Deck
+          wsServer.broadcast({
+            type: "spark_completed",
+            filename: res.filename,
+            filePath: res.filePath,
+            framework: res.frameworkName,
+          });
         } catch (err: any) {
           console.error("Spark failed:", err.message);
+          wsServer.broadcast({ type: "spark_failed", error: err.message });
+        }
+        break;
+
+      case "open_code":
+        console.log("👁️ [Bridge] Received OPEN_CODE command from surface");
+        try {
+          const tempDir = "/tmp/musedeck";
+          if (fs.existsSync(tempDir)) {
+            const files = fs.readdirSync(tempDir).filter((f) => f.startsWith("Extracted") || f.startsWith("extracted"));
+            if (files.length > 0) {
+              const target = path.join(tempDir, files[0]);
+              await TerminalAutomation.openFileInEditor(target);
+            }
+          }
+        } catch (err: any) {
+          console.warn("Could not open code:", err.message);
         }
         break;
 
