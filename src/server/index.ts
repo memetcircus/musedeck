@@ -113,8 +113,13 @@ async function main() {
           const thumb = snipRes.thumbnailBase64;
           stateMachine.setLastThumbnail(thumb);
 
-          // Synthesize code using Meta Muse Spark
           const targetFramework = (msg.target as any) || "AUTO";
+
+          // Immediate feedback to user: native notification + Stream Deck status
+          await TerminalAutomation.sendSystemNotification("Synthesizing component with Meta Muse Spark...", "MuseDeck");
+          wsServer.broadcast({ type: "spark_synthesizing", target: targetFramework } as any);
+
+          // Synthesize code using Meta Muse Spark (takes ~15s)
           const res = await sparkClient.generateCodeFromImage(thumb, targetFramework);
           stateMachine.setLastSparkCode(res.code);
 

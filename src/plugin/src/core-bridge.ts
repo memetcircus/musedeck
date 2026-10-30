@@ -143,6 +143,8 @@ export class StreamDeckCoreBridge {
             imgToCodeSubmenuManager.close();
           } else if (msg.type === "spark_completed") {
             imgToCodeSubmenuManager.notifyCodeGenerated();
+          } else if (msg.type === "spark_synthesizing") {
+            imgToCodeSubmenuManager.notifySynthesizing();
           } else if (msg.type === "spark_failed") {
             imgToCodeSubmenuManager.notifyCodeFailed(msg.reason);
           } else if (msg.type === "switch_page") {

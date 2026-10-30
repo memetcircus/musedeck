@@ -875,44 +875,30 @@ export class SvgKeyRenderer {
     `);
   }
 
-  static renderLivePreviewKey(isReady = false, breathStep = 0): string {
+  static renderLivePreviewKey(isReady = false): string {
     if (!isReady) {
       return this.renderEmptyTile();
     }
 
-    // 4-stage organic breathing animation (inhale -> peak -> exhale -> base)
-    const breathProfiles = [
-      // Step 0: Base calm glow
-      { border: "#0284c7", width: "2.2", glowR: "48", glowOp: "0.20", sub: "#38bdf8", play: "#38bdf8", subText: "RUN LIVE ↗" },
-      // Step 1: Inhaling (rising energy)
-      { border: "#0ea5e9", width: "2.8", glowR: "51", glowOp: "0.35", sub: "#7dd3fc", play: "#7dd3fc", subText: "RUN LIVE ↗" },
-      // Step 2: Peak Inhale (maximum radiant neon pulse)
-      { border: "#38bdf8", width: "3.5", glowR: "55", glowOp: "0.60", sub: "#ffffff", play: "#ffffff", subText: "CLICK ME ↗" },
-      // Step 3: Exhaling (descending energy)
-      { border: "#0ea5e9", width: "2.8", glowR: "51", glowOp: "0.35", sub: "#7dd3fc", play: "#7dd3fc", subText: "RUN LIVE ↗" },
-    ];
-
-    const p = breathProfiles[Math.abs(breathStep) % breathProfiles.length];
-
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${p.border}" stroke-width="${p.width}"/>
-        <circle cx="72" cy="72" r="${p.glowR}" fill="${p.border}" fill-opacity="${p.glowOp}"/>
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#06b6d4" stroke-width="2.6"/>
+        <circle cx="72" cy="72" r="50" fill="#06b6d4" fill-opacity="0.04"/>
 
-        <!-- Play / Monitor Window Icon with Breathing Glow -->
+        <!-- Sleek Monitor Window & Play Icon -->
         <g transform="translate(48, 16)">
-          <rect x="0" y="0" width="48" height="38" rx="8" fill="#0369a1" fill-opacity="${p.glowOp}" stroke="${p.border}" stroke-width="${p.width}"/>
-          <polygon points="20,11 34,19 20,27" fill="${p.play}"/>
+          <rect x="0" y="0" width="48" height="36" rx="8" fill="#0891b2" fill-opacity="0.25" stroke="#22d3ee" stroke-width="2"/>
+          <polygon points="20,10 34,18 20,26" fill="#38bdf8"/>
         </g>
 
         <!-- Main Title -->
-        <text x="72" y="76" fill="#ffffff" font-size="16.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">PREVIEW</text>
+        <text x="72" y="77" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">PREVIEW</text>
 
         <!-- Divider Line -->
-        <line x1="16" y1="88" x2="128" y2="88" stroke="${p.border}" stroke-width="1.5" stroke-opacity="0.6"/>
+        <line x1="16" y1="90" x2="128" y2="90" stroke="#06b6d4" stroke-width="1.5" stroke-opacity="0.5"/>
 
-        <!-- Subtitle with Breathing Color -->
-        <text x="72" y="120" fill="${p.sub}" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${p.subText}</text>
+        <!-- Subtitle -->
+        <text x="72" y="121" fill="#38bdf8" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">RUN LIVE ↗</text>
       </svg>
     `);
   }

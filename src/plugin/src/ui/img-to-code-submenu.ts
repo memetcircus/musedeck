@@ -96,8 +96,6 @@ class ImgToCodeSubmenuManager {
   private hasGeneratedCode = false;
   private isProcessing = false;
   private lastTappedCoord: { col: number; row: number } | null = null;
-  private breathFrame = 0;
-  private breathTimer: NodeJS.Timeout | null = null;
 
   get isActive(): boolean {
     return this.active;
@@ -111,23 +109,43 @@ class ImgToCodeSubmenuManager {
     console.log("🎨 [ImgToCode] Opening Multi-Language UI-to-Code Submenu");
     this.active = true;
     this.hasGeneratedCode = false; // Always start with clean slate: NO preview or open buttons until synthesized!
-    this.stopBreathingPreview();
+    this.isProcessing = false;
     this.render();
   }
 
   close(): void {
     if (!this.active) return;
     console.log("🔙 [ImgToCode] Closing Multi-Language UI-to-Code Submenu -> Restoring Page 1");
-    this.stopBreathingPreview();
     this.hasGeneratedCode = false;
+    this.isProcessing = false;
     this.active = false;
     keyRegistry.restoreAll();
   }
 
   forceClose(): void {
-    this.stopBreathingPreview();
     this.hasGeneratedCode = false;
+    this.isProcessing = false;
     this.active = false;
+  }
+
+  notifySynthesizing(): void {
+    if (!this.active || !this.lastTappedCoord) return;
+    const { col, row } = this.lastTappedCoord;
+    const keyObj = keyRegistry.all().find((k) => k.column === col && k.row === row);
+    const keyCoord = `${col},${row}`;
+    const option = IMG_TO_CODE_OPTIONS[keyCoord];
+    if (keyObj && option) {
+      void keyObj.action.setImage(
+        SvgKeyRenderer.renderImgToCodeOptionKey(
+          "SPARKING...",
+          "GENERATING",
+          "WAITING API",
+          option.badge,
+          "#f59e0b",
+          "#fde047"
+        )
+      );
+    }
   }
 
   notifyCodeGenerated(): void {
@@ -135,45 +153,12 @@ class ImgToCodeSubmenuManager {
     this.isProcessing = false;
     if (this.active) {
       this.render();
-      this.startBreathingPreview();
-    }
-  }
-
-  private startBreathingPreview(): void {
-    this.stopBreathingPreview();
-    this.breathFrame = 0;
-    this.breathTimer = setInterval(() => {
-      this.breathFrame = (this.breathFrame + 1) % 4;
-      if (this.active && this.hasGeneratedCode) {
-        const keyObj = keyRegistry.all().find((k) => k.column === 4 && k.row === 2);
-        if (keyObj) {
-          void keyObj.action.setImage(
-            SvgKeyRenderer.renderLivePreviewKey(true, this.breathFrame)
-          );
-        }
-      }
-    }, 220);
-  }
-
-  private stopBreathingPreview(): void {
-    if (this.breathTimer) {
-      clearInterval(this.breathTimer);
-      this.breathTimer = null;
-    }
-    if (this.active && this.hasGeneratedCode) {
-      const keyObj = keyRegistry.all().find((k) => k.column === 4 && k.row === 2);
-      if (keyObj) {
-        void keyObj.action.setImage(
-          SvgKeyRenderer.renderLivePreviewKey(true, 0)
-        );
-      }
     }
   }
 
   notifyCodeFailed(reason = "empty"): void {
     this.isProcessing = false;
     this.hasGeneratedCode = false;
-    this.stopBreathingPreview();
     if (!this.active) return;
 
     if (reason === "empty" && this.lastTappedCoord) {
@@ -221,7 +206,7 @@ class ImgToCodeSubmenuManager {
       } else if (row === 2 && col === 4) {
         // (4, 2): PREVIEW key - ONLY SHOWN AFTER CODE IS SYNTHESIZED!
         if (this.hasGeneratedCode) {
-          image = SvgKeyRenderer.renderLivePreviewKey(true, this.breathFrame);
+          image = SvgKeyRenderer.renderLivePreviewKey(true);
         } else {
           image = SvgKeyRenderer.renderEmptyTile();
         }
@@ -261,21 +246,22 @@ class ImgToCodeSubmenuManager {
     // 2. (4, 1): OPEN CODE in developer editor (only active after code generated)
     if (col === 4 && row === 1) {
       if (!this.hasGeneratedCode) return true;
-      console.log("👁️ [ImgToCode] Open Code tapped -> Launching editor");
+      console.log("👁️ [ImgToCode] Open Code tapped -> Launching editor and returning to Page 1");
       if (this.bridge) {
         await this.bridge.openCode();
       }
+      this.close();
       return true;
     }
 
     // 3. (4, 2): LIVE PREVIEW in native macOS app or browser window (only active after code generated)
     if (col === 4 && row === 2) {
       if (!this.hasGeneratedCode) return true;
-      this.stopBreathingPreview();
-      console.log("▶️ [ImgToCode] Live Preview tapped -> Launching live app/browser window");
+      console.log("▶️ [ImgToCode] Live Preview tapped -> Launching live app and returning to Page 1");
       if (this.bridge) {
         await this.bridge.runPreview();
       }
+      this.close();
       return true;
     }
 
@@ -286,8 +272,7 @@ class ImgToCodeSubmenuManager {
       if (this.isProcessing) return true;
       this.isProcessing = true;
       this.lastTappedCoord = { col, row };
-      this.hasGeneratedCode = false; // Reset so old preview button disappears during fresh capture
-      this.stopBreathingPreview();
+      this.hasGeneratedCode = false; // Reset so preview/open buttons are completely invisible
       this.render();
 
       console.log(`🎨 [ImgToCode] Selected framework: ${option.target} (${option.line1})`);
@@ -311,10 +296,8 @@ class ImgToCodeSubmenuManager {
         if (this.bridge) {
           await this.bridge.spark(option.target);
         }
-        this.hasGeneratedCode = true;
       } catch (err: any) {
         console.error("Spark synthesis error:", err.message);
-      } finally {
         this.isProcessing = false;
         this.render();
       }

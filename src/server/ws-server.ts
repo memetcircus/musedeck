@@ -11,6 +11,7 @@ export type SurfaceMessage =
   | { type: "open_code" }
   | { type: "run_preview" }
   | { type: "spark_completed"; filename?: string; filePath?: string; framework?: string }
+  | { type: "spark_synthesizing"; target?: string }
   | { type: "runTask"; prompt: string }
   | { type: "toggle_submenu" }
   | { type: "toggle_snippets" }
