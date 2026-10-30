@@ -754,11 +754,17 @@ end tell
                   minH = 400;
                 }
 
-                swiftCode = swiftCode.replace(
-                  /\.frame\(width:\s*\d+,\s*height:\s*\d+\)(?:\s*\.windowResizability\(\.contentSize\))?/g,
-                  `.frame(minWidth: ${minW}, idealWidth: ${idealW}, maxWidth: .infinity, minHeight: ${minH}, idealHeight: ${idealH}, maxHeight: .infinity)`
-                );
-                swiftCode = swiftCode.replace(/\.windowResizability\(\.contentSize\)/g, "");
+                // ONLY modify the @main PreviewApp window frame, NEVER touch component inner views/icons!
+                const previewAppMatch = swiftCode.match(/@main[\s\S]*?struct\s+PreviewApp[\s\S]*$/);
+                if (previewAppMatch && previewAppMatch.index !== undefined) {
+                  let previewAppCode = previewAppMatch[0];
+                  previewAppCode = previewAppCode.replace(
+                    /\.frame\(width:\s*\d+,\s*height:\s*\d+\)(?:\s*\.windowResizability\(\.contentSize\))?/,
+                    `.frame(minWidth: ${minW}, idealWidth: ${idealW}, maxWidth: .infinity, minHeight: ${minH}, idealHeight: ${idealH}, maxHeight: .infinity)`
+                  );
+                  previewAppCode = previewAppCode.replace(/\.windowResizability\(\.contentSize\)/, "");
+                  swiftCode = swiftCode.slice(0, previewAppMatch.index) + previewAppCode;
+                }
               }
             } catch {}
           }
