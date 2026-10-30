@@ -918,7 +918,6 @@ export class SvgKeyRenderer {
 
     let borderColor = "#f59e0b";
     let bgOpacity = "0.06";
-    let badge = "";
     let mainText = "";
     let subText = "";
     let subColor = "#fbbf24";
@@ -929,12 +928,11 @@ export class SvgKeyRenderer {
       bgOpacity = isStepActive ? "0.26" : "0.04";
       subColor = isStepActive ? "#fde047" : "#d97706";
       const bannerData = [
-        { badge: "WAIT", main: "WAIT", sub: "MUSE SPARK" },
-        { badge: "AI CODE", main: "FOR", sub: "GENERATION" },
-        { badge: "SPARK", main: "MUSE", sub: "SYNTHESIS" },
-        { badge: "~15 SEC", main: "SPARK", sub: "ACTIVE..." },
+        { main: "WAIT", sub: "AI CODE" },
+        { main: "FOR", sub: "GENERATION" },
+        { main: "MUSE", sub: "SYNTHESIS" },
+        { main: "SPARK", sub: "~15 SEC" },
       ];
-      badge = bannerData[index].badge;
       mainText = bannerData[index].main;
       subText = bannerData[index].sub;
     } else if (mode === "preview") {
@@ -942,12 +940,11 @@ export class SvgKeyRenderer {
       bgOpacity = isStepActive ? "0.28" : "0.05";
       subColor = isStepActive ? "#67e8f9" : "#0891b2";
       const bannerData = [
-        { badge: "BUILD", main: "CREATING", sub: "SWIFTC..." },
-        { badge: "MACOS", main: "PREVIEW", sub: "COMPILING" },
-        { badge: "NATIVE", main: "APP", sub: "PACKAGING" },
-        { badge: "LAUNCH", main: "SOON...", sub: "STARTING" },
+        { main: "CREATING", sub: "SWIFTC..." },
+        { main: "PREVIEW", sub: "COMPILING" },
+        { main: "LIVE", sub: "MACOS" },
+        { main: "APP", sub: "STARTING" },
       ];
-      badge = bannerData[index].badge;
       mainText = bannerData[index].main;
       subText = bannerData[index].sub;
     } else if (mode === "success") {
@@ -955,12 +952,11 @@ export class SvgKeyRenderer {
       bgOpacity = "0.22";
       subColor = "#86efac";
       const bannerData = [
-        { badge: "LIVE", main: "PREVIEW", sub: "ON SCREEN" },
-        { badge: "READY", main: "APP", sub: "INTERACTIVE" },
-        { badge: "MACOS", main: "WINDOW", sub: "LAUNCHED" },
-        { badge: "OK", main: "PAGE 1", sub: "RESTORE..." },
+        { main: "PREVIEW", sub: "MACOS" },
+        { main: "APP", sub: "WINDOW" },
+        { main: "LIVE ON", sub: "RUNNING" },
+        { main: "SCREEN", sub: "READY" },
       ];
-      badge = bannerData[index].badge;
       mainText = bannerData[index].main;
       subText = bannerData[index].sub;
     } else if (mode === "failed") {
@@ -968,37 +964,33 @@ export class SvgKeyRenderer {
       bgOpacity = "0.22";
       subColor = "#fca5a5";
       const bannerData = [
-        { badge: "ERROR", main: "BUILD", sub: "FAILED" },
-        { badge: "CHECK", main: "XCODE", sub: "OPENED" },
-        { badge: "INSPECT", main: "CODE", sub: "IN EDITOR" },
-        { badge: "RETRY", main: "SWIFT", sub: "TRY AGAIN" },
+        { main: "BUILD", sub: "ERROR" },
+        { main: "FAILED", sub: "LOG" },
+        { main: "CHECK", sub: "INSPECT" },
+        { main: "XCODE", sub: "EDITOR" },
       ];
-      badge = bannerData[index].badge;
       mainText = bannerData[index].main;
       subText = bannerData[index].sub;
     }
 
-    const badgeWidth = Math.min(128, Math.max(60, Math.round(badge.length * 9.2 + 22)));
-    const badgeX = Math.round((144 - badgeWidth) / 2);
     const strokeWidth = isStepActive ? "3.2" : "2";
+    const mainFontSize = mainText.length > 7 ? "24" : mainText.length > 5 ? "26" : "30";
+    const subFontSize = subText.length > 9 ? "15" : "17";
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <!-- Sleek Card Container -->
         <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="${strokeWidth}"/>
         <rect width="144" height="144" rx="24" fill="${borderColor}" fill-opacity="${bgOpacity}"/>
 
-        <!-- Top Badge -->
-        <rect x="${badgeX}" y="12" width="${badgeWidth}" height="24" rx="6" fill="${borderColor}" fill-opacity="0.3" stroke="${borderColor}" stroke-width="1.4"/>
-        <text x="72" y="28.5" fill="#ffffff" font-size="12.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${badge}</text>
-
-        <!-- Big Bold Main Word -->
-        <text x="72" y="76" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.2">${mainText}</text>
+        <!-- Big Bold Main Title (No tiny badges, ultra-legible) -->
+        <text x="72" y="65" fill="#ffffff" font-size="${mainFontSize}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">${mainText}</text>
 
         <!-- Divider Line -->
-        <line x1="18" y1="92" x2="126" y2="92" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.6"/>
+        <line x1="18" y1="82" x2="126" y2="82" stroke="${borderColor}" stroke-width="2" stroke-opacity="0.6"/>
 
-        <!-- Subtitle Info -->
-        <text x="72" y="122" fill="${subColor}" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${subText}</text>
+        <!-- Large Turuncu / Accent Subtitle -->
+        <text x="72" y="116" fill="${subColor}" font-size="${subFontSize}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subText}</text>
       </svg>
     `);
   }

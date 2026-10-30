@@ -178,7 +178,7 @@ class ImgToCodeSubmenuManager {
         void keyObj.action.setImage(
           SvgKeyRenderer.renderImgToCodeOptionKey(
             "SPARKING...",
-            "GENERATING",
+            "",
             "WAITING API",
             option.badge,
             "#f59e0b",
@@ -239,15 +239,16 @@ class ImgToCodeSubmenuManager {
 
   notifyPreviewLaunched(): void {
     if (!this.active) return;
-    console.log("✅ [ImgToCode] PreviewApp launched on macOS! Displaying success banner and returning to Page 1");
+    console.log("✅ [ImgToCode] PreviewApp launched on macOS! Displaying success banner");
     this.stopBannerAnimation();
     this.bannerMode = "success";
     this.updateBannerKeys();
     setTimeout(() => {
       if (this.active) {
-        this.close();
+        this.bannerMode = "idle";
+        this.updateBannerKeys();
       }
-    }, 1500);
+    }, 3000);
   }
 
   notifyPreviewFailed(error?: string): void {
@@ -329,11 +330,10 @@ class ImgToCodeSubmenuManager {
     // 2. (4, 1): OPEN CODE in developer editor (only active after code generated)
     if (col === 4 && row === 1) {
       if (!this.hasGeneratedCode) return true;
-      console.log("👁️ [ImgToCode] Open Code tapped -> Launching editor and returning to Page 1");
+      console.log("👁️ [ImgToCode] Open Code tapped -> Launching editor");
       if (this.bridge) {
         await this.bridge.openCode();
       }
-      this.close();
       return true;
     }
 
