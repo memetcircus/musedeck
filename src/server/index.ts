@@ -217,6 +217,13 @@ async function main() {
         wsServer.broadcast(msg as any);
         break;
 
+      case "launch_session":
+        console.log("🚀 [Bridge] Received launch_session command from surface");
+        await TerminalAutomation.launchMuseCodeTerminal(
+          msg.projectDir || process.cwd() || "/Users/akif/Projects/musedeck/musedeck"
+        );
+        break;
+
       case "subscribe":
         wsServer.broadcastTelemetry(stateMachine.getTelemetry());
         break;

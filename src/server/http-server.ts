@@ -188,6 +188,16 @@ export class MuseHttpServer {
       res.json({ ok: true });
     });
 
+    this.app.post("/api/sessions/launch", async (req: Request, res: Response) => {
+      try {
+        const cwd = req.body?.cwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
+        await TerminalAutomation.launchMuseCodeTerminal(cwd);
+        res.json({ ok: true });
+      } catch (err: any) {
+        res.status(500).json({ error: err.message });
+      }
+    });
+
     this.app.post("/api/review/trigger-review", (_req: Request, res: Response) => {
       stateMachine.setWaitingApproval(
         {

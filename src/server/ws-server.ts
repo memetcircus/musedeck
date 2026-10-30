@@ -24,6 +24,7 @@ export type SurfaceMessage =
   | { type: "close_img_to_code" }
   | { type: "toggle_sessions" }
   | { type: "switch_page"; page?: number }
+  | { type: "launch_session"; projectDir?: string }
   | { type: "subscribe" };
 
 export class MuseWsServer {

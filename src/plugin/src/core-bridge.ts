@@ -212,6 +212,14 @@ export class StreamDeckCoreBridge {
     }
   }
 
+  async launchSession(projectDir?: string): Promise<void> {
+    await this.dispatch(
+      { type: "launch_session", projectDir },
+      "sessions/launch",
+      { cwd: projectDir }
+    );
+  }
+
   async approve(): Promise<void> {
     await this.dispatch({ type: "approve" }, "approve");
   }

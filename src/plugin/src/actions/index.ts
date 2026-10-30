@@ -250,19 +250,23 @@ export class AgentStatusAction extends SingletonAction {
     if (checkSubmenuKeyDown(_ev)) return;
     const current = this.bridge.getTelemetry();
 
-    // If awaiting approval: specifically open Review / HITL Submenu without direct focus action
+    // If awaiting approval: specifically open Review / HITL Submenu without launching terminal
     if (current.state === AgentState.WAITING_APPROVAL) {
       console.log("[StatusKey] Awaiting approval -> Opening Review Submenu");
       reviewSubmenuManager.open();
-    } else {
-      // Normal states (READY, RUNNING, IDLE): Bring active Muse Terminal to front, or launch fresh session if none exists!
-      console.log(`[StatusKey] Tapped (Current state: ${current.state}). Checking active Muse Terminal...`);
-      const focused = await TerminalAutomation.bringTerminalToFront();
-      if (!focused) {
-        console.log(`[StatusKey] No active Muse terminal found -> Launching new Muse session in Terminal.app...`);
-        await TerminalAutomation.launchMuseCodeTerminal(process.cwd());
-      }
+      return;
     }
+
+    // NEW SESSION action: ALWAYS launch a fresh Muse Code session in a dedicated Terminal window!
+    console.log(`[StatusKey / NEW SESSION] Launching new Muse Code Terminal session...`);
+    const projectDir = "/Users/akif/Projects/musedeck/musedeck";
+    try {
+      await TerminalAutomation.launchMuseCodeTerminal(projectDir);
+    } catch (err) {
+      console.error("[StatusKey] Failed direct terminal launch:", err);
+    }
+    // Also trigger via bridge so server daemon guarantees execution
+    void this.bridge.launchSession(projectDir);
   }
 }
 
