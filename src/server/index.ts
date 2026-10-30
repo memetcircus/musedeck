@@ -433,6 +433,12 @@ async function main() {
           try { fs.unlinkSync(videoPath); } catch {}
         }
 
+        // Clean up any lingering screencapture processes to ensure macOS interactive capture is never blocked
+        try {
+          execSync("killall screencapture 2>/dev/null || true");
+          execSync("killall wait-mouse-release 2>/dev/null || true");
+        } catch {}
+
         // Spawn screencapture with interactive mouse selection (-i -s)
         // -i: capture screen interactively
         // -s: only allow mouse selection mode (crosshair '+')
@@ -440,6 +446,10 @@ async function main() {
         // -V 5: 5 seconds recording limit
         // -k: show clicks in video recording mode
         activeRecordingProcess = spawn("screencapture", ["-i", "-s", "-v", "-V", "5", "-k", videoPath]);
+
+        activeRecordingProcess.stderr?.on("data", (d) => {
+          console.warn("[screencapture stderr]", d.toString().trim());
+        });
 
         let recordingStarted = false;
         let mouseWaiterProcess: any = null;
