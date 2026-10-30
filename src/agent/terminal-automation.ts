@@ -1114,7 +1114,7 @@ dependencies {
     // 6. gradle-wrapper.properties
     const wrapperProp = `distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
-distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-bin.zip
+distributionUrl=https\\://services.gradle.org/distributions/gradle-8.12-bin.zip
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 `;
