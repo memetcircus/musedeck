@@ -779,23 +779,37 @@ export class SvgKeyRenderer {
 
   static renderImgToCodeKey(status: "idle" | "snipping" | "generating" | "ready" = "idle"): string {
     const borderColor = status === "generating" ? "#f59e0b" : status === "ready" ? "#22c55e" : "#0284c7";
-    const subText = status === "generating" ? "SPARKING..." : status === "snipping" ? "SNIP AREA..." : status === "ready" ? "READY ↗" : "MULTI-LANG";
-    const subColor = status === "generating" ? "#fbbf24" : status === "ready" ? "#4ade80" : "#38bdf8";
+    const subText = status === "generating" ? "SPARKING..." : status === "snipping" ? "SNIP AREA..." : status === "ready" ? "READY ↗" : "IMG TO CODE";
+    const subColor = status === "generating" ? "#fbbf24" : status === "ready" ? "#4ade80" : "#ffffff";
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
         <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
         <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
 
-        <!-- Top Header / Main Title -->
-        <text x="72" y="44" fill="#ffffff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">IMG</text>
-        <text x="72" y="73" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">TO CODE</text>
+        <!-- Ambient Circle Glow -->
+        <circle cx="72" cy="46" r="32" fill="#0c4a6e" fill-opacity="0.35" stroke="${borderColor}" stroke-width="2" stroke-dasharray="6, 5"/>
 
-        <!-- Divider Line -->
-        <line x1="16" y1="87" x2="128" y2="87" stroke="${borderColor}" stroke-width="1.8" stroke-opacity="0.5"/>
+        <!-- Image Icon on left -->
+        <g transform="translate(24, 30)">
+          <rect x="0" y="0" width="34" height="28" rx="6" fill="#075985" fill-opacity="0.45" stroke="#38bdf8" stroke-width="2.2"/>
+          <circle cx="10" cy="9" r="2.8" fill="#7dd3fc"/>
+          <path d="M 4 23 L 13 14 L 21 21 L 26 17 L 30 23" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
 
-        <!-- Subtitle -->
-        <text x="72" y="119" fill="${subColor}" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subText}</text>
+        <!-- Transformation Arrow in center -->
+        <path d="M 66 44 L 78 44 M 73 39 L 78 44 L 73 49" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Code Brackets on right -->
+        <g transform="translate(86, 30)">
+          <rect x="0" y="0" width="34" height="28" rx="6" fill="#042f2e" fill-opacity="0.5" stroke="#2dd4bf" stroke-width="2.2"/>
+          <path d="M 12 9 L 6 14 L 12 19" fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M 22 9 L 28 14 L 22 19" fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="18" y1="8" x2="16" y2="20" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+        </g>
+
+        <!-- Single Line Crisp Label -->
+        <text x="72" y="118" fill="${subColor}" font-size="16.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${subText}</text>
       </svg>
     `);
   }
