@@ -175,6 +175,7 @@ export class AgentStatusAction extends SingletonAction {
   private activeKeys = new Set<KeyAction>();
   private flashTimer: NodeJS.Timeout | null = null;
   private flashPhase = false;
+  private lastLaunchTime = 0;
 
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
@@ -257,16 +258,18 @@ export class AgentStatusAction extends SingletonAction {
       return;
     }
 
-    // NEW SESSION action: ALWAYS launch a fresh Muse Code session in a dedicated Terminal window!
-    console.log(`[StatusKey / NEW SESSION] Launching new Muse Code Terminal session...`);
-    const projectDir = "/Users/akif/Projects/musedeck/musedeck";
-    try {
-      await TerminalAutomation.launchMuseCodeTerminal(projectDir);
-    } catch (err) {
-      console.error("[StatusKey] Failed direct terminal launch:", err);
+    // Debounce guard: prevent accidental duplicate taps within 1.5s
+    const now = Date.now();
+    if (now - this.lastLaunchTime < 1500) {
+      console.log("[StatusKey] Debounced duplicate tap");
+      return;
     }
-    // Also trigger via bridge so server daemon guarantees execution
-    void this.bridge.launchSession(projectDir);
+    this.lastLaunchTime = now;
+
+    // NEW SESSION action: Launch a single fresh Muse Code session via bridge daemon
+    console.log(`[StatusKey / NEW SESSION] Launching single new Muse Code Terminal session...`);
+    const projectDir = "/Users/akif/Projects/musedeck/musedeck";
+    await this.bridge.launchSession(projectDir);
   }
 }
 
