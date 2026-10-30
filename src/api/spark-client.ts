@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import sharp from "sharp";
 import type { MetaModelApiClient } from "./meta-client.js";
 
 export type TargetFramework =
@@ -155,7 +156,44 @@ export class MuseSparkClient {
       if (!code.includes("@main")) {
         const viewMatch = code.match(/struct\s+(\w+)\s*:\s*View/);
         const mainViewName = viewMatch ? viewMatch[1] : "ExtractedComponent";
-        code += `\n\n@main\nstruct PreviewApp: App {\n    var body: some Scene {\n        WindowGroup {\n            ${mainViewName}()\n                .frame(width: 380, height: 780)\n        }\n        .windowResizability(.contentSize)\n    }\n}\n`;
+
+        let idealW = 390;
+        let idealH = 780;
+        let minW = 320;
+        let minH = 500;
+
+        try {
+          const imgBuf = Buffer.isBuffer(imageBufferOrBase64)
+            ? imageBufferOrBase64
+            : Buffer.from(base64Data, "base64");
+          const meta = await sharp(imgBuf).metadata();
+          if (meta.width && meta.height) {
+            const ratio = meta.width / meta.height;
+            if (ratio >= 1.2) {
+              // Landscape layout (iPad / tablet / desktop / dashboard)
+              idealW = Math.min(1200, Math.max(900, Math.round(meta.width)));
+              idealH = Math.round(idealW / ratio);
+              minW = 750;
+              minH = 500;
+            } else if (ratio <= 0.8) {
+              // Portrait layout (mobile phone)
+              idealW = 390;
+              idealH = 780;
+              minW = 320;
+              minH = 500;
+            } else {
+              // Square or card layout
+              idealW = Math.min(800, Math.max(520, Math.round(meta.width)));
+              idealH = Math.round(idealW / ratio);
+              minW = 400;
+              minH = 400;
+            }
+          }
+        } catch (err: any) {
+          console.warn("Could not determine screenshot aspect ratio:", err.message);
+        }
+
+        code += `\n\n@main\nstruct PreviewApp: App {\n    var body: some Scene {\n        WindowGroup {\n            ${mainViewName}()\n                .frame(minWidth: ${minW}, idealWidth: ${idealW}, maxWidth: .infinity, minHeight: ${minH}, idealHeight: ${idealH}, maxHeight: .infinity)\n        }\n    }\n}\n`;
       }
     }
 

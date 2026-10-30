@@ -37,5 +37,6 @@ export default {
     "node:buffer",
     "node:events",
     "typescript",
+    "sharp",
   ],
 };

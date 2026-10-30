@@ -714,6 +714,55 @@ end tell
           swiftCode = swiftCode.replace(/\.presentationDragIndicator\([^)]*\)/g, "");
           swiftCode = swiftCode.replace(/\.keyboardType\([^)]*\)/g, "");
           swiftCode = swiftCode.replace(/\.textInputAutocapitalization\([^)]*\)/g, "");
+
+          // Dynamic aspect-ratio-aware window sizing (iPad/Landscape vs iPhone/Portrait)
+          const segmentedPath = "/tmp/musedeck/latest_segmented.png";
+          const montagePath = "/tmp/musedeck/flow_montage.png";
+          const capturePath = fs.existsSync(segmentedPath) ? segmentedPath : (fs.existsSync(montagePath) ? montagePath : null);
+
+          let isLandscape = false;
+          if (capturePath) {
+            try {
+              const sharpModule: any = await import("sharp");
+              const sharp = sharpModule.default || sharpModule;
+              const meta = await sharp(capturePath).metadata();
+              if (meta.width && meta.height) {
+                const ratio = meta.width / meta.height;
+                isLandscape = ratio >= 1.2;
+                let idealW = 390;
+                let idealH = 780;
+                let minW = 320;
+                let minH = 500;
+
+                if (isLandscape) {
+                  // Tablet / desktop / wide dashboard layout
+                  idealW = Math.min(1200, Math.max(900, Math.round(meta.width)));
+                  idealH = Math.round(idealW / ratio);
+                  minW = 750;
+                  minH = 500;
+                } else if (ratio <= 0.8) {
+                  // Mobile phone layout
+                  idealW = 390;
+                  idealH = 780;
+                  minW = 320;
+                  minH = 500;
+                } else {
+                  // Square / card layout
+                  idealW = Math.min(800, Math.max(520, Math.round(meta.width)));
+                  idealH = Math.round(idealW / ratio);
+                  minW = 400;
+                  minH = 400;
+                }
+
+                swiftCode = swiftCode.replace(
+                  /\.frame\(width:\s*\d+,\s*height:\s*\d+\)(?:\s*\.windowResizability\(\.contentSize\))?/g,
+                  `.frame(minWidth: ${minW}, idealWidth: ${idealW}, maxWidth: .infinity, minHeight: ${minH}, idealHeight: ${idealH}, maxHeight: .infinity)`
+                );
+                swiftCode = swiftCode.replace(/\.windowResizability\(\.contentSize\)/g, "");
+              }
+            } catch {}
+          }
+
           await fs.promises.writeFile(filePath, swiftCode, "utf8");
 
           await execAsync(`swiftc -parse-as-library -o "${binPath}" "${filePath}"`);
@@ -739,7 +788,7 @@ let axApp = AXUIElementCreateApplication(app.processIdentifier)
 var windowsRef: CFTypeRef?
 if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &windowsRef) == .success,
    let windows = windowsRef as? [AXUIElement], let window = windows.first {
-    var newPoint = CGPoint(x: 770, y: 150)
+    var newPoint = CGPoint(x: 200, y: 120)
     if let pointValue = AXValueCreate(.cgPoint, &newPoint) {
         AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, pointValue)
     }
