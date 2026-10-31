@@ -89,21 +89,21 @@ async function main() {
   const sessionsKeys = [
     SvgKeyRenderer.renderUpBackKey(),
     SvgKeyRenderer.renderNewSessionKey(),
-    SvgKeyRenderer.renderHistoricalSessionCard("17:48", "MUSEDECK", "TODAY", "#38bdf8", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("17:31", "MUSEDECK", "TODAY", "#38bdf8", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("16:03", "MUSEDECK", "TODAY", "#38bdf8", false),
+    SvgKeyRenderer.renderHistoricalSessionCard(1, "MUSEDECK", "TODAY", "21:49", "today"),
+    SvgKeyRenderer.renderHistoricalSessionCard(2, "MUSEDECK", "TODAY", "21:49", "today"),
+    SvgKeyRenderer.renderHistoricalSessionCard(3, "MUSEDECK", "TODAY", "21:49", "today"),
 
-    SvgKeyRenderer.renderHistoricalSessionCard("16:02", "MUSEDECK", "TODAY", "#38bdf8", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("15:44", "MUSEDECK", "YESTRDY", "#f59e0b", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("15:44", "MUSEDECK", "YESTRDY", "#f59e0b", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("20:05", "MUSEDECK", "OCT 29", "#a855f7", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("20:05", "MUSEDECK", "OCT 29", "#a855f7", false),
+    SvgKeyRenderer.renderHistoricalSessionCard(4, "MUSEDECK", "TODAY", "16:02", "today"),
+    SvgKeyRenderer.renderHistoricalSessionCard(5, "MUSEDECK", "YESTRDY", "15:44", "yesterday"),
+    SvgKeyRenderer.renderHistoricalSessionCard(6, "MUSEDECK", "YESTRDY", "15:44", "yesterday"),
+    SvgKeyRenderer.renderHistoricalSessionCard(7, "MUSEDECK", "OCT 29", "20:05", "older"),
+    SvgKeyRenderer.renderHistoricalSessionCard(8, "MUSEDECK", "OCT 29", "20:05", "older"),
 
-    SvgKeyRenderer.renderHistoricalSessionCard("20:05", "MUSEDECK", "OCT 29", "#a855f7", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("19:18", "GLOBAL", "OCT 29", "#a855f7", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("21:27", "MUSEDECK", "OCT 28", "#a855f7", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("21:03", "GRID", "OCT 28", "#a855f7", false),
-    SvgKeyRenderer.renderHistoricalSessionCard("20:15", "MUSEDECK", "OCT 28", "#a855f7", false)
+    SvgKeyRenderer.renderHistoricalSessionCard(9, "MUSEDECK", "OCT 29", "20:05", "older"),
+    SvgKeyRenderer.renderHistoricalSessionCard(10, "GLOBAL", "OCT 29", "19:18", "older"),
+    SvgKeyRenderer.renderHistoricalSessionCard(11, "MUSEDECK", "OCT 28", "21:27", "older"),
+    SvgKeyRenderer.renderHistoricalSessionCard(12, "GRID", "OCT 28", "21:03", "older"),
+    SvgKeyRenderer.renderHistoricalSessionCard(13, "MUSEDECK", "OCT 28", "20:15", "older")
   ];
   await renderGrid(sessionsKeys, "./assets/deck_sessions_submenu.png");
 
