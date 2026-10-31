@@ -46,7 +46,7 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 | **[1,&nbsp;1]** | **IMG&nbsp;TO&nbsp;CODE** | Meta Muse Spark 1.3 visual frontend synthesizer. Transforms UI snips and mocks into clean React + Tailwind, Flutter, or Streamlit code. |
 | **[2,&nbsp;1]** | **VID&nbsp;TO&nbsp;CODE** | Video-to-Code engine. Records 5s UI interactions, runs perceptual motion checks, compiles an 8-frame timecoded filmstrip, and synthesizes animated fixes via Muse Spark 1.3. |
 | **[3,&nbsp;1]** | **MUSE&nbsp;SETTINGS** | Launches the local Web Mission Control configuration console in your browser (`http://localhost:3456`). |
-| **[4,&nbsp;1]** | **CREDITS&nbsp;HUD** | Live Meta Model API credits tracker (`$149.97`). Tap opens the **10-Key Telemetry Dashboard**. |
+| **[4,&nbsp;1]** | **CREDITS&nbsp;HUD** | Live Meta Model API credits tracker (`$148.01`). Tap opens the **10-Key Telemetry Dashboard**. |
 | **[0,&nbsp;2]** | **VIDEO&nbsp;RECORD** | One-touch desktop video recording trigger for capturing reproducible bug flows and UI glitches. |
 | **[1,&nbsp;2]** | **MUSE&nbsp;MEMORY** | Living architecture memory drawer (`MUSE RULES`, `SPEC.md`, `ARCH.md`, `DECISIONS.md`, `SYNC CONTEXT`). |
 | **[2,&nbsp;2]** | **MUSE&nbsp;OPS** | Developer operations drawer (`FIX ERROR`, `REFACTOR`, `OPTIMIZE`, `EXPLAIN`, `RUN TESTS`). |
@@ -144,7 +144,7 @@ Real-time hardware HUD tracking Meta Model API resource utilization and cloud in
 
 ![MuseDeck Credits and Telemetry Submenu](assets/deck_telemetry_submenu.png)
 
-* **REMAINING CREDITS:** Live Meta Model API grant balance (`$149.97`).
+* **REMAINING CREDITS:** Live Meta Model API grant balance (`$148.01`).
 * **TOTAL SPEND & REQUESTS:** Cumulative session expenditure (`$0.00`) and API call count (`21`).
 * **INPUT & OUTPUT TOKENS:** Real-time token volume tracking (`433.9k in / 19.4k out`).
 * **CACHE HIT RATE:** Model prompt caching efficiency (`57.7%`).

@@ -32,8 +32,8 @@ class TelemetrySubmenuManager {
   render(telemetry?: TelemetryData): void {
     if (!this.active) return;
     const usage = telemetry?.apiUsage;
-    const credits = usage?.creditsRemaining ?? "$149.97";
-    const spent = usage?.spent ?? "$0.00";
+    const credits = usage?.creditsRemaining ?? "$148.01";
+    const spent = usage?.spent ?? "$1.99";
     const model = usage?.model ?? "SPARK 1.3";
     const inTokens = usage?.inputTokens ?? "433.9k";
     const outTokens = usage?.outputTokens ?? "19.4k";

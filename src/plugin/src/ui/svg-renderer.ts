@@ -1854,7 +1854,7 @@ export class SvgKeyRenderer {
    * AI Credits & Telemetry HUD Key (Col 4, Row 1 on Page 1 / Page 2)
    * Clean edge-to-edge frame without corner notches, bold readable balance.
    */
-  static renderApiStatusKey(credits = "$149.97"): string {
+  static renderApiStatusKey(credits = "$148.01"): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
         <!-- Clean Edge-to-edge Frame -->

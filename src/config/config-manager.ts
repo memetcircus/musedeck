@@ -11,6 +11,8 @@ export interface MuseDeckConfig {
   workspacePath: string;
   museBin: string;
   simulationMode: boolean;
+  creditsRemaining?: string;
+  spent?: string;
 }
 
 const DEFAULT_CONFIG: MuseDeckConfig = {
@@ -22,6 +24,8 @@ const DEFAULT_CONFIG: MuseDeckConfig = {
   workspacePath: process.env.WORKSPACE_PATH || process.cwd(),
   museBin: process.env.MUSE_CODE_BIN || "muse",
   simulationMode: process.env.MUSE_CODE_SIMULATION === "true",
+  creditsRemaining: "$148.01",
+  spent: "$1.99",
 };
 
 class ConfigManager {

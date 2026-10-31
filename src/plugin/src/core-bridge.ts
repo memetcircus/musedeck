@@ -32,8 +32,8 @@ export class StreamDeckCoreBridge {
     uptimeSeconds: 0,
     timestamp: new Date().toISOString(),
     apiUsage: {
-      creditsRemaining: "$149.97",
-      spent: "$0.00",
+      creditsRemaining: "$148.01",
+      spent: "$1.99",
       model: "SPARK 1.3",
       inputTokens: "433.9k",
       outputTokens: "19.4k",

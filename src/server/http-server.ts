@@ -336,6 +336,12 @@ export class MuseHttpServer {
     // Save Settings
     this.app.post("/api/settings", (req: Request, res: Response) => {
       const updated = configManager.save(req.body);
+      if (updated.creditsRemaining) {
+        stateMachine.setApiUsage({
+          creditsRemaining: updated.creditsRemaining,
+          spent: updated.spent || "$1.99",
+        });
+      }
       if (wsServer) {
         wsServer.broadcast({
           type: "config_updated",
@@ -343,6 +349,24 @@ export class MuseHttpServer {
         });
       }
       res.json({ ok: true, config: updated });
+    });
+
+    // Update Telemetry Credits Directly
+    this.app.post("/api/telemetry/credits", (req: Request, res: Response) => {
+      const { credits, spent, inputTokens, outputTokens } = req.body;
+      const usageUpdate: any = {};
+      if (credits) usageUpdate.creditsRemaining = String(credits).startsWith("$") ? String(credits) : `$${credits}`;
+      if (spent) usageUpdate.spent = String(spent).startsWith("$") ? String(spent) : `$${spent}`;
+      if (inputTokens) usageUpdate.inputTokens = String(inputTokens);
+      if (outputTokens) usageUpdate.outputTokens = String(outputTokens);
+
+      stateMachine.setApiUsage(usageUpdate);
+      configManager.save({
+        creditsRemaining: stateMachine.getTelemetry().apiUsage?.creditsRemaining,
+        spent: stateMachine.getTelemetry().apiUsage?.spent,
+      });
+
+      res.json({ ok: true, apiUsage: stateMachine.getTelemetry().apiUsage });
     });
 
     // Test API Key / Ping

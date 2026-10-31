@@ -22,8 +22,8 @@ export interface DiffStats {
 }
 
 export interface ApiUsageStats {
-  creditsRemaining: string; // e.g. "$149.97"
-  spent: string; // e.g. "$0.00"
+  creditsRemaining: string; // e.g. "$148.01"
+  spent: string; // e.g. "$1.99"
   model: string; // e.g. "SPARK 1.3"
   inputTokens: string; // e.g. "433.9k"
   outputTokens: string; // e.g. "19.4k"

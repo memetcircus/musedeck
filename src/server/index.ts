@@ -16,6 +16,7 @@ import { MuseHttpServer } from "./http-server.js";
 import { MuseWsServer, type SurfaceMessage } from "./ws-server.js";
 import { TerminalSessionWatcher } from "../agent/terminal-session-watcher.js";
 import { extractVideoFrames, detectMotionDifference, buildTemporalStoryboard } from "../agent/video-storyboard.js";
+import { configManager } from "../config/config-manager.js";
 
 async function main() {
   console.log(`
@@ -33,6 +34,15 @@ async function main() {
 
   // 1. Initialize State Machine
   const stateMachine = new AgentStateMachine();
+
+  // Load configured credits & telemetry from persistent config
+  const initialCfg = configManager.load();
+  if (initialCfg.creditsRemaining) {
+    stateMachine.setApiUsage({
+      creditsRemaining: initialCfg.creditsRemaining,
+      spent: initialCfg.spent || "$1.99",
+    });
+  }
 
   // 2. Initialize Meta API Clients
   const metaClient = new MetaModelApiClient();

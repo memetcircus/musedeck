@@ -63,7 +63,7 @@ async function main() {
     SvgKeyRenderer.renderImgToCodeKey("idle"),
     SvgKeyRenderer.renderVidToCodeKey("idle"),
     SvgKeyRenderer.renderMascotSettingsKey("idle"),
-    SvgKeyRenderer.renderApiStatusKey("$149.97"),
+    SvgKeyRenderer.renderApiStatusKey("$148.01"),
 
     SvgKeyRenderer.renderRecordFlowKey("idle"),
     SvgKeyRenderer.renderMuseMemoryKey(),
@@ -110,7 +110,7 @@ async function main() {
   // 4. CREDITS & TELEMETRY SUBMENU
   const telemetryKeys = [
     SvgKeyRenderer.renderUpBackKey(),
-    SvgKeyRenderer.renderTelemetryCard("$149.97", "REMAINING", "#22c55e", "#4ade80", "CREDITS"),
+    SvgKeyRenderer.renderTelemetryCard("$148.01", "REMAINING", "#22c55e", "#4ade80", "CREDITS"),
     SvgKeyRenderer.renderTelemetryCard("$0.00", "TOTAL", "#38bdf8", "#7dd3fc", "SPEND"),
     SvgKeyRenderer.renderTelemetryCard("21", "CALLS", "#a855f7", "#c084fc", "REQUESTS"),
     SvgKeyRenderer.renderTelemetryCard("CONSOLE", "OPEN WEB", "#06b6d4", "#22d3ee", "BILLING ↗"),

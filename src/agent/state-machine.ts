@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import { AgentState, type DiffStats, type TelemetryData } from "./types.js";
+import { AgentState, type DiffStats, type TelemetryData, type ApiUsageStats } from "./types.js";
 
 export class AgentStateMachine extends EventEmitter {
   private state: AgentState = AgentState.IDLE;
@@ -15,6 +15,15 @@ export class AgentStateMachine extends EventEmitter {
   private lastSparkCode?: string;
   private connectedSurfaces = 0;
   private startTime = Date.now();
+  private apiUsage: ApiUsageStats = {
+    creditsRemaining: "$148.01",
+    spent: "$1.99",
+    model: "SPARK 1.3",
+    inputTokens: "433.9k",
+    outputTokens: "19.4k",
+    cacheHitRate: "57.7%",
+    totalRequests: 21,
+  };
 
   constructor() {
     super();
@@ -40,16 +49,31 @@ export class AgentStateMachine extends EventEmitter {
       connectedSurfaces: this.connectedSurfaces,
       uptimeSeconds: Math.floor((Date.now() - this.startTime) / 1000),
       timestamp: new Date().toISOString(),
-      apiUsage: {
-        creditsRemaining: "$149.97",
-        spent: "$0.00",
-        model: "SPARK 1.3",
-        inputTokens: "433.9k",
-        outputTokens: "19.4k",
-        cacheHitRate: "57.7%",
-        totalRequests: 21,
-      },
+      apiUsage: { ...this.apiUsage },
     };
+  }
+
+  setApiUsage(usage: Partial<ApiUsageStats>): void {
+    this.apiUsage = {
+      ...this.apiUsage,
+      ...usage,
+    };
+    this.emitTelemetry();
+  }
+
+  recordApiInference(inputTokens = 1200, outputTokens = 450, cost = 0.003): void {
+    const currentCreditsNum = parseFloat(this.apiUsage.creditsRemaining.replace("$", "")) || 148.01;
+    const currentSpentNum = parseFloat(this.apiUsage.spent.replace("$", "")) || 1.99;
+    const newCredits = Math.max(0, currentCreditsNum - cost);
+    const newSpent = currentSpentNum + cost;
+
+    this.apiUsage = {
+      ...this.apiUsage,
+      creditsRemaining: `$${newCredits.toFixed(2)}`,
+      spent: `$${newSpent.toFixed(2)}`,
+      totalRequests: (this.apiUsage.totalRequests || 21) + 1,
+    };
+    this.emitTelemetry();
   }
 
   setConnectedSurfaces(count: number): void {

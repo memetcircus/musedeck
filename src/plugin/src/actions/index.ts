@@ -793,7 +793,7 @@ export class ResetAction extends SingletonAction {
     super();
     this.bridge.onTelemetry((telemetry) => {
       const usage = telemetry.apiUsage;
-      const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
+      const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$148.01");
       for (const key of this.activeKeys) {
         if (!museBeamAnimator.isRunning && !isAnySubmenuActive()) {
           void key.setImage(img);
@@ -805,7 +805,7 @@ export class ResetAction extends SingletonAction {
 
   private renderKeyImage(key: KeyAction): void {
     const usage = this.bridge?.getTelemetry()?.apiUsage;
-    const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
+    const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$148.01");
     void key.setImage(img);
     void key.setTitle("");
   }
@@ -1663,7 +1663,7 @@ export class ApiStatusAction extends SingletonAction {
     if (this.bridge) {
       this.bridge.onTelemetry((telemetry) => {
         const usage = telemetry.apiUsage;
-        const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
+        const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$148.01");
         for (const key of this.activeKeys) {
           if (!museBeamAnimator.isRunning && !isAnySubmenuActive()) {
             void key.setImage(img);
@@ -1676,7 +1676,7 @@ export class ApiStatusAction extends SingletonAction {
 
   private renderKeyImage(key: KeyAction): void {
     const usage = this.bridge?.getTelemetry()?.apiUsage;
-    const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$149.97");
+    const img = SvgKeyRenderer.renderApiStatusKey(usage?.creditsRemaining ?? "$148.01");
     void key.setImage(img);
     void key.setTitle("");
   }
