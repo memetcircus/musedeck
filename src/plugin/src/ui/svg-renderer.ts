@@ -259,6 +259,104 @@ export class SvgKeyRenderer {
   }
 
   /**
+   * Key 8: Living Mascot Settings Key (col 3, row 1)
+   * Inspired by Meta Muse mascot with animated eye blinking & cyberpunk neon styling.
+   */
+  static renderMascotSettingsKey(expression: "idle" | "blink" | "thinking" = "idle"): string {
+    let eyesSvg = "";
+    if (expression === "idle") {
+      eyesSvg = `
+        <circle cx="61" cy="48" r="4.2" fill="#0f172a" />
+        <circle cx="62.5" cy="46.5" r="1.6" fill="#ffffff" />
+        <circle cx="83" cy="48" r="4.2" fill="#0f172a" />
+        <circle cx="84.5" cy="46.5" r="1.6" fill="#ffffff" />
+      `;
+    } else if (expression === "blink") {
+      eyesSvg = `
+        <path d="M 57 48 Q 61 43.5 65 48" fill="none" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+        <path d="M 79 48 Q 83 43.5 87 48" fill="none" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+      `;
+    } else if (expression === "thinking") {
+      eyesSvg = `
+        <path d="M 57 49 Q 61 43 65 49" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" />
+        <path d="M 79 49 Q 83 43 87 49" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" />
+      `;
+    }
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <defs>
+          <linearGradient id="mascotDeckBg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#180e2a"/>
+            <stop offset="100%" stop-color="#080412"/>
+          </linearGradient>
+          <linearGradient id="mascotHoodGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fbf7ee"/>
+            <stop offset="100%" stop-color="#eddcc6"/>
+          </linearGradient>
+          <linearGradient id="mascotFaceGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fffdfa"/>
+            <stop offset="100%" stop-color="#fdf0dd"/>
+          </linearGradient>
+          <filter id="mascotNeonGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+          </filter>
+        </defs>
+
+        <rect width="144" height="144" rx="26" fill="url(#mascotDeckBg)" stroke="#c084fc" stroke-width="3"/>
+        <circle cx="72" cy="50" r="42" fill="#c084fc" fill-opacity="0.16"/>
+
+        <path d="M 37 87 C 37 66, 41 24, 72 24 C 103 24, 107 66, 107 87" 
+              fill="none" stroke="#c084fc" stroke-width="6" stroke-linecap="round" filter="url(#mascotNeonGlow)" opacity="0.6"/>
+
+        <path d="M 38 88 C 38 67, 42 25, 72 25 C 102 25, 106 67, 106 88 C 96 90.5, 48 90.5, 38 88 Z" 
+              fill="url(#mascotHoodGrad)" stroke="#c084fc" stroke-width="1.8" />
+
+        <path d="M 48 52 C 48 34, 96 34, 96 52 C 96 69, 48 69, 48 52 Z" 
+              fill="url(#mascotFaceGrad)" stroke="#eed5b7" stroke-width="1" />
+
+        <circle cx="55" cy="56" r="6" fill="#f43f5e" fill-opacity="0.35" />
+        <circle cx="89" cy="56" r="6" fill="#f43f5e" fill-opacity="0.35" />
+
+        ${eyesSvg}
+
+        <path d="M 68 55 Q 72 58.5 76 55" fill="none" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+
+        <text x="72" y="109" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">MUSE</text>
+        <text x="72" y="128" fill="#c084fc" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">SETTINGS</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Render Settings / Model Submenu Card
+   */
+  static renderSettingsCard(
+    line1: string,
+    line2: string,
+    borderColor: string,
+    textColor: string,
+    isActive = false
+  ): string {
+    const l1Size = line1.length > 7 ? 20 : 25;
+    const l2Size = line2.length > 7 ? 20 : 25;
+    const activeBadge = isActive
+      ? `<rect x="24" y="14" width="96" height="20" rx="10" fill="#22c55e" fill-opacity="0.2" stroke="#22c55e" stroke-width="1.5"/>
+         <text x="72" y="28" fill="#4ade80" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">ACTIVE</text>`
+      : "";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#070a16" stroke="${borderColor}" stroke-width="${isActive ? 4 : 2.5}"/>
+        <circle cx="72" cy="72" r="54" fill="${borderColor}" fill-opacity="${isActive ? 0.14 : 0.06}"/>
+        ${activeBadge}
+        <text x="72" y="${isActive ? 68 : 58}" fill="#ffffff" font-size="${l1Size}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
+        <text x="72" y="${isActive ? 102 : 94}" fill="${textColor}" font-size="${l2Size}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>
+      </svg>
+    `);
+  }
+
+  /**
    * Key 2: Diff Summary Key (Legacy)
    */
   static renderDiffKey(telemetry: TelemetryData): string {

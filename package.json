@@ -10,6 +10,7 @@
     "build:server": "tsc -p tsconfig.server.json",
     "build:plugin": "rollup -c rollup.config.mjs",
     "build": "npm run build:server && npm run build:plugin",
+    "pack": "npm run build && npx @elgato/cli pack com.memetcircus.musedeck.sdPlugin -o dist/",
     "test:agent": "tsx test/test-agent.ts",
     "test:meta": "tsx test/test-meta.ts"
   },

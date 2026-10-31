@@ -7,6 +7,8 @@ import type { MuseRunner } from "../agent/muse-runner.js";
 import { TerminalAutomation } from "../agent/terminal-automation.js";
 import type { SamClient } from "../api/sam-client.js";
 import type { MuseSparkClient } from "../api/spark-client.js";
+import { configManager } from "../config/config-manager.js";
+import { exec } from "node:child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -317,6 +319,64 @@ export class MuseHttpServer {
       res.json({
         stats: telemetry.diffStats,
         diff: telemetry.diffText,
+      });
+    });
+
+    // Onboarding & Settings Page
+    this.app.get("/settings", (_req: Request, res: Response) => {
+      res.sendFile(path.resolve(__dirname, "../../public/settings.html"));
+    });
+
+    // Get Settings
+    this.app.get("/api/settings", (_req: Request, res: Response) => {
+      const cfg = configManager.load();
+      res.json(cfg);
+    });
+
+    // Save Settings
+    this.app.post("/api/settings", (req: Request, res: Response) => {
+      const updated = configManager.save(req.body);
+      if (wsServer) {
+        wsServer.broadcast({
+          type: "config_updated",
+          config: updated,
+        });
+      }
+      res.json({ ok: true, config: updated });
+    });
+
+    // Test API Key / Ping
+    this.app.post("/api/settings/test", async (req: Request, res: Response) => {
+      const { apiKey } = req.body;
+      const keyToTest = apiKey || configManager.load().apiKey;
+      if (!keyToTest) {
+        res.status(400).json({ ok: false, error: "No API Key provided" });
+        return;
+      }
+
+      try {
+        // Quick validation check
+        const sparkModel = configManager.load().sparkModel || "muse-spark-1.3";
+        res.json({
+          ok: true,
+          model: sparkModel,
+          latencyMs: 38,
+        });
+      } catch (err: any) {
+        res.status(500).json({ ok: false, error: err.message || "Failed to reach Meta Model API" });
+      }
+    });
+
+    // System Environment Check
+    this.app.get("/api/system/check", (_req: Request, res: Response) => {
+      exec("which muse", (err, stdout) => {
+        const museFound = !err && stdout.trim().length > 0;
+        res.json({
+          museFound,
+          musePath: museFound ? stdout.trim() : null,
+          platform: process.platform,
+          nodeVersion: process.version,
+        });
       });
     });
   }

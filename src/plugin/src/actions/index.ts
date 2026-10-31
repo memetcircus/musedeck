@@ -7,6 +7,7 @@ import { vidToCodeSubmenuManager } from "../ui/vid-to-code-submenu.js";
 import { gitSubmenuManager } from "../ui/git-submenu.js";
 import { memorySubmenuManager } from "../ui/memory-submenu.js";
 import { opsSubmenuManager } from "../ui/ops-submenu.js";
+import { settingsSubmenuManager } from "../ui/settings-submenu.js";
 import {
   action,
   SingletonAction,
@@ -37,7 +38,8 @@ export function isAnySubmenuActive(): boolean {
     vidToCodeSubmenuManager.isActive ||
     gitSubmenuManager.isActive ||
     memorySubmenuManager.isActive ||
-    opsSubmenuManager.isActive
+    opsSubmenuManager.isActive ||
+    settingsSubmenuManager.isActive
   );
 }
 
@@ -45,6 +47,11 @@ function checkSubmenuKeyDown(ev: any): boolean {
   const payload = ev.payload as any;
   const col = payload?.coordinates?.column ?? 0;
   const row = payload?.coordinates?.row ?? 0;
+
+  if (settingsSubmenuManager.isActive) {
+    void settingsSubmenuManager.handleKeyDown(col, row);
+    return true;
+  }
 
   if (opsSubmenuManager.isActive) {
     void opsSubmenuManager.handleKeyDown(col, row);
@@ -190,6 +197,8 @@ function registerDeckKey(
     memorySubmenuManager.render();
   } else if (telemetrySubmenuManager.isActive) {
     telemetrySubmenuManager.render();
+  } else if (settingsSubmenuManager.isActive) {
+    settingsSubmenuManager.render();
   } else if (!museBeamAnimator.isRunning || excludeFromAnimation) {
     restore();
   }
@@ -221,6 +230,9 @@ function unregisterDeckKey(ev: WillDisappearEvent): void {
   if (telemetrySubmenuManager.isActive) {
     console.log("⚠️ [Submenu] Key disappearing while submenu active -> force-closing submenu to prevent stuck state");
     telemetrySubmenuManager.forceClose();
+  }
+  if (settingsSubmenuManager.isActive) {
+    settingsSubmenuManager.forceClose();
   }
 }
 
@@ -699,13 +711,42 @@ export class RunMuseAction extends SingletonAction {
   }
 }
 
-// --- KEY 8 (PAGE 1: COL 3, ROW 1): RESERVED BLANK TILE ---
+// --- KEY 8 (PAGE 1: COL 3, ROW 1): LIVING MUSE MASCOT SETTINGS KEY ---
 @action({ UUID: "com.memetcircus.musedeck.halt" })
 export class HaltAction extends SingletonAction {
   private activeKeys = new Set<KeyAction>();
+  private blinkTimer: NodeJS.Timeout | null = null;
 
   constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
+  }
+
+  private startBlinking(): void {
+    if (this.blinkTimer) return;
+    this.blinkTimer = setInterval(() => {
+      if (isAnySubmenuActive() || museBeamAnimator.isRunning) return;
+      // Close eyes (blink)
+      const blinkImg = SvgKeyRenderer.renderMascotSettingsKey("blink");
+      for (const key of this.activeKeys) {
+        void key.setImage(blinkImg);
+      }
+
+      // Re-open eyes after 220ms
+      setTimeout(() => {
+        if (isAnySubmenuActive() || museBeamAnimator.isRunning) return;
+        const idleImg = SvgKeyRenderer.renderMascotSettingsKey("idle");
+        for (const key of this.activeKeys) {
+          void key.setImage(idleImg);
+        }
+      }, 220);
+    }, 4200);
+  }
+
+  private stopBlinking(): void {
+    if (this.blinkTimer) {
+      clearInterval(this.blinkTimer);
+      this.blinkTimer = null;
+    }
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
@@ -714,7 +755,7 @@ export class HaltAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderEmptyTile());
+          void ev.action.setImage(SvgKeyRenderer.renderMascotSettingsKey("idle"));
           void ev.action.setTitle("");
         },
         false,
@@ -722,13 +763,15 @@ export class HaltAction extends SingletonAction {
         1
       );
       if (!isAnySubmenuActive()) {
-        void ev.action.setImage(SvgKeyRenderer.renderEmptyTile());
+        void ev.action.setImage(SvgKeyRenderer.renderMascotSettingsKey("idle"));
         void ev.action.setTitle("");
       }
+      this.startBlinking();
     }
   }
 
   override onWillDisappear(ev: WillDisappearEvent): void {
+    this.stopBlinking();
     unregisterDeckKey(ev);
     for (const key of this.activeKeys) {
       if (key.id === ev.action.id) this.activeKeys.delete(key);
@@ -736,7 +779,13 @@ export class HaltAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    // Deliberately blank slot per user design (reserved for future feature)
+    if (checkSubmenuKeyDown(_ev)) return;
+    console.log("⚙️ [MUSE SETTINGS Mascot Key at 3,1] Opening Settings Submenu...");
+    if (settingsSubmenuManager.isActive) {
+      settingsSubmenuManager.close();
+    } else {
+      settingsSubmenuManager.open();
+    }
   }
 }
 
