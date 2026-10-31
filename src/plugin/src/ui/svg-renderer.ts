@@ -183,13 +183,18 @@ export class SvgKeyRenderer {
   /**
    * Render Upward Back key for submenus (pure vector retina SVG)
    */
-  static renderUpBackKey(): string {
+  static renderUpBackKey(isLocked = false): string {
+    const strokeColor = isLocked ? "#1e293b" : "#a855f7";
+    const circleFill = isLocked ? "#0f172a" : "#581c87";
+    const circleStroke = isLocked ? "#334155" : "#c084fc";
+    const arrowColor = isLocked ? "#475569" : "#ffffff";
+
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#a855f7" stroke-width="3"/>
-        <circle cx="72" cy="72" r="34" fill="#581c87" fill-opacity="0.4" stroke="#c084fc" stroke-width="2.5"/>
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="${strokeColor}" stroke-width="3"/>
+        <circle cx="72" cy="72" r="34" fill="${circleFill}" fill-opacity="0.4" stroke="${circleStroke}" stroke-width="2.5"/>
         <!-- Prominent Upward Arrow -->
-        <path d="M72 42 L52 62 M72 42 L92 62 M72 42 L72 98" fill="none" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M72 42 L52 62 M72 42 L92 62 M72 42 L72 98" fill="none" stroke="${arrowColor}" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     `);
   }
@@ -826,8 +831,34 @@ export class SvgKeyRenderer {
     title: string,
     subtitle: string,
     borderColor = "#0284c7",
-    textColor = "#ffffff"
+    textColor = "#ffffff",
+    isLocked = false
   ): string {
+    if (isLocked) {
+      const fontSize = title.length > 7 ? "21" : title.length > 5 ? "24" : "27";
+      return this.svgToDataUri(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+          <!-- Muted Locked Cyber Tile -->
+          <rect width="144" height="144" rx="24" fill="#070a12" stroke="#1e293b" stroke-width="2"/>
+          <rect width="144" height="144" rx="24" fill="#0f172a" fill-opacity="0.35"/>
+
+          <!-- Centered Sleek Padlock Icon -->
+          <g transform="translate(62, 18)">
+            <path d="M 10 0 C 4.5 0 0 4.5 0 10 L 0 14 L -2 14 C -3.1 14 -4 14.9 -4 16 L -4 28 C -4 29.1 -3.1 30 -2 30 L 22 30 C 23.1 30 24 29.1 24 28 L 24 16 C 24 14.9 23.1 14 22 14 L 20 14 L 20 10 C 20 4.5 15.5 0 10 0 Z M 10 4 C 13.3 4 16 6.7 16 10 L 16 14 L 4 14 L 4 10 C 4 6.7 6.7 4 10 4 Z" fill="#64748b" fill-opacity="0.9"/>
+          </g>
+
+          <!-- Dimmed Framework Title -->
+          <text x="72" y="77" fill="#64748b" font-size="${fontSize}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${title}</text>
+
+          <!-- Dimmed Divider Line -->
+          <line x1="20" y1="92" x2="124" y2="92" stroke="#1e293b" stroke-width="1.5" stroke-opacity="0.8"/>
+
+          <!-- Locked Status -->
+          <text x="72" y="117" fill="#475569" font-size="14.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">LOCKED</text>
+        </svg>
+      `);
+    }
+
     const fontSize = title.length > 7 ? "23" : title.length > 5 ? "26" : "29";
     const subFontSize = subtitle.length > 8 ? "15" : "17";
 
@@ -853,9 +884,10 @@ export class SvgKeyRenderer {
     title: string,
     subtitle: string,
     borderColor = "#a855f7",
-    textColor = "#ffffff"
+    textColor = "#ffffff",
+    isLocked = false
   ): string {
-    return this.renderImgToCodeOptionKey(title, subtitle, borderColor, textColor);
+    return this.renderImgToCodeOptionKey(title, subtitle, borderColor, textColor, isLocked);
   }
 
   static renderOpenCodeKey(isReady = false): string {

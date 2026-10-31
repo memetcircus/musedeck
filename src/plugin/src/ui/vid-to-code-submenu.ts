@@ -133,12 +133,6 @@ class VidToCodeSubmenuManager {
     }
   }
 
-  notifyAiming(): void {
-    if (!this.active) return;
-    this.isRecording = false;
-    this.startBannerAnimation("aiming", 350);
-  }
-
   private updateBannerKeys(): void {
     if (!this.active) return;
     for (let c = 0; c < 4; c++) {
@@ -160,6 +154,7 @@ class VidToCodeSubmenuManager {
     this.active = true;
     this.isProcessing = false;
     this.isRecording = false;
+    this.lastTappedCoord = null;
     this.countdownSeconds = 5;
     this.hasGeneratedCode = hasExistingComponent();
     this.bannerMode = "idle";
@@ -172,6 +167,7 @@ class VidToCodeSubmenuManager {
     this.active = false;
     this.isProcessing = false;
     this.isRecording = false;
+    this.lastTappedCoord = null;
     this.stopBannerAnimation();
     keyRegistry.restoreAll();
     console.log("🎬 [VidToCode] Submenu drawer closed -> Page 1 restored");
@@ -181,28 +177,42 @@ class VidToCodeSubmenuManager {
     this.active = false;
     this.isProcessing = false;
     this.isRecording = false;
+    this.lastTappedCoord = null;
     this.stopBannerAnimation();
+  }
+
+  notifyAiming(): void {
+    if (!this.active) return;
+    this.isProcessing = true;
+    this.isRecording = false;
+    this.startBannerAnimation("aiming", 350);
+    this.render();
   }
 
   notifyRecordingStarted(duration = 5): void {
     if (!this.active) return;
+    this.isProcessing = true;
     this.isRecording = true;
     this.countdownSeconds = duration;
     console.log(`🔴 [VidToCode] Screen recording started (${duration}s)`);
     this.startBannerAnimation("recording", 300);
+    this.render();
   }
 
   notifyCountdown(seconds: number): void {
     if (!this.active) return;
     this.countdownSeconds = seconds;
     this.updateBannerKeys();
+    this.render();
   }
 
   notifySynthesizing(): void {
     if (!this.active) return;
+    this.isProcessing = true;
     this.isRecording = false;
     console.log("⚡ [VidToCode] Flow recorded! Synthesizing animated component with Meta Muse Spark...");
     this.startBannerAnimation("spark", 350);
+    this.render();
   }
 
   notifyCodeGenerated(): void {
@@ -211,6 +221,7 @@ class VidToCodeSubmenuManager {
     this.hasGeneratedCode = true;
     this.isProcessing = false;
     this.isRecording = false;
+    this.lastTappedCoord = null;
     if (this.active) {
       this.render();
     }
@@ -223,13 +234,16 @@ class VidToCodeSubmenuManager {
     this.bannerMode = "idle";
     this.isProcessing = false;
     this.isRecording = false;
+    this.lastTappedCoord = null;
     this.render();
   }
 
   notifyPreviewLaunching(): void {
     if (!this.active) return;
     console.log("🔨 [VidToCode] Preview compilation in progress -> Animating banner");
+    this.isProcessing = true;
     this.startBannerAnimation("preview", 200);
+    this.render();
   }
 
   notifyPreviewLaunched(): void {
@@ -237,7 +251,9 @@ class VidToCodeSubmenuManager {
     console.log("✅ [VidToCode] PreviewApp launched on macOS!");
     this.stopBannerAnimation();
     this.bannerMode = "success";
+    this.isProcessing = false;
     this.updateBannerKeys();
+    this.render();
     setTimeout(() => {
       if (this.active) {
         this.bannerMode = "idle";
@@ -253,6 +269,7 @@ class VidToCodeSubmenuManager {
     this.bannerMode = "too_small";
     this.isProcessing = false;
     this.isRecording = false;
+    this.lastTappedCoord = null;
     this.updateBannerKeys();
     setTimeout(() => {
       if (this.active) {
@@ -269,6 +286,7 @@ class VidToCodeSubmenuManager {
     this.bannerMode = "static_screen";
     this.isProcessing = false;
     this.isRecording = false;
+    this.lastTappedCoord = null;
     this.updateBannerKeys();
     setTimeout(() => {
       if (this.active) {
@@ -283,7 +301,9 @@ class VidToCodeSubmenuManager {
     console.warn("⚠️ [VidToCode] Preview compilation failed:", error);
     this.stopBannerAnimation();
     this.bannerMode = "failed";
+    this.isProcessing = false;
     this.updateBannerKeys();
+    this.render();
     setTimeout(() => {
       if (this.active) {
         this.bannerMode = "idle";
@@ -302,18 +322,18 @@ class VidToCodeSubmenuManager {
       let image = "";
 
       if (row === 0 && col === 0) {
-        // (0, 0): BACK key
-        image = SvgKeyRenderer.renderUpBackKey();
+        // (0, 0): BACK key (dimmed when locked)
+        image = SvgKeyRenderer.renderUpBackKey(this.isProcessing);
       } else if (row === 1 && col === 4) {
         // (4, 1): OPEN CODE key - ONLY SHOWN AFTER CODE IS SYNTHESIZED!
-        if (this.hasGeneratedCode) {
+        if (this.hasGeneratedCode && !this.isProcessing) {
           image = SvgKeyRenderer.renderOpenCodeKey(true);
         } else {
           image = SvgKeyRenderer.renderEmptyTile();
         }
       } else if (row === 2 && col === 4) {
         // (4, 2): PREVIEW key - ONLY SHOWN AFTER CODE IS SYNTHESIZED!
-        if (this.hasGeneratedCode) {
+        if (this.hasGeneratedCode && !this.isProcessing) {
           image = SvgKeyRenderer.renderLivePreviewKey(true);
         } else {
           image = SvgKeyRenderer.renderEmptyTile();
@@ -330,12 +350,40 @@ class VidToCodeSubmenuManager {
         const keyCoord = `${col},${row}`;
         const option = VID_TO_CODE_OPTIONS[keyCoord];
         if (option) {
-          image = SvgKeyRenderer.renderVidToCodeOptionKey(
-            option.title,
-            option.subtitle,
-            option.borderColor,
-            option.textColor
-          );
+          const isTriggeredKey =
+            this.lastTappedCoord !== null &&
+            this.lastTappedCoord.col === col &&
+            this.lastTappedCoord.row === row;
+
+          if (this.isProcessing) {
+            if (isTriggeredKey) {
+              const sub = this.isRecording ? `REC ${this.countdownSeconds}s` : "AIMING...";
+              image = SvgKeyRenderer.renderVidToCodeOptionKey(
+                option.title,
+                sub,
+                "#38bdf8",
+                "#7dd3fc",
+                false
+              );
+            } else {
+              // Multiple Trigger Lock: lock all other framework options
+              image = SvgKeyRenderer.renderVidToCodeOptionKey(
+                option.title,
+                option.subtitle,
+                option.borderColor,
+                option.textColor,
+                true // isLocked = true
+              );
+            }
+          } else {
+            image = SvgKeyRenderer.renderVidToCodeOptionKey(
+              option.title,
+              option.subtitle,
+              option.borderColor,
+              option.textColor,
+              false
+            );
+          }
         } else {
           image = SvgKeyRenderer.renderEmptyTile();
         }
@@ -351,13 +399,7 @@ class VidToCodeSubmenuManager {
   async handleKeyDown(col: number, row: number): Promise<boolean> {
     if (!this.active) return false;
 
-    // 1. (0, 0): BACK -> Return to Page 1
-    if (col === 0 && row === 0) {
-      this.close();
-      return true;
-    }
-
-    // 2. (3, 2): STOP BUTTON DURING RECORDING
+    // Special exception: (3, 2) STOP BUTTON during recording is allowed so user can terminate capture early
     if (row === 2 && col === 3 && this.isRecording) {
       console.log("⏹️ [VidToCode] STOP button pressed during recording -> Stopping early");
       if (this.bridge) {
@@ -366,8 +408,21 @@ class VidToCodeSubmenuManager {
       return true;
     }
 
-    // 3. (4, 1): OPEN CODE
+    // Multiple Trigger Lock: When processing, strictly lock and ignore all other keypresses
+    if (this.isProcessing) {
+      console.warn(`🔒 [VidToCode] Multiple trigger locked! Ignoring key tap at (${col}, ${row}) while operation is in progress.`);
+      return true;
+    }
+
+    // 1. (0, 0): BACK -> Return to Page 1
+    if (col === 0 && row === 0) {
+      this.close();
+      return true;
+    }
+
+    // 2. (4, 1): OPEN CODE
     if (col === 4 && row === 1) {
+      if (!this.hasGeneratedCode) return true;
       console.log("👁️ [VidToCode] Open Code tapped -> Launching editor");
       if (this.bridge) {
         await this.bridge.openCode();
@@ -375,26 +430,28 @@ class VidToCodeSubmenuManager {
       return true;
     }
 
-    // 4. (4, 2): LIVE PREVIEW
+    // 3. (4, 2): LIVE PREVIEW
     if (col === 4 && row === 2) {
+      if (!this.hasGeneratedCode) return true;
       console.log("▶️ [VidToCode] Live Preview tapped -> Compiling & launching live preview");
+      this.isProcessing = true;
       this.startBannerAnimation("preview", 200);
+      this.render();
       if (this.bridge) {
         await this.bridge.runPreview();
       }
       return true;
     }
 
-    // 5. Banner keys (0..2, 2) ignore taps
+    // 4. Banner keys (0..2, 2) ignore taps
     if (row === 2 && col >= 0 && col < 4) {
       return true;
     }
 
-    // 6. Animation Target selected:
+    // 5. Animation Target selected:
     const keyCoord = `${col},${row}`;
     const option = VID_TO_CODE_OPTIONS[keyCoord];
     if (option) {
-      if (this.isProcessing) return true;
       this.isProcessing = true;
       this.lastTappedCoord = { col, row };
       this.hasGeneratedCode = false;
@@ -409,7 +466,8 @@ class VidToCodeSubmenuManager {
             "AIM +",
             "DRAG RECT",
             "#38bdf8",
-            "#7dd3fc"
+            "#7dd3fc",
+            false
           )
         );
       }
@@ -423,6 +481,7 @@ class VidToCodeSubmenuManager {
       } catch (err: any) {
         console.error("VidToCode dispatch failed:", err.message);
         this.isProcessing = false;
+        this.lastTappedCoord = null;
         this.notifyCancelled();
       }
       return true;

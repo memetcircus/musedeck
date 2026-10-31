@@ -148,6 +148,7 @@ class ImgToCodeSubmenuManager {
     this.active = true;
     this.hasGeneratedCode = hasExistingComponent();
     this.isProcessing = false;
+    this.lastTappedCoord = null;
     this.stopBannerAnimation();
     this.bannerMode = "idle";
     this.render();
@@ -159,6 +160,7 @@ class ImgToCodeSubmenuManager {
     this.bannerMode = "idle";
     this.hasGeneratedCode = false;
     this.isProcessing = false;
+    this.lastTappedCoord = null;
     this.active = false;
     keyRegistry.restoreAll();
   }
@@ -168,12 +170,14 @@ class ImgToCodeSubmenuManager {
     this.bannerMode = "idle";
     this.hasGeneratedCode = false;
     this.isProcessing = false;
+    this.lastTappedCoord = null;
     this.active = false;
     keyRegistry.restoreAll();
   }
 
   notifySynthesizing(): void {
     if (!this.active) return;
+    this.isProcessing = true;
     if (this.lastTappedCoord) {
       const { col, row } = this.lastTappedCoord;
       const keyObj = keyRegistry.all().find((k) => k.column === col && k.row === row);
@@ -185,13 +189,15 @@ class ImgToCodeSubmenuManager {
             "SPARKING",
             "WAITING API",
             "#f59e0b",
-            "#fde047"
+            "#fde047",
+            false
           )
         );
       }
     }
     // Start sweeping animation on the bottom 4 keys (0..3, 2): WAIT FOR MUSE SPARK
     this.startBannerAnimation("spark", 350);
+    this.render();
   }
 
   notifyCodeGenerated(): void {
@@ -199,6 +205,7 @@ class ImgToCodeSubmenuManager {
     this.bannerMode = "idle";
     this.hasGeneratedCode = true;
     this.isProcessing = false;
+    this.lastTappedCoord = null;
     if (this.active) {
       this.render();
     }
@@ -220,22 +227,27 @@ class ImgToCodeSubmenuManager {
             "NO UI",
             "SKIPPED",
             "#ef4444",
-            "#fca5a5"
+            "#fca5a5",
+            false
           )
         );
         setTimeout(() => {
+          this.lastTappedCoord = null;
           this.render();
         }, 1500);
         return;
       }
     }
+    this.lastTappedCoord = null;
     this.render();
   }
 
   notifyPreviewLaunching(): void {
     if (!this.active) return;
     console.log("🔨 [ImgToCode] Preview compilation in progress -> Animating bottom banner");
+    this.isProcessing = true;
     this.startBannerAnimation("preview", 200);
+    this.render();
   }
 
   notifyPreviewLaunched(): void {
@@ -243,7 +255,9 @@ class ImgToCodeSubmenuManager {
     console.log("✅ [ImgToCode] PreviewApp launched on macOS! Displaying success banner");
     this.stopBannerAnimation();
     this.bannerMode = "success";
+    this.isProcessing = false;
     this.updateBannerKeys();
+    this.render();
     setTimeout(() => {
       if (this.active) {
         this.bannerMode = "idle";
@@ -258,6 +272,7 @@ class ImgToCodeSubmenuManager {
     this.stopBannerAnimation();
     this.bannerMode = "too_small";
     this.isProcessing = false;
+    this.lastTappedCoord = null;
     this.updateBannerKeys();
     setTimeout(() => {
       if (this.active) {
@@ -272,7 +287,9 @@ class ImgToCodeSubmenuManager {
     console.warn("⚠️ [ImgToCode] Preview compilation failed:", error);
     this.stopBannerAnimation();
     this.bannerMode = "failed";
+    this.isProcessing = false;
     this.updateBannerKeys();
+    this.render();
     setTimeout(() => {
       if (this.active) {
         this.bannerMode = "idle";
@@ -291,18 +308,18 @@ class ImgToCodeSubmenuManager {
       let image = "";
 
       if (row === 0 && col === 0) {
-        // (0, 0): BACK key
-        image = SvgKeyRenderer.renderUpBackKey();
+        // (0, 0): BACK key (dimmed when locked)
+        image = SvgKeyRenderer.renderUpBackKey(this.isProcessing);
       } else if (row === 1 && col === 4) {
         // (4, 1): OPEN CODE key - ONLY SHOWN AFTER CODE IS SYNTHESIZED!
-        if (this.hasGeneratedCode) {
+        if (this.hasGeneratedCode && !this.isProcessing) {
           image = SvgKeyRenderer.renderOpenCodeKey(true);
         } else {
           image = SvgKeyRenderer.renderEmptyTile();
         }
       } else if (row === 2 && col === 4) {
         // (4, 2): PREVIEW key - ONLY SHOWN AFTER CODE IS SYNTHESIZED!
-        if (this.hasGeneratedCode) {
+        if (this.hasGeneratedCode && !this.isProcessing) {
           image = SvgKeyRenderer.renderLivePreviewKey(true);
         } else {
           image = SvgKeyRenderer.renderEmptyTile();
@@ -314,12 +331,39 @@ class ImgToCodeSubmenuManager {
         const keyCoord = `${col},${row}`;
         const option = IMG_TO_CODE_OPTIONS[keyCoord];
         if (option) {
-          image = SvgKeyRenderer.renderImgToCodeOptionKey(
-            option.title,
-            option.subtitle,
-            option.borderColor,
-            option.textColor
-          );
+          const isTriggeredKey =
+            this.lastTappedCoord !== null &&
+            this.lastTappedCoord.col === col &&
+            this.lastTappedCoord.row === row;
+
+          if (this.isProcessing) {
+            if (isTriggeredKey) {
+              image = SvgKeyRenderer.renderImgToCodeOptionKey(
+                option.title,
+                "SPARKING",
+                "#f59e0b",
+                "#fbbf24",
+                false
+              );
+            } else {
+              // Lock all other framework options
+              image = SvgKeyRenderer.renderImgToCodeOptionKey(
+                option.title,
+                option.subtitle,
+                option.borderColor,
+                option.textColor,
+                true // isLocked = true
+              );
+            }
+          } else {
+            image = SvgKeyRenderer.renderImgToCodeOptionKey(
+              option.title,
+              option.subtitle,
+              option.borderColor,
+              option.textColor,
+              false
+            );
+          }
         } else {
           image = SvgKeyRenderer.renderEmptyTile();
         }
@@ -335,6 +379,12 @@ class ImgToCodeSubmenuManager {
   async handleKeyDown(col: number, row: number): Promise<boolean> {
     if (!this.active) return false;
 
+    // Multiple Trigger Lock: When processing, strictly lock and ignore all keypresses
+    if (this.isProcessing) {
+      console.warn(`🔒 [ImgToCode] Multiple trigger locked! Ignoring key tap at (${col}, ${row}) while operation is in progress.`);
+      return true;
+    }
+
     // 1. (0, 0): BACK -> Return to Page 1
     if (col === 0 && row === 0) {
       this.close();
@@ -343,6 +393,7 @@ class ImgToCodeSubmenuManager {
 
     // 2. (4, 1): OPEN CODE in developer editor
     if (col === 4 && row === 1) {
+      if (!this.hasGeneratedCode) return true;
       console.log("👁️ [ImgToCode] Open Code tapped -> Launching editor");
       if (this.bridge) {
         await this.bridge.openCode();
@@ -352,8 +403,11 @@ class ImgToCodeSubmenuManager {
 
     // 3. (4, 2): LIVE PREVIEW in native macOS app / browser
     if (col === 4 && row === 2) {
+      if (!this.hasGeneratedCode) return true;
       console.log("▶️ [ImgToCode] Live Preview tapped -> Compiling & launching live preview");
+      this.isProcessing = true;
       this.startBannerAnimation("preview", 200);
+      this.render();
       if (this.bridge) {
         await this.bridge.runPreview();
       }
@@ -369,7 +423,6 @@ class ImgToCodeSubmenuManager {
     const keyCoord = `${col},${row}`;
     const option = IMG_TO_CODE_OPTIONS[keyCoord];
     if (option) {
-      if (this.isProcessing) return true;
       this.isProcessing = true;
       this.lastTappedCoord = { col, row };
       this.hasGeneratedCode = false; // Reset so preview/open buttons are completely invisible
@@ -387,7 +440,8 @@ class ImgToCodeSubmenuManager {
             "SNIP UI",
             "SELECT REGION",
             "#f59e0b",
-            "#fbbf24"
+            "#fbbf24",
+            false
           )
         );
       }
@@ -399,6 +453,7 @@ class ImgToCodeSubmenuManager {
       } catch (err: any) {
         console.error("Spark synthesis error:", err.message);
         this.isProcessing = false;
+        this.lastTappedCoord = null;
         this.stopBannerAnimation();
         this.bannerMode = "idle";
         this.render();

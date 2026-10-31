@@ -47,6 +47,8 @@ async function main() {
 
   // Track the most recently synthesized component file path (img-to-code or vid-to-code)
   let lastGeneratedFilePath: string | null = null;
+  let isOperationInProgress = false;
+  let isPreviewInProgress = false;
 
   const getActiveComponentFile = (): string | null => {
     if (lastGeneratedFilePath && fs.existsSync(lastGeneratedFilePath)) {
@@ -78,6 +80,11 @@ async function main() {
 
   const handleRunPreview = async (): Promise<boolean> => {
     console.log("▶️ [Bridge] Launching RUN_PREVIEW");
+    if (isPreviewInProgress || isOperationInProgress) {
+      console.warn("⚠️ [Bridge] Preview or synthesis operation already in progress. Ignoring duplicate RUN_PREVIEW.");
+      return false;
+    }
+    isPreviewInProgress = true;
     try {
       wsServer.broadcast({ type: "preview_launching" });
       const target = getActiveComponentFile();
@@ -98,6 +105,8 @@ async function main() {
       console.warn("Could not launch live preview:", err.message);
       wsServer.broadcast({ type: "preview_failed", error: err.message });
       return false;
+    } finally {
+      isPreviewInProgress = false;
     }
   };
 
@@ -232,6 +241,7 @@ async function main() {
 
       if (isStatic) {
         console.warn(`⚠️ [VidToCode] Static screen detected (${motionPercent.toFixed(2)}% change). Prompting user to use IMG TO CODE.`);
+        isOperationInProgress = false;
         await TerminalAutomation.sendSystemNotification(
           "Static screen detected. No motion found — please use IMG TO CODE instead.",
           "MuseDeck Vid to Code"
@@ -326,6 +336,8 @@ async function main() {
         type: "vid_spark_failed",
         error: err.message,
       } as any);
+    } finally {
+      isOperationInProgress = false;
     }
   };
 
@@ -373,6 +385,16 @@ async function main() {
 
       case "spark":
         console.log(`✨ [Bridge] Received SPARK (IMG TO CODE) command with target=${msg.target || "AUTO"}`);
+        if (isOperationInProgress) {
+          console.warn("⚠️ [Bridge] Synthesis/Recording operation already in progress. Ignoring duplicate SPARK request.");
+          wsServer.broadcast({
+            type: "spark_failed",
+            reason: "busy",
+            error: "Operation already in progress",
+          } as any);
+          break;
+        }
+        isOperationInProgress = true;
         try {
           // Always prompt interactive screen capture for fresh target
           const snipRes = await samClient.snipScreenRegion();
@@ -427,6 +449,8 @@ async function main() {
             reason: errMsg.includes("cancelled") || errMsg.includes("Escape") ? "cancelled" : "empty",
             error: errMsg,
           });
+        } finally {
+          isOperationInProgress = false;
         }
         break;
 
@@ -451,6 +475,15 @@ async function main() {
 
       case "vid_record": {
         const target = (msg.target as string) || "AUTO";
+        if (isOperationInProgress) {
+          console.warn("⚠️ [Bridge] Operation already in progress. Ignoring duplicate VID_RECORD trigger.");
+          wsServer.broadcast({
+            type: "vid_recording_cancelled",
+            error: "Operation already in progress",
+          } as any);
+          break;
+        }
+        isOperationInProgress = true;
         activeRecordingTarget = target;
         console.log(`🎬 [Bridge] Launching crosshair screen selection for target: ${target}`);
 
@@ -550,6 +583,7 @@ async function main() {
           // If user pressed ESC or cancelled, no valid video file exists
           if (code !== 0 || !fs.existsSync(videoPath) || fs.statSync(videoPath).size === 0) {
             console.log("ℹ️ [Bridge] Video selection was cancelled or no area selected.");
+            isOperationInProgress = false;
             wsServer.broadcast({ type: "vid_recording_cancelled" } as any);
             return;
           }
