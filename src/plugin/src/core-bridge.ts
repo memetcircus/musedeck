@@ -7,7 +7,6 @@ import { reviewSubmenuManager } from "./ui/review-submenu.js";
 import { sessionsSubmenuManager } from "./ui/sessions-submenu.js";
 import { imgToCodeSubmenuManager } from "./ui/img-to-code-submenu.js";
 import { vidToCodeSubmenuManager } from "./ui/vid-to-code-submenu.js";
-import { settingsSubmenuManager } from "./ui/settings-submenu.js";
 
 export interface FlowRecEvent {
   type: "aiming" | "started" | "countdown" | "too_small" | "pasted" | "cancelled";
@@ -245,9 +244,7 @@ export class StreamDeckCoreBridge {
           } else if (msg.type === "git_commit_result") {
             this.notifyGitCommitResult(msg.result);
           } else if (msg.type === "config_updated") {
-            if (settingsSubmenuManager.isActive) {
-              settingsSubmenuManager.render();
-            }
+            console.log("[Bridge] Config updated successfully");
           } else if (msg.type === "switch_page") {
             const page = typeof msg.page === "number" ? msg.page : 1;
             console.log(`[Bridge] Received switch_page command to page ${page}`);

@@ -7,7 +7,6 @@ import { vidToCodeSubmenuManager } from "../ui/vid-to-code-submenu.js";
 import { gitSubmenuManager } from "../ui/git-submenu.js";
 import { memorySubmenuManager } from "../ui/memory-submenu.js";
 import { opsSubmenuManager } from "../ui/ops-submenu.js";
-import { settingsSubmenuManager } from "../ui/settings-submenu.js";
 import {
   action,
   SingletonAction,
@@ -38,8 +37,7 @@ export function isAnySubmenuActive(): boolean {
     vidToCodeSubmenuManager.isActive ||
     gitSubmenuManager.isActive ||
     memorySubmenuManager.isActive ||
-    opsSubmenuManager.isActive ||
-    settingsSubmenuManager.isActive
+    opsSubmenuManager.isActive
   );
 }
 
@@ -47,11 +45,6 @@ function checkSubmenuKeyDown(ev: any): boolean {
   const payload = ev.payload as any;
   const col = payload?.coordinates?.column ?? 0;
   const row = payload?.coordinates?.row ?? 0;
-
-  if (settingsSubmenuManager.isActive) {
-    void settingsSubmenuManager.handleKeyDown(col, row);
-    return true;
-  }
 
   if (opsSubmenuManager.isActive) {
     void opsSubmenuManager.handleKeyDown(col, row);
@@ -197,8 +190,6 @@ function registerDeckKey(
     memorySubmenuManager.render();
   } else if (telemetrySubmenuManager.isActive) {
     telemetrySubmenuManager.render();
-  } else if (settingsSubmenuManager.isActive) {
-    settingsSubmenuManager.render();
   } else if (!museBeamAnimator.isRunning || excludeFromAnimation) {
     restore();
   }
@@ -230,9 +221,6 @@ function unregisterDeckKey(ev: WillDisappearEvent): void {
   if (telemetrySubmenuManager.isActive) {
     console.log("⚠️ [Submenu] Key disappearing while submenu active -> force-closing submenu to prevent stuck state");
     telemetrySubmenuManager.forceClose();
-  }
-  if (settingsSubmenuManager.isActive) {
-    settingsSubmenuManager.forceClose();
   }
 }
 
@@ -780,12 +768,16 @@ export class HaltAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    console.log("⚙️ [MUSE SETTINGS Mascot Key at 3,1] Opening Settings Submenu...");
-    if (settingsSubmenuManager.isActive) {
-      settingsSubmenuManager.close();
-    } else {
-      settingsSubmenuManager.open();
-    }
+    console.log("⚙️ [MUSE SETTINGS Mascot Key at 3,1] Launching Mission Control Web UI...");
+    exec("open http://localhost:3456/settings");
+
+    // Play an interactive happy blink on the physical Stream Deck key
+    const blinkImg = SvgKeyRenderer.renderMascotSettingsKey("blink");
+    void _ev.action.setImage(blinkImg);
+    setTimeout(() => {
+      const idleImg = SvgKeyRenderer.renderMascotSettingsKey("idle");
+      void _ev.action.setImage(idleImg);
+    }, 1200);
   }
 }
 
