@@ -1224,12 +1224,25 @@ export class SvgKeyRenderer {
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
             <rect width="144" height="144" rx="26" fill="#070b14" stroke="#ef4444" stroke-width="3"/>
-            <circle cx="72" cy="46" r="26" fill="#450a0a" stroke="#f87171" stroke-width="2.5"/>
-            <!-- Video Cam / Record Lens Icon -->
-            <circle cx="72" cy="46" r="14" fill="#ef4444"/>
-            <circle cx="72" cy="46" r="6" fill="#ffffff"/>
-            <text x="72" y="100" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REC FLOW</text>
-            <text x="72" y="122" fill="#fca5a5" font-size="14" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TO PROMPT</text>
+            <!-- Cinema Camera Silhouette -->
+            <g fill="#f87171">
+              <!-- Left Reel -->
+              <circle cx="53" cy="37" r="13"/>
+              <circle cx="53" cy="37" r="4.5" fill="#070b14"/>
+              <!-- Right Reel (Larger) -->
+              <circle cx="75" cy="32" r="16.5"/>
+              <circle cx="75" cy="32" r="5.5" fill="#070b14"/>
+              <!-- Camera Body -->
+              <rect x="49" y="49" width="40" height="28" rx="4"/>
+              <!-- Lens Funnel -->
+              <polygon points="89,58 101,51 101,75 89,68"/>
+              <!-- Lens Rim -->
+              <rect x="101" y="49" width="4" height="28" rx="1.5"/>
+              <!-- Tripod Mount -->
+              <polygon points="65,77 73,77 75,82 63,82"/>
+            </g>
+            <text x="72" y="104" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">VIDEO</text>
+            <text x="72" y="124" fill="#fca5a5" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">RECORD</text>
           </svg>
         `);
     }
