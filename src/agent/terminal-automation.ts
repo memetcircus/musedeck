@@ -532,8 +532,8 @@ end tell
   /**
    * Safely attach a recorded video flow directly into the active Muse Code terminal prompt.
    * - Focuses existing Muse terminal specifically (never touches random windows like TextEdit or plain shells).
-   * - If no Muse Code terminal exists, automatically launches a fresh one and attaches the video.
-   * - Places native file object on clipboard so the terminal renders the compact [video] pill.
+   * - If no Muse Code terminal exists, automatically launches a fresh one, waits for prompt readiness, and inserts the path.
+   * - Types the video link directly at the prompt cursor and copies it to clipboard.
    */
   static async pasteVideoAttachmentIntoMuseTerminal(videoPath: string): Promise<boolean> {
     const cleanPath = path.resolve(videoPath.trim());
@@ -542,40 +542,64 @@ end tell
       return false;
     }
 
-    // 1. Check if active Muse session exists and focus it specifically
+    // 1. Copy clean path to macOS clipboard
+    try {
+      await execAsync(`printf "%s " "${cleanPath}" | pbcopy`);
+      console.log(`📋 [Clipboard] Copied video path to macOS clipboard: ${cleanPath}`);
+    } catch (e: any) {
+      console.warn("Failed to set pbcopy:", e.message);
+    }
+
+    // 2. Check if active Muse session exists, or spawn a new one
     let hasMuseSession = await this.focusMuseTerminalWindow();
     if (!hasMuseSession) {
       console.log("💻 [Terminal] No active Muse Code terminal window found. Spawning new dedicated session...");
       await this.sendSystemNotification("Launching new Muse Code terminal session...", "MuseDeck");
       await this.launchMuseCodeTerminal(process.cwd());
-      await new Promise((r) => setTimeout(r, 1500));
-      hasMuseSession = await this.focusMuseTerminalWindow();
+
+      // Wait up to 5 seconds for the Terminal window to register and focus
+      for (let i = 0; i < 10; i++) {
+        await new Promise((r) => setTimeout(r, 400));
+        hasMuseSession = await this.focusMuseTerminalWindow();
+        if (hasMuseSession) break;
+      }
+      // Give the muse CLI process time to finish banner/init and present the interactive prompt
+      await new Promise((r) => setTimeout(r, 2200));
     }
 
-    if (!hasMuseSession) {
-      console.warn("⚠️ [Terminal] Could not find or spawn a dedicated Muse terminal.");
-      return false;
+    // Re-verify window focus
+    await this.focusMuseTerminalWindow();
+
+    // 3. Type video path directly into the terminal prompt cursor via native mac-type
+    const textToInsert = `${cleanPath} `;
+    const macTypeBin = this.getMacTypeBin();
+    if (macTypeBin) {
+      try {
+        await execAsync(`"${macTypeBin}" text "${textToInsert}"`);
+        console.log(`🎬 [Terminal] Typed video link at cursor: ${textToInsert}`);
+        await this.sendSystemNotification("Screen flow recorded and attached to Muse Code prompt.", "MuseDeck");
+        return true;
+      } catch (err: any) {
+        console.warn("Native mac-type typing failed, attempting AppleScript fallback:", err.message);
+      }
     }
 
-    // 2. Put native file object into clipboard and paste with ⌘V into focused Muse terminal
+    // 4. Fallback: AppleScript System Events keystroke
     const appleScript = `
 tell application "Terminal" to activate
 delay 0.08
-set the clipboard to (POSIX file "${this.escapeForAppleScript(cleanPath)}")
 tell application "System Events"
-  keystroke "v" using {command down}
-  delay 0.05
-  keystroke space
+  keystroke "${this.escapeForAppleScript(textToInsert)}"
 end tell
     `.trim();
 
     try {
       await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
-      console.log(`🎬 [Terminal] Attached recorded video [video] into Muse Code prompt: ${cleanPath}`);
+      console.log(`🎬 [Terminal] Typed video link via AppleScript into Muse Code prompt: ${cleanPath}`);
       await this.sendSystemNotification("Screen flow recorded and attached to Muse Code prompt.", "MuseDeck");
       return true;
     } catch (err: any) {
-      console.warn("Failed to paste video attachment into terminal:", err.message);
+      console.warn("Failed to insert video link into terminal:", err.message);
       return false;
     }
   }

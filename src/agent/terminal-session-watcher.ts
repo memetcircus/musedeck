@@ -270,17 +270,20 @@ export class TerminalSessionWatcher extends EventEmitter {
 
     if (isRunTerminal) {
       if (this.stateMachine.getState() !== AgentState.WAITING_APPROVAL) {
+        const wasExecuting = this.stateMachine.getState() === AgentState.EXECUTING;
         console.log("🏁 [SessionWatcher] Command completed / settled -> Agent READY");
         this.stateMachine.transition(AgentState.IDLE, "Terminal ready for input");
 
-        // Clean up temporary residue media files so disk space is never wasted
-        try {
-          const residuePath = "/tmp/musedeck/recorded_flow.mp4";
-          if (fs.existsSync(residuePath)) {
-            fs.unlinkSync(residuePath);
-            console.log("🧹 [SessionWatcher] Cleaned up residue screen recording: /tmp/musedeck/recorded_flow.mp4");
-          }
-        } catch {}
+        // Clean up temporary residue media files only after a command has actually executed and settled
+        if (wasExecuting) {
+          try {
+            const residuePath = "/tmp/musedeck/recorded_flow.mp4";
+            if (fs.existsSync(residuePath)) {
+              fs.unlinkSync(residuePath);
+              console.log("🧹 [SessionWatcher] Cleaned up residue screen recording after command execution: /tmp/musedeck/recorded_flow.mp4");
+            }
+          } catch {}
+        }
       }
       return;
     }
