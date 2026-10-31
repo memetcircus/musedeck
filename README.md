@@ -1,4 +1,4 @@
-# MuseDeck ⚡
+# MuseDeck
 
 > **Tactile Mission Control for Meta Muse Code CLI & Meta AI**  
 > Physical Elgato Stream Deck console bridging Muse Code CLI, Meta SAM 3.1, Muse Spark 1.3 & Voice Transcribe.
@@ -13,7 +13,7 @@
 
 ---
 
-## 🌟 Overview
+## Overview
 
 Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end repository refactoring, test generation across parallel git worktrees, and terminal automation. However, developer trust and velocity break down when agent execution becomes an opaque black box:
 * **Context Switching Friction**: Constant alt-tabbing between code editors, terminals, browsers, and documentation.
@@ -29,11 +29,11 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 
 ---
 
-## 📸 Primary Console (Page 1)
+## Primary Console (Page 1)
 
 ![MuseDeck Page 1 Master Console](assets/deck_page1.png)
 
-### 🎛️ Page 1 Key Layout
+### Page 1 Key Layout
 
 | Key [Col, Row] | Button | Function & Developer Capability |
 |:---:|:---:|---|
@@ -55,7 +55,7 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 
 ---
 
-## 📂 Submenu Consoles & Detailed Guides
+## Submenu Consoles & Detailed Guides
 
 ### 1. Human-in-the-Loop (HITL) Review Submenu
 When Muse Code generates file diffs and pauses for human verification, the top-left key pulses. Tapping it opens this dedicated confirmation modal:
@@ -153,15 +153,15 @@ Real-time hardware HUD tracking Meta Model API resource utilization and cloud in
 
 ---
 
-## 🎨 Multimodal Engine: Image-to-Code & Video-to-Code
+## Multimodal Engine: Image-to-Code & Video-to-Code
 
-### 🖼️ Image-to-Code (`IMG TO CODE` + SAM 3.1)
+### Image-to-Code (`IMG TO CODE` + SAM 3.1)
 1. **Interactive macOS Screen Snip:** Tapping `SCREENSHOT` activates native crosshair region selection.
 2. **Meta SAM 3.1 Segmentation:** Dispatched to Meta's **Segment Anything Model 3.1** via Meta Model API to isolate foreground UI elements and compute spatial bounding coordinates.
 3. **Cursor Injection:** Coordinates and image references are pasted directly into the active Muse CLI prompt without wiping user text.
 4. **Muse Spark 1.3 Synthesis:** Tapping `IMG TO CODE` feeds the isolated UI component to **Muse Spark 1.3** to synthesize clean React + Tailwind CSS, Flutter, or Streamlit frontend code.
 
-### 🎥 Video-to-Code (`VID TO CODE`)
+### Video-to-Code (`VID TO CODE`)
 Dynamic UI defects (broken animation curves, layout jitter, state desyncs) cannot be conveyed in static images:
 1. **One-Touch Workflow Recording:** Tapping `VIDEO RECORD` captures focused screen activity while reproducing the glitch.
 2. **Meta Files API:** The recorded video (`.mp4`) is automatically packaged and uploaded to the Meta Files API.
@@ -169,7 +169,7 @@ Dynamic UI defects (broken animation curves, layout jitter, state desyncs) canno
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 ```mermaid
 flowchart TD
@@ -208,7 +208,7 @@ flowchart TD
 
 ---
 
-## 🔄 Multimodal Data Pipeline
+## Multimodal Data Pipeline
 
 ```mermaid
 flowchart LR
@@ -237,7 +237,7 @@ flowchart LR
 
 ---
 
-## ⚖️ Human-in-the-Loop (HITL) Execution Sequence
+## Human-in-the-Loop (HITL) Execution Sequence
 
 ```mermaid
 sequenceDiagram
@@ -263,7 +263,7 @@ sequenceDiagram
 
 ---
 
-## ⚙️ Muse Settings & Web Mission Control (`http://localhost:3456/settings`)
+## Muse Settings & Web Mission Control (`http://localhost:3456/settings`)
 
 Tapping Key **[3, 1]** (`MUSE SETTINGS`) on your physical Stream Deck instantly opens the local **MuseDeck Mission Control Cockpit** in your default browser.
 
@@ -293,7 +293,7 @@ Tapping Key **[3, 1]** (`MUSE SETTINGS`) on your physical Stream Deck instantly 
 
 ---
 
-## 🚀 Quickstart
+## Quickstart
 
 ### 1. Prerequisites
 * macOS 13+ (Apple Silicon or Intel)
@@ -351,7 +351,7 @@ Restart the Stream Deck app, and **MuseDeck** will automatically load with the d
 
 ---
 
-## 🧪 Testing
+## Testing
 
 Run the automated test suites:
 ```bash
@@ -364,6 +364,6 @@ npm run test:meta
 
 ---
 
-## 🛡️ License
+## License
 
 Licensed under the [Apache-2.0 License](LICENSE).
