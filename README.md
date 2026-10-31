@@ -22,7 +22,7 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 
 **MuseDeck** solves this by transforming the **Elgato Stream Deck MK.2** into a dedicated, physical mission control console:
 1. **Physical Human-in-the-Loop (HITL) Review Gate**: When Muse Code pauses for confirmation, the top-left key pulses with a calm 650ms breathing alert. Tapping it surfaces the active terminal and opens a tactile Review Submenu (`APPROVE`, `ALWAYS`, `REJECT`, `FEEDBACK`).
-2. **Multimodal Visual Engineering (Image-to-Code & Video-to-Code)**: One-touch screen snip powered by **Meta SAM 3.1** component segmentation and frontend synthesis via **Muse Spark 1.3**. Plus, desktop interaction recording for dynamic UI bugs uploaded via Meta Files API for automated regression patching.
+2. **Multimodal Visual Engineering (Image-to-Code & Video-to-Code)**: One-touch screen snip powered by **Meta SAM 3.1** component segmentation and frontend synthesis via **Muse Spark 1.3**. Plus, 5-second desktop interaction recording with perceptual motion validation, 8-frame timecoded contact sheet assembly, and automated animated regression patching.
 3. **Voice Transcribe Streaming**: Physical `VOICE` key toggles hardware `Option+V` microphone transcription directly at the active terminal prompt with zero typing.
 4. **Session Switcher & History Drawer**: Physical session drawer monitoring active terminal tabs and scanning historical sessions across workspaces with high-contrast date badges (`TODAY`, `YESTRDY`, `OCT 29`).
 5. **Living Developer Memory & Ops Cockpit**: One-touch access to architecture docs, living prompt qualifiers (`BE HONEST`, `DONT CODE`, `SHORT`, `SHOW OPTS`), a 13-key Git dashboard, and an emergency `HALT` switch.
@@ -44,7 +44,7 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 | **[4,&nbsp;0]** | **SESSIONS** | Active session counter. Tap opens the tactile **13-Key Session Switcher & Drawer**. |
 | **[0,&nbsp;1]** | **SCREENSHOT** | Interactive macOS screen region snip. Dispatches to Meta SAM 3.1 to segment foreground UI components and injects coordinates at cursor. |
 | **[1,&nbsp;1]** | **IMG&nbsp;TO&nbsp;CODE** | Meta Muse Spark 1.3 visual frontend synthesizer. Transforms UI snips and mocks into clean React + Tailwind, Flutter, or Streamlit code. |
-| **[2,&nbsp;1]** | **VID&nbsp;TO&nbsp;CODE** | Video-to-Code bug diagnostic engine. Records desktop interactions, uploads via Meta Files API, analyzes transitions, and synthesizes regression patches. |
+| **[2,&nbsp;1]** | **VID&nbsp;TO&nbsp;CODE** | Video-to-Code engine. Records 5s UI interactions, runs perceptual motion checks, compiles an 8-frame timecoded filmstrip, and synthesizes animated fixes via Muse Spark 1.3. |
 | **[3,&nbsp;1]** | **MUSE&nbsp;SETTINGS** | Launches the local Web Mission Control configuration console in your browser (`http://localhost:3456`). |
 | **[4,&nbsp;1]** | **CREDITS&nbsp;HUD** | Live Meta Model API credits tracker (`$149.97`). Tap opens the **10-Key Telemetry Dashboard**. |
 | **[0,&nbsp;2]** | **VIDEO&nbsp;RECORD** | One-touch desktop video recording trigger for capturing reproducible bug flows and UI glitches. |
@@ -163,9 +163,10 @@ Real-time hardware HUD tracking Meta Model API resource utilization and cloud in
 
 ### Video-to-Code (`VID TO CODE`)
 Dynamic UI defects (broken animation curves, layout jitter, state desyncs) cannot be conveyed in static images:
-1. **One-Touch Workflow Recording:** Tapping `VIDEO RECORD` captures focused screen activity while reproducing the glitch.
-2. **Meta Files API:** The recorded video (`.mp4`) is automatically packaged and uploaded to the Meta Files API.
-3. **Temporal Multi-Frame Analysis:** Meta's multimodal pipeline analyzes frame transitions, pinpoints faulty CSS keyframes or reactive logic, and commits the regression patch directly to your repository.
+1. **One-Touch Workflow Recording:** Tapping `VID TO CODE` or `VIDEO RECORD` captures a focused 5-second screen recording of the interaction glitch.
+2. **Perceptual Motion Detection:** Evaluates pixel delta across keyframes using Sharp. If motion is static (< 1.5% delta), it advises switching to `IMG TO CODE` to prevent wasted tokens.
+3. **Temporal Filmstrip & Contact Sheet Assembly:** Extracts 8 sequential keyframes, overlays individual timecode badges (`#1  0.00s` to `#8  5.00s`), and stitches them into a unified 4×2 contact sheet (`flow_montage.png`) alongside a structured `flow_manifest.json`.
+4. **Multi-Frame Temporal Synthesis:** Dispatches the contact sheet and temporal timeline metadata to Meta Muse Spark 1.3 to analyze state transitions and synthesize reactive code or regression patches directly into the repository.
 
 ---
 
@@ -182,6 +183,7 @@ flowchart TD
         Plugin["Stream Deck Plugin (Node.js SDK)"]
         Server["Express REST API & WS Broadcaster"]
         Automator["Terminal Automation (AppleScript / Native C Engine)"]
+        Storyboard["Temporal Storyboard Engine (FFmpeg & Sharp)"]
     end
 
     subgraph MetaStack["Meta AI & CLI Stack"]
@@ -195,6 +197,7 @@ flowchart TD
     SD <-->|"Bidirectional WebSocket"| Plugin
     Plugin <-->|"WebSocket Telemetry & Action Dispatch"| Server
     Server --> Automator
+    Server --> Storyboard
     Automator -->|"Zero-latency keystrokes & window focus"| MuseCLI
     Server <-->|"REST & Polling"| MuseCLI
 
@@ -202,6 +205,7 @@ flowchart TD
     VoiceAPI -->|"Audio-to-text"| MuseCLI
 
     Server <-->|"Bounding segmentation"| SAM
+    Storyboard -->|"Timecoded 4×2 filmstrip & manifest"| Spark
     Server <-->|"Multimodal code synthesis"| Spark
     Server <-->|"Video frame diagnostic"| FilesAPI
 ```
@@ -214,13 +218,17 @@ flowchart TD
 flowchart LR
     subgraph Ingestion["Input Capture"]
         Snip["SAM 3.1 Screen Snip"]
-        Video["Desktop Video Recorder"]
+        Video["Desktop Video Recorder (5s)"]
         Voice["Option+V Microphone"]
+    end
+
+    subgraph Processing["Local Pre-Processing"]
+        Motion["Motion Delta Check"]
+        Filmstrip["Temporal Contact Sheet (8 Frames)"]
     end
 
     subgraph MetaProcessing["Meta Multimodal Processing"]
         SAM_Proc["SAM 3.1 Boundary Segmentation"]
-        Files_Proc["Meta Files API Chunked Upload"]
         Spark_Proc["Muse Spark 1.3 Code Engine"]
     end
 
@@ -231,7 +239,7 @@ flowchart LR
     end
 
     Snip --> SAM_Proc --> Spark_Proc --> Deck
-    Video --> Files_Proc --> Spark_Proc --> Patch
+    Video --> Motion --> Filmstrip --> Spark_Proc --> Patch
     Voice --> Term
 ```
 
@@ -355,11 +363,17 @@ Restart the Stream Deck app, and **MuseDeck** will automatically load with the d
 
 Run the automated test suites:
 ```bash
+# Run all automated test suites
+npm test
+
 # Test Agent State Machine, Transitions & HITL Gates
 npm run test:agent
 
 # Test Meta Model API Client, SAM 3.1 & Muse Spark Synthesis
 npm run test:meta
+
+# Test Temporal Storyboard, Motion Detection & Contact Sheet Assembly
+npm run test:storyboard
 ```
 
 ---
