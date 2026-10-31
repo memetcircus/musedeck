@@ -530,6 +530,57 @@ end tell
   }
 
   /**
+   * Safely attach a recorded video flow directly into the active Muse Code terminal prompt.
+   * - Focuses existing Muse terminal specifically (never touches random windows like TextEdit or plain shells).
+   * - If no Muse Code terminal exists, automatically launches a fresh one and attaches the video.
+   * - Places native file object on clipboard so the terminal renders the compact [video] pill.
+   */
+  static async pasteVideoAttachmentIntoMuseTerminal(videoPath: string): Promise<boolean> {
+    const cleanPath = path.resolve(videoPath.trim());
+    if (!fs.existsSync(cleanPath)) {
+      console.warn(`⚠️ [Terminal] Video file not found: ${cleanPath}`);
+      return false;
+    }
+
+    // 1. Check if active Muse session exists and focus it specifically
+    let hasMuseSession = await this.focusMuseTerminalWindow();
+    if (!hasMuseSession) {
+      console.log("💻 [Terminal] No active Muse Code terminal window found. Spawning new dedicated session...");
+      await this.sendSystemNotification("Launching new Muse Code terminal session...", "MuseDeck");
+      await this.launchMuseCodeTerminal(process.cwd());
+      await new Promise((r) => setTimeout(r, 1500));
+      hasMuseSession = await this.focusMuseTerminalWindow();
+    }
+
+    if (!hasMuseSession) {
+      console.warn("⚠️ [Terminal] Could not find or spawn a dedicated Muse terminal.");
+      return false;
+    }
+
+    // 2. Put native file object into clipboard and paste with ⌘V into focused Muse terminal
+    const appleScript = `
+tell application "Terminal" to activate
+delay 0.08
+set the clipboard to (POSIX file "${this.escapeForAppleScript(cleanPath)}")
+tell application "System Events"
+  keystroke "v" using {command down}
+  delay 0.05
+  keystroke space
+end tell
+    `.trim();
+
+    try {
+      await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      console.log(`🎬 [Terminal] Attached recorded video [video] into Muse Code prompt: ${cleanPath}`);
+      await this.sendSystemNotification("Screen flow recorded and attached to Muse Code prompt.", "MuseDeck");
+      return true;
+    } catch (err: any) {
+      console.warn("Failed to paste video attachment into terminal:", err.message);
+      return false;
+    }
+  }
+
+  /**
    * Type a prompt snippet directly into active Muse Terminal prompt at the cursor.
    * If pressEnter is true (e.g. for "GO!"), immediately executes with Enter.
    * Strictly verifies that an active Muse Code terminal exists before typing.
@@ -1329,7 +1380,10 @@ zipStorePath=wrapper/dists
    */
   static async sendSystemNotification(message: string, title = "MuseDeck"): Promise<void> {
     try {
-      const appleScript = `display notification "${this.escapeForAppleScript(message)}" with title "${this.escapeForAppleScript(title)}"`;
+      // Strictly strip any emojis or symbols to guarantee clean zero-emoji native macOS notifications
+      const cleanMsg = message.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F018}-\u{1F270}\u{2388}\u{200D}\u{FE0F}]/gu, "").trim();
+      const cleanTitle = title.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F018}-\u{1F270}\u{2388}\u{200D}\u{FE0F}]/gu, "").trim();
+      const appleScript = `display notification "${this.escapeForAppleScript(cleanMsg)}" with title "${this.escapeForAppleScript(cleanTitle)}"`;
       await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
     } catch (err: any) {
       console.warn("Could not display macOS notification:", err.message);

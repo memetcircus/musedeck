@@ -228,6 +228,17 @@ export class MuseHttpServer {
       res.json({ ok: true });
     });
 
+    // Prompt Flow Recording Endpoints
+    this.app.post("/api/flow/record", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "record_prompt_flow" as any });
+      res.json({ ok: true });
+    });
+
+    this.app.post("/api/flow/stop", (_req: Request, res: Response) => {
+      wsServer?.broadcast({ type: "stop_prompt_flow" as any });
+      res.json({ ok: true });
+    });
+
     this.app.post("/api/review/trigger-review", (_req: Request, res: Response) => {
       stateMachine.setWaitingApproval(
         {

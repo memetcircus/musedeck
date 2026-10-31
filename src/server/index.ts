@@ -158,6 +158,10 @@ async function main() {
   let activeCountdownTimer: NodeJS.Timeout | null = null;
   let activeRecordingTarget = "AUTO";
 
+  // Prompt Flow recording state
+  let activeFlowRecordingProcess: ChildProcess | null = null;
+  let activeFlowCountdownTimer: NodeJS.Timeout | null = null;
+
   const finishRecordingAndSynthesize = async (targetFramework: string) => {
     if (activeCountdownTimer) {
       clearInterval(activeCountdownTimer);
@@ -603,6 +607,147 @@ async function main() {
         break;
       }
 
+      case "record_prompt_flow": {
+        if (isOperationInProgress) {
+          console.warn("⚠️ [Bridge] Operation already in progress. Ignoring duplicate REC FLOW trigger.");
+          break;
+        }
+        isOperationInProgress = true;
+        console.log("🎬 [Bridge] Launching crosshair screen selection for prompt flow recording...");
+
+        // Broadcast aiming mode to Stream Deck immediately
+        wsServer.broadcast({ type: "flow_rec_aiming" } as any);
+
+        const flowVideoPath = "/tmp/musedeck/recorded_flow.mp4";
+        fs.mkdirSync(path.dirname(flowVideoPath), { recursive: true });
+        if (fs.existsSync(flowVideoPath)) {
+          try { fs.unlinkSync(flowVideoPath); } catch {}
+        }
+
+        try {
+          execSync("killall screencapture 2>/dev/null || true");
+          execSync("killall wait-mouse-release 2>/dev/null || true");
+        } catch {}
+
+        activeFlowRecordingProcess = spawn("screencapture", ["-i", "-s", "-v", "-V", "5", "-k", flowVideoPath]);
+
+        activeFlowRecordingProcess.stderr?.on("data", (d) => {
+          console.warn("[flow screencapture stderr]", d.toString().trim());
+        });
+
+        let flowRecordingStarted = false;
+        let flowMouseWaiterProcess: any = null;
+
+        const startFlowRecordingCountdown = () => {
+          if (flowRecordingStarted) return;
+          flowRecordingStarted = true;
+          console.log("🔴 [Bridge] Area selected. Starting 5s prompt flow recording...");
+          wsServer.broadcast({ type: "flow_rec_started", duration: 5 } as any);
+          void TerminalAutomation.sendSystemNotification(
+            "Starting screen recording (5s limit)...",
+            "MuseDeck"
+          );
+
+          let countdown = 5;
+          if (activeFlowCountdownTimer) clearInterval(activeFlowCountdownTimer);
+          activeFlowCountdownTimer = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+              wsServer.broadcast({ type: "flow_rec_countdown", seconds: countdown } as any);
+            } else {
+              clearInterval(activeFlowCountdownTimer!);
+              activeFlowCountdownTimer = null;
+            }
+          }, 1000);
+        };
+
+        const mouseWaiterPath = path.resolve(process.cwd(), "bin/wait-mouse-release");
+        const mouseWaiterSrc = path.resolve(process.cwd(), "scripts/wait-mouse-release.swift");
+        if (!fs.existsSync(mouseWaiterPath) && fs.existsSync(mouseWaiterSrc)) {
+          try {
+            fs.mkdirSync(path.dirname(mouseWaiterPath), { recursive: true });
+            execSync(`swiftc -O "${mouseWaiterSrc}" -o "${mouseWaiterPath}"`);
+          } catch {}
+        }
+        if (fs.existsSync(mouseWaiterPath)) {
+          flowMouseWaiterProcess = spawn(mouseWaiterPath);
+          flowMouseWaiterProcess.on("exit", (code: number) => {
+            flowMouseWaiterProcess = null;
+            if (code === 0 && activeFlowRecordingProcess) {
+              startFlowRecordingCountdown();
+            }
+          });
+        }
+
+        activeFlowRecordingProcess.on("exit", async (code: number) => {
+          activeFlowRecordingProcess = null;
+          if (flowMouseWaiterProcess) {
+            try { flowMouseWaiterProcess.kill(); } catch {}
+            flowMouseWaiterProcess = null;
+          }
+          if (activeFlowCountdownTimer) {
+            clearInterval(activeFlowCountdownTimer);
+            activeFlowCountdownTimer = null;
+          }
+
+          if (code !== 0 || !fs.existsSync(flowVideoPath) || fs.statSync(flowVideoPath).size === 0) {
+            console.log("ℹ️ [Bridge] Flow recording selection was cancelled or no area selected.");
+            isOperationInProgress = false;
+            wsServer.broadcast({ type: "flow_rec_cancelled" } as any);
+            return;
+          }
+
+          let vidWidth = 0;
+          let vidHeight = 0;
+          try {
+            const dimOut = execSync(
+              `/opt/homebrew/bin/ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "${flowVideoPath}" || ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "${flowVideoPath}"`
+            ).toString().trim();
+            const parts = dimOut.split("x");
+            if (parts.length >= 2) {
+              vidWidth = parseInt(parts[0], 10) || 0;
+              vidHeight = parseInt(parts[1], 10) || 0;
+            }
+          } catch {}
+
+          if (vidWidth > 0 && vidHeight > 0 && (vidWidth < 120 || vidHeight < 120)) {
+            console.warn(`⚠️ [FlowRec] Selected area too small: ${vidWidth}x${vidHeight}px (minimum is 120x120px)`);
+            try { fs.unlinkSync(flowVideoPath); } catch {}
+            await TerminalAutomation.sendSystemNotification(
+              `Selected area too small (${vidWidth}x${vidHeight}px). Minimum is 120x120px.`,
+              "MuseDeck"
+            );
+            wsServer.broadcast({ type: "flow_rec_too_small", width: vidWidth, height: vidHeight } as any);
+            isOperationInProgress = false;
+            return;
+          }
+
+          try {
+            console.log("🎬 [FlowRec] Attaching video flow to Muse terminal prompt...");
+            const attached = await TerminalAutomation.pasteVideoAttachmentIntoMuseTerminal(flowVideoPath);
+            if (attached) {
+              wsServer.broadcast({ type: "flow_rec_pasted" } as any);
+            } else {
+              wsServer.broadcast({ type: "flow_rec_cancelled" } as any);
+            }
+          } catch (err: any) {
+            console.error("Failed to attach video to terminal:", err);
+            wsServer.broadcast({ type: "flow_rec_cancelled" } as any);
+          } finally {
+            isOperationInProgress = false;
+          }
+        });
+        break;
+      }
+
+      case "stop_prompt_flow": {
+        console.log("⏹️ [Bridge] Early stop requested for prompt flow recording");
+        if (activeFlowRecordingProcess) {
+          activeFlowRecordingProcess.kill("SIGINT");
+        }
+        break;
+      }
+
       case "toggle_img_to_code":
       case "open_img_to_code":
       case "close_img_to_code":
@@ -621,6 +766,12 @@ async function main() {
       case "vid_synthesizing":
       case "vid_spark_completed":
       case "vid_spark_failed":
+      case "flow_rec_aiming":
+      case "flow_rec_started":
+      case "flow_rec_countdown":
+      case "flow_rec_too_small":
+      case "flow_rec_pasted":
+      case "flow_rec_cancelled":
       case "preview_launching":
       case "preview_launched":
       case "preview_failed":

@@ -8,6 +8,15 @@ import { sessionsSubmenuManager } from "./ui/sessions-submenu.js";
 import { imgToCodeSubmenuManager } from "./ui/img-to-code-submenu.js";
 import { vidToCodeSubmenuManager } from "./ui/vid-to-code-submenu.js";
 
+export interface FlowRecEvent {
+  type: "aiming" | "started" | "countdown" | "too_small" | "pasted" | "cancelled";
+  duration?: number;
+  seconds?: number;
+  width?: number;
+  height?: number;
+}
+export type FlowRecListener = (event: FlowRecEvent) => void;
+
 export class StreamDeckCoreBridge {
   private ws: WebSocket | null = null;
   private telemetry: TelemetryData = {
@@ -34,6 +43,7 @@ export class StreamDeckCoreBridge {
   };
 
   private telemetryListeners = new Set<(telemetry: TelemetryData) => void>();
+  private flowRecListeners: FlowRecListener[] = [];
   private httpUrl: string;
   private wsUrl: string;
   private reconnectTimer: NodeJS.Timeout | null = null;
@@ -64,6 +74,23 @@ export class StreamDeckCoreBridge {
     this.telemetryListeners.add(listener);
     listener(this.telemetry);
     return () => this.telemetryListeners.delete(listener);
+  }
+
+  onFlowRec(listener: FlowRecListener): () => void {
+    this.flowRecListeners.push(listener);
+    return () => {
+      this.flowRecListeners = this.flowRecListeners.filter((l) => l !== listener);
+    };
+  }
+
+  notifyFlowRec(event: FlowRecEvent): void {
+    for (const listener of this.flowRecListeners) {
+      try {
+        listener(event);
+      } catch (err: any) {
+        console.error("Error in flowRecListener:", err);
+      }
+    }
   }
 
   async start(): Promise<void> {
@@ -184,6 +211,18 @@ export class StreamDeckCoreBridge {
           } else if (msg.type === "preview_failed") {
             imgToCodeSubmenuManager.notifyPreviewFailed(msg.error);
             vidToCodeSubmenuManager.notifyPreviewFailed(msg.error);
+          } else if (msg.type === "flow_rec_aiming") {
+            this.notifyFlowRec({ type: "aiming" });
+          } else if (msg.type === "flow_rec_started") {
+            this.notifyFlowRec({ type: "started", duration: msg.duration });
+          } else if (msg.type === "flow_rec_countdown") {
+            this.notifyFlowRec({ type: "countdown", seconds: msg.seconds });
+          } else if (msg.type === "flow_rec_too_small") {
+            this.notifyFlowRec({ type: "too_small", width: msg.width, height: msg.height });
+          } else if (msg.type === "flow_rec_pasted") {
+            this.notifyFlowRec({ type: "pasted" });
+          } else if (msg.type === "flow_rec_cancelled") {
+            this.notifyFlowRec({ type: "cancelled" });
           } else if (msg.type === "switch_page") {
             const page = typeof msg.page === "number" ? msg.page : 1;
             console.log(`[Bridge] Received switch_page command to page ${page}`);
@@ -298,6 +337,14 @@ export class StreamDeckCoreBridge {
 
   async stopVidRecording(): Promise<void> {
     await this.dispatch({ type: "vid_stop" }, "vid/stop");
+  }
+
+  async recordPromptFlow(): Promise<void> {
+    await this.dispatch({ type: "record_prompt_flow" }, "flow/record");
+  }
+
+  async stopPromptFlow(): Promise<void> {
+    await this.dispatch({ type: "stop_prompt_flow" }, "flow/stop");
   }
 
   async runTask(prompt: string): Promise<void> {

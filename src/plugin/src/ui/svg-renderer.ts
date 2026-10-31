@@ -1160,10 +1160,83 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 10: Prompt Task
+   * Key 10: Record Screen Flow directly to Terminal Prompt
    */
+  static renderRecordFlowKey(
+    status: "idle" | "aiming" | "recording" | "too_small" | "pasted" = "idle",
+    countdown = 5
+  ): string {
+    switch (status) {
+      case "aiming":
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#0c2333" stroke="#38bdf8" stroke-width="4"/>
+            <!-- Reticle Crosshair -->
+            <circle cx="72" cy="46" r="24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="5,4"/>
+            <circle cx="72" cy="46" r="6" fill="#38bdf8"/>
+            <line x1="72" y1="16" x2="72" y2="34" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+            <line x1="72" y1="58" x2="72" y2="76" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+            <line x1="42" y1="46" x2="60" y2="46" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+            <line x1="84" y1="46" x2="102" y2="46" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+            <text x="72" y="102" fill="#ffffff" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">AIM +</text>
+            <text x="72" y="122" fill="#7dd3fc" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">DRAG RECT</text>
+          </svg>
+        `);
+
+      case "recording":
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#450a0a" stroke="#ef4444" stroke-width="5"/>
+            <!-- Pulsing Record Circle -->
+            <circle cx="72" cy="44" r="22" fill="#ef4444"/>
+            <circle cx="72" cy="44" r="10" fill="#ffffff"/>
+            <text x="72" y="100" fill="#ffffff" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">REC ${countdown}s</text>
+            <text x="72" y="122" fill="#fecaca" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">TAP TO STOP</text>
+          </svg>
+        `);
+
+      case "too_small":
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#3f1313" stroke="#f59e0b" stroke-width="4"/>
+            <!-- Warning Triangle -->
+            <polygon points="72,20 96,62 48,62" fill="#f59e0b" stroke="#fde047" stroke-width="2.5" stroke-linejoin="round"/>
+            <text x="72" y="55" fill="#000000" font-size="22" font-weight="900" text-anchor="middle">!</text>
+            <text x="72" y="100" fill="#fef08a" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">TOO SMALL</text>
+            <text x="72" y="122" fill="#fca5a5" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">MIN 120x120</text>
+          </svg>
+        `);
+
+      case "pasted":
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#052e16" stroke="#22c55e" stroke-width="4.5"/>
+            <!-- Emerald Check Badge -->
+            <circle cx="72" cy="46" r="26" fill="#15803d" stroke="#86efac" stroke-width="2.5"/>
+            <path d="M58 46 L68 56 L86 38" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="72" y="100" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">[VIDEO]</text>
+            <text x="72" y="122" fill="#86efac" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">PASTED ✓</text>
+          </svg>
+        `);
+
+      case "idle":
+      default:
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#ef4444" stroke-width="3"/>
+            <circle cx="72" cy="46" r="26" fill="#450a0a" stroke="#f87171" stroke-width="2.5"/>
+            <!-- Video Cam / Record Lens Icon -->
+            <circle cx="72" cy="46" r="14" fill="#ef4444"/>
+            <circle cx="72" cy="46" r="6" fill="#ffffff"/>
+            <text x="72" y="100" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REC FLOW</text>
+            <text x="72" y="122" fill="#fca5a5" font-size="14" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TO PROMPT</text>
+          </svg>
+        `);
+    }
+  }
+
   static renderPromptKey(): string {
-    return CyberIcons["p1_prompt-task"];
+    return this.renderRecordFlowKey("idle");
   }
 
   /**

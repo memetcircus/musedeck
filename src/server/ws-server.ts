@@ -36,6 +36,14 @@ export type SurfaceMessage =
   | { type: "vid_synthesizing"; target?: string }
   | { type: "vid_spark_completed"; filename?: string; filePath?: string; framework?: string }
   | { type: "vid_spark_failed"; reason?: string; error?: string }
+  | { type: "record_prompt_flow" }
+  | { type: "stop_prompt_flow" }
+  | { type: "flow_rec_aiming" }
+  | { type: "flow_rec_started"; duration?: number }
+  | { type: "flow_rec_countdown"; seconds?: number }
+  | { type: "flow_rec_too_small"; width?: number; height?: number }
+  | { type: "flow_rec_pasted" }
+  | { type: "flow_rec_cancelled" }
   | { type: "toggle_sessions" }
   | { type: "switch_page"; page?: number }
   | { type: "launch_session"; projectDir?: string }

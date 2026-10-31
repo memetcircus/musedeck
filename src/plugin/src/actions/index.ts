@@ -768,35 +768,120 @@ export class ResetAction extends SingletonAction {
   }
 }
 
-// --- KEY 10: QUICK PROMPT PRESET ---
+// --- KEY 10: RECORD SCREEN FLOW TO PROMPT ---
 @action({ UUID: "com.memetcircus.musedeck.prompt-task" })
 export class PromptTaskAction extends SingletonAction {
+  private activeKeys = new Set<KeyAction>();
+  private status: "idle" | "aiming" | "recording" | "too_small" | "pasted" = "idle";
+  private countdown = 5;
+  private resetTimer: NodeJS.Timeout | null = null;
+
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
+
+    this.bridge.onFlowRec((event) => {
+      this.clearResetTimer();
+      switch (event.type) {
+        case "aiming":
+          this.status = "aiming";
+          this.countdown = 5;
+          this.updateVisuals();
+          break;
+
+        case "started":
+          this.status = "recording";
+          this.countdown = event.duration || 5;
+          this.updateVisuals();
+          break;
+
+        case "countdown":
+          this.status = "recording";
+          this.countdown = event.seconds ?? this.countdown;
+          this.updateVisuals();
+          break;
+
+        case "too_small":
+          this.status = "too_small";
+          this.updateVisuals();
+          this.resetTimer = setTimeout(() => {
+            this.status = "idle";
+            this.countdown = 5;
+            this.updateVisuals();
+          }, 1500);
+          break;
+
+        case "pasted":
+          this.status = "pasted";
+          this.updateVisuals();
+          this.resetTimer = setTimeout(() => {
+            this.status = "idle";
+            this.countdown = 5;
+            this.updateVisuals();
+          }, 2200);
+          break;
+
+        case "cancelled":
+          this.status = "idle";
+          this.countdown = 5;
+          this.updateVisuals();
+          break;
+      }
+    });
+  }
+
+  private clearResetTimer(): void {
+    if (this.resetTimer) {
+      clearTimeout(this.resetTimer);
+      this.resetTimer = null;
+    }
+  }
+
+  private updateVisuals(): void {
+    if (isAnySubmenuActive()) return;
+    const img = SvgKeyRenderer.renderRecordFlowKey(this.status, this.countdown);
+    for (const key of this.activeKeys) {
+      if (!museBeamAnimator.isRunning) {
+        void key.setImage(img);
+        void key.setTitle("");
+      }
+    }
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
       attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderPromptKey());
+          void ev.action.setImage(SvgKeyRenderer.renderRecordFlowKey(this.status, this.countdown));
+          void ev.action.setTitle("");
         },
         false,
         0,
         2
       );
+      this.updateVisuals();
     }
   }
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Refactor agent communication bridge to use zero-copy buffers");
+
+    if (this.status === "recording") {
+      console.log("⏹️ [PromptTaskAction] Stopping screen recording early");
+      await this.bridge.stopPromptFlow();
+    } else if (this.status === "idle") {
+      console.log("🔴 [PromptTaskAction] Triggering screen flow recording");
+      await this.bridge.recordPromptFlow();
+    }
   }
 }
 
