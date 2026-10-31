@@ -427,6 +427,37 @@ end tell
     }
   }
 
+  /**
+   * Retrieves active clipboard content from macOS.
+   */
+  static async getClipboardContent(): Promise<string> {
+    try {
+      const { stdout } = await execAsync("pbpaste 2>/dev/null || true");
+      return stdout ? stdout.trim() : "";
+    } catch {
+      return "";
+    }
+  }
+
+  /**
+   * Run an automated Ops command:
+   * If clipboard has content, incorporates it into the prompt.
+   * Otherwise uses the interactive fallbackPrompt.
+   */
+  static async runOpsAction(
+    actionName: string,
+    contextPromptBuilder: (context: string) => string,
+    fallbackPrompt: string,
+    rawCwd?: string
+  ): Promise<void> {
+    const clip = await this.getClipboardContent();
+    const hasContext = Boolean(clip && clip.length > 0 && clip.length < 5000);
+    const prompt = hasContext ? contextPromptBuilder(clip) : fallbackPrompt;
+
+    console.log(`🎯 [OpsAction / ${actionName}] Running prompt (hasContext=${hasContext}): ${prompt.slice(0, 100)}...`);
+    await this.runContextAction(prompt, rawCwd);
+  }
+
   static async bringTerminalToFront(): Promise<boolean> {
     return await this.focusMuseTerminalWindow();
   }

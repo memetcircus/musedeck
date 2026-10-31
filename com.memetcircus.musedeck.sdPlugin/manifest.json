@@ -130,10 +130,10 @@
       "States": [{ "Image": "imgs/actions/write-tests/key" }]
     },
     {
-      "Name": "Fix Bug",
+      "Name": "Muse Ops",
       "UUID": "com.memetcircus.musedeck.fix-bug",
       "Icon": "imgs/actions/fix-bug/icon",
-      "Tooltip": "Passes the latest runtime error or exception to Muse Code for automated patch generation.",
+      "Tooltip": "Developer operations console: Fix Error, Refactor, Optimize, Explain, Find Symbol, Code Review, Run Tests, Run Build, Type Check.",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/fix-bug/key" }]
     },

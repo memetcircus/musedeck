@@ -6,6 +6,7 @@ import { imgToCodeSubmenuManager } from "../ui/img-to-code-submenu.js";
 import { vidToCodeSubmenuManager } from "../ui/vid-to-code-submenu.js";
 import { gitSubmenuManager } from "../ui/git-submenu.js";
 import { memorySubmenuManager } from "../ui/memory-submenu.js";
+import { opsSubmenuManager } from "../ui/ops-submenu.js";
 import {
   action,
   SingletonAction,
@@ -35,7 +36,8 @@ export function isAnySubmenuActive(): boolean {
     imgToCodeSubmenuManager.isActive ||
     vidToCodeSubmenuManager.isActive ||
     gitSubmenuManager.isActive ||
-    memorySubmenuManager.isActive
+    memorySubmenuManager.isActive ||
+    opsSubmenuManager.isActive
   );
 }
 
@@ -43,6 +45,11 @@ function checkSubmenuKeyDown(ev: any): boolean {
   const payload = ev.payload as any;
   const col = payload?.coordinates?.column ?? 0;
   const row = payload?.coordinates?.row ?? 0;
+
+  if (opsSubmenuManager.isActive) {
+    void opsSubmenuManager.handleKeyDown(col, row);
+    return true;
+  }
 
   if (snippetsSubmenuManager.isActive) {
     void snippetsSubmenuManager.handleKeyDown(col, row);
@@ -122,6 +129,9 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
       return;
     }
     if (memorySubmenuManager.isActive) {
+      return;
+    }
+    if (opsSubmenuManager.isActive) {
       return;
     }
     if (sessionsSubmenuManager.isActive) {
@@ -953,37 +963,61 @@ export class WriteTestsAction extends SingletonAction {
   }
 }
 
-// --- KEY 12: FIX BUG / AUTO-DEBUG ---
+// --- KEY 12: MUSE OPS SUBMENU ---
 @action({ UUID: "com.memetcircus.musedeck.fix-bug" })
-export class FixBugAction extends SingletonAction {
+export class MuseOpsAction extends SingletonAction {
+  private activeKeys = new Set<KeyAction>();
+
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
       attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderFixBugKey());
+          void ev.action.setImage(SvgKeyRenderer.renderMuseOpsKey());
+          void ev.action.setTitle("");
         },
         false,
         2,
         2
       );
+      if (!isAnySubmenuActive()) {
+        void ev.action.setImage(SvgKeyRenderer.renderMuseOpsKey());
+        void ev.action.setTitle("");
+      }
     }
   }
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
+    if (opsSubmenuManager.isActive) {
+      opsSubmenuManager.forceClose();
+    }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Analyze recent runtime errors and generate automated patch");
+
+    if (opsSubmenuManager.isActive) {
+      console.log("🔙 [MuseOpsAction] Closing Muse Ops Submenu");
+      opsSubmenuManager.close();
+    } else {
+      console.log("🎯 [MuseOpsAction] Opening Muse Ops Submenu");
+      opsSubmenuManager.open();
+    }
   }
 }
+
+// Backwards compatibility alias
+export { MuseOpsAction as FixBugAction };
 
 // --- KEY 13: GIT COMMANDS SUBMENU ---
 @action({ UUID: "com.memetcircus.musedeck.commit-pr" })

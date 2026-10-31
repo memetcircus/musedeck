@@ -1265,10 +1265,49 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 12: Fix Bug Key
+   * Key 12: Muse Ops Key
    */
+  static renderMuseOpsKey(): string {
+    const crosshairB64 = "iVBORw0KGgoAAAANSUhEUgAAAFQAAABUCAYAAAAcaxDBAAAMC0lEQVR4nO1cC4xdVRXd5810+nNoy9CWtpSWllYUlW8FrIXUlCotgjZIFSsxARtMjIlICEEjiqiBmBpF/MRPo1B/iMYYKKISFUQMoC21mEL5Ftvysy39MC2dWWa9Wee9PWfumzLTDu+8cXbyct8759xzz113/87e+z6zzAhAScd3A7gcwBi2AQj1XlvDEqqgvgfA233bEPWRIicCOALAWfre1Nd5hqiYQ78DYKa+N4TIZydG6AIOAEab2U4zox49W33ZrTelnBc42szO0XGXNQjlDOgOcegcM2sPIaDeC2p0/XkSgN2UfQBXqK3ZMqccOTToONzMRpnZHjNbp7ZOy5xyBBTuSN1Jl+lotWVv6XMENNJTWl+Hma1RW/Z6NEdA4bhxj477rUEoR0CDjkeaWauZjTSzD2S83m6UM6CHyzDREP1JbUMifxBEMONDJ5c2BOXMoeNcW8MER3IEFDruzXydhZQzhza7tglJX7aUM4dudm1tlU4g5BzKq9veGF2ghOSheiseLXzJGajggyQKPHfmFDipC4cCaCIIIQSCsd99uCuK4GxQtKlCIYRXeS6AKfrdwXlyyjk114MrQwgd+n6KmS3STugVM/unmf1Fwyeb2WH6XgZQQeclDO0BGC+H/4YQwg4XqUJOHDtgBJcXAnAOgAcB7Ed3+oMbc6Zrvw7AuQBW6fdeABv0/bcA3g+AD+D/LsZ5OIBfoCetB3AtgLcl8VByMukqpZPHAfgIgM8B+Hcyxw0EFcDIQZ3Yg4LC4sqNDoCtAH4M4IMARqRWnOcBWKuxXy+YdyKAzwPY6eZ8GsDf2DcoQUWV21oBbHE3/quYzXRjm9z4mEomOKSbHcgcV9H9nAfAxwE85eanOlgY57XBQKiC8w0AjwLYB+ClmM5QX5M+FQvtgGsBcIcAulXjhiXjvF6eJ27tcHp2SaOkTnol6EYBLE/03KfUTsBKtTjUtd2p8+a7tlLCzaUINAsjAGzXOTR47QCW+TU1HKF6o9MBdAKg70j6rLiqJfUZE07jmDkAPgTgbp27EsBiAMf0cl7U1ScDuF/X3i/JaFzxR/XGfiYweGM/Uls38U705fsAfA3AY6hNFOffqYhsSjqn49RTlTHdp+tTf0/Sw8pxu31AUb9EAPCGSG/x/W48b3AkgE84a/2iXCi23au2RwCskBWP9ByARen+3j3Q6MdGnfqTojVkS87dOUI3G0X9llpgOveH1vyrMiw+EMI20vXOW3gr3SgAu9R3YzRQbs74YM/XuLiBmJsas2zJccblzig8LMBKXtTi3hvAcTJcb07mapHhoodAuiY1ZBLhWyKocV7XH8X/pxJ7flapralRuHO0djBRzJaq3/uNlUAGgOOdLow+ZlnP6bha81yrMcPUFx9eyXkCV0YPQH1lTwDAO53ot0ePIWtQnWU/VqJObmAAY1aRIUj8zm7c69oIyB8FxpcLHkwEfzyAJ+UulcN87oHFdXFbGumX8fyBwOJQWbwI0CxFsPh7TQjhMUWXOr3BYkQpgqMQXo8SG4XyGIVi5KipRn8phPCCmV2ke5mSRvYF7hfMbLvmol6dpYhXnhbfieBK5yotdcYictN89f/8tXAJgIc0/tRa4x03TouBkaQ/in40cHSnpqsvP0DdDQ13wQ8apBPUXgZU37knJ50W+2rMGcevViSqx86qaA0HeNgX6tqvAFjQ2/UPCSXGID7VUi9t8dOsT6vzE7co1Bb35Bw3CsA2APfE7WIMdNQCjAaLnoAHzRlAv96gBzpJ86ZjmtQfOX6lrjnCXT/9RMmKayzCxG9/y+urKHlFuWOkm/oppaI2UmcUOavqsLtCCNsScOhfjjWzm6Qze+jNuMCoU0MI/0nWVznGU9y5XN8k1UPtko71Y6gzmfg7mVUpTLkcgpqpuKbKvZSRl4ImIER5q5lx77uJlcNS5kxPUExoZF6VkdinCWfq97uc8aDIX2xmszWGlvVMfV+o+CdvfLjm43XvDSFsqpEy6Qa+fMxWles8S7CUb+K4MUyJUGLEBLzWGDOjHo7+7lQAl5rZUSo553VHKl29Qff2kpnt1kPimH8oE8uaq+eV75oWQqCvPdfMnjazbd4aflI5HF78Ck0Yk2QvqDS7U0+1pO9wGUnT7+CylX0h1oKuNbMvksM9kARWyThK1D0ERPOPExgE7r+62Wblpk4RI7QKEB77Q/udJBOTNgH6iJndamYbNfdqMiA5dJ6ZLTezF81srhZrOjFuA8tWUTfR0svFgxtHgHZoEUeqEoRzP6PFdIpjYskNf7+JXB4zmZVJu37HtPNdWi/njK5aSrFANyVKQyWm6qjd3dfLUk1PqJ1rfM7MJkp6V5gZDe7VIYTHARwmFdOlppTcGikunCrEzxXbE8i/6kbapCOnaPL1ZnacRK5ZXHKZmc0ws1+b2ZUCs13zUzXcb2Z3hhAW8+I0VJo3SBp2hxB43QOJPM8jI4x3UkG6Xmu5yswe0FskvKcn9XC/IrHmQ/2S1vyomW0Rl3GebQLxz1r7fIn6MKmAzVIrm6O6tIEgJdHaZUW/VdAfrTz9wP6KX6+uDoDnAayr0TdD/jHppv5e/0Cumnc7UrcpugvRTfAujv+UAxkS3fWad7vbe8foDkX+IXHreer38/sQXDy2KoBSATHm9N16huv76eLY78V0ievn+hhC7JDYr03OTV3BuBGp5UKWBjz3L5/uRAWAn5EfWslgJnHSx8WxhRUfbvxHFVMt6/WimIADj/4t6fxkjnj8TMPERZ2Du0yxSobVykYjcb4ZK6XuIS1PAx5uviCQoiN+rL+OGxfBukzj1qQPyXH7SQoHliv5cindKSS36KOkq66mnyd1UAmn6XiBbp5cPDblFjfuRKfzzupl3NHKppIWZ899/SF0cdh5Be0RhB8IgO/TmCV98chEXYdAnZeO0TWoNm7TXLfX4OLRqW60RiFUDVub6o3eSzF3fVHnMY/0bQFBsZ7k1EOzSwnH6NDRXl+qn2A+4HTy5ILMQIvW0jgg1iJ0ccZ06U1/k5Vkmou2Mz56WqL7zlYfjdLsZG7O+xtXJfJGtaeVJ20qAWqsbGdvhKprlEbpgzwDGoqHxW0XKAnXolQw5LvGWqVJyobGYob7nPHrpl81/0wZylgW2diEnjn4Hpyq77MF7mQBScBPd/HLfyUp5PUqhHhDLwUPs1WlN3ZQiHxSp0TRG1eQF6qZ0nWAdoojWQ3yTeXbi1SIT9AtVD3UokFl9VEV7dtUEXJ8ke+Z+KpNLiNKK/9EkcjqQXVLxun7CdqCUj9fXFT6M5A00Iq6pCdqCUj9fXFT6M5A00Iq6pC0a3yymc85KkEsY3PUFX0rUxVLuGAjZqoAJt5NtAr3s1wqgcpKOwCoJSP/3uwqKNCkQw3MHD6FqdScAeNbpwE+7MZUYQo0c0CaliqP6qHCmm+OYpP60021BB4f+LACV1XeefhjdHT/WceECN/YMP05jWZGyhDl7t53dJ7/2OgVWsnk7ZKBAvUgcB1cUu0oWeWpyDl2eSMvEpfynsY/JB42uE5xz/2DMttaLXrenh2ruigHqa8zs0uT6DNz+3aVWmO9hSM6U5hitHFIRMQh+IcOGIYQ9Uhvld5hsMBO6u0xztKdnbfzL6DtRT97OmIGv16+3iL/uF0fXDZdi6kAvc01UroaJtVFK/BW9J79Rf0Zwt/JS63wir3xDg50ra5GvKEnSKDO0V1/gakxXyL8cVWOebPbpdXs7IlQ5NGYz2cZEWnzNcJTPooYQ1rrdUExVY8CSZP2kur9uElzFisAtv2GsrCvz6tyvTxMXEtis/yEnG1Fx4NI6d6pwgdUlpJZa5Tu5UVaAJrTXAUpOJWXvpOcM6BhXVUJPgJS9Bc8ZUHMinpXhaVRAd0iPmoqzcl9vtgsMOsZaKlPdFWlI5PtK7gUHFnD9Xs2shGsIyvZPra1rbW3JWyBDVr4fFMsXmTp+hwxTObc/JPIHRzsV0iN3lqtLhjj04IiiPkHHaO2HqK/kckvj9c79LlfokJ3OT6mUMag7FfukP7o05/V6ynKBoStIMkJp4Dv0Oo81QnAke0LX++5nNIrI1z0eWovk3JNTb07+7TZryvaJB72+LUt/n9qyF/lsAbUuABmdp/78MH/XO6P5Wuh/PWEBinnRt1QAAAAASUVORK5CYII=";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <defs>
+          <linearGradient id="opsBg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#180e29"/>
+            <stop offset="100%" stop-color="#090514"/>
+          </linearGradient>
+        </defs>
+        <rect width="144" height="144" rx="26" fill="url(#opsBg)" stroke="#c084fc" stroke-width="3"/>
+        <circle cx="72" cy="48" r="38" fill="#a855f7" fill-opacity="0.12"/>
+        
+        <!-- Exact Clean Crosshair from user reference -->
+        <image href="data:image/png;base64,${crosshairB64}" x="36" y="12" width="72" height="72"/>
+
+        <text x="72" y="107" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">MUSE</text>
+        <text x="72" y="126" fill="#c084fc" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">OPS</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * Render Ops Submenu Card
+   */
+  static renderOpsCard(line1: string, line2: string, borderColor: string, textColor: string): string {
+    const l1Size = line1.length > 7 ? 20 : 25;
+    const l2Size = line2.length > 7 ? 20 : 25;
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#060913" stroke="${borderColor}" stroke-width="3"/>
+        <circle cx="72" cy="72" r="54" fill="${borderColor}" fill-opacity="0.08"/>
+        <text x="72" y="58" fill="#ffffff" font-size="${l1Size}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
+        <text x="72" y="94" fill="${textColor}" font-size="${l2Size}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>
+      </svg>
+    `);
+  }
+
   static renderFixBugKey(): string {
-    return CyberIcons["p1_fix-bug"];
+    return this.renderMuseOpsKey();
   }
 
   /**
