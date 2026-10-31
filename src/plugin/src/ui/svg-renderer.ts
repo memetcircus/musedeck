@@ -1554,9 +1554,11 @@ export class SvgKeyRenderer {
 
   /**
    * Page 1 Key 11: MUSE MEMORY Launcher (replaces Write Tests)
-   * Head profile facing left with exposed convoluted brain (bold iconic silhouette)
+   * Exact anatomical brain silhouette from user reference with two-line typography
    */
   static renderMuseMemoryKey(): string {
+    const brainB64 = "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";
+
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
         <defs>
@@ -1567,51 +1569,8 @@ export class SvgKeyRenderer {
         </defs>
         <rect width="144" height="144" rx="26" fill="url(#museMemBg)" stroke="#0ea5e9" stroke-width="3"/>
         
-        <!-- Head Profile Facing Left with Exposed Brain -->
-        <g transform="translate(68, 48)">
-          <!-- Head Silhouette (Facing Left) -->
-          <path d="M 28,42 
-                   C 32,30 35,16 35,0 
-                   C 35,-22 24,-40 0,-44 
-                   C -16,-46 -30,-38 -36,-26 
-                   C -39,-20 -40,-12 -45,-4 
-                   C -49,2 -55,4 -58,6 
-                   C -56,8 -52,9 -52,11 
-                   C -54,13 -56,14 -55,16 
-                   C -53,17 -50,17 -50,19 
-                   C -52,21 -53,23 -49,26 
-                   C -44,29 -36,30 -32,29 
-                   C -28,30 -24,40 -16,42
-                   Z" 
-                fill="#0c1e34" stroke="#38bdf8" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-
-          <!-- Exposed Brain (Inside the head) -->
-          <path d="M -16,-34 
-                   C -11,-39 -2,-39 4,-34 
-                   C 10,-39 19,-36 22,-29 
-                   C 27,-30 32,-24 31,-17 
-                   C 35,-12 34,-4 29,1 
-                   C 32,7 29,14 23,17 
-                   C 24,23 18,29 11,30 
-                   C 5,31 -1,32 -6,27 
-                   C -11,30 -18,27 -21,21 
-                   C -26,22 -32,17 -31,10 
-                   C -36,6 -35,-2 -31,-7 
-                   C -35,-13 -31,-21 -25,-23 
-                   C -26,-30 -22,-35 -16,-34 Z" 
-                fill="#ffffff" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
-                
-          <!-- Sulci Folds inside brain (dark lines) -->
-          <path d="M -8,-28 C -5,-24 0,-24 3,-27" fill="none" stroke="#0c1e34" stroke-width="2.8" stroke-linecap="round"/>
-          <path d="M 12,-23 C 16,-19 13,-14 10,-17" fill="none" stroke="#0c1e34" stroke-width="2.8" stroke-linecap="round"/>
-          <path d="M -18,-18 C -14,-15 -16,-8 -10,-11 C -6,-13 -4,-16 -1,-18" fill="none" stroke="#0c1e34" stroke-width="2.8" stroke-linecap="round"/>
-          <path d="M 0,-7 C 2,0 8,-2 11,-7" fill="none" stroke="#0c1e34" stroke-width="2.8" stroke-linecap="round"/>
-          <path d="M 18,-10 C 22,-6 20,1 15,-1" fill="none" stroke="#0c1e34" stroke-width="2.8" stroke-linecap="round"/>
-          <path d="M 18,8 C 13,6 12,13 8,14" fill="none" stroke="#0c1e34" stroke-width="2.8" stroke-linecap="round"/>
-          <path d="M -21,-3 C -16,0 -18,7 -12,4" fill="none" stroke="#0c1e34" stroke-width="2.8" stroke-linecap="round"/>
-          <path d="M -14,12 C -9,16 -4,11 -1,17" fill="none" stroke="#0c1e34" stroke-width="2.8" stroke-linecap="round"/>
-          <path d="M 4,20 C 8,17 11,21 7,24" fill="none" stroke="#0c1e34" stroke-width="2.8" stroke-linecap="round"/>
-        </g>
+        <!-- Exact Brain Vector Graphic from User Reference -->
+        <image href="data:image/png;base64,${brainB64}" x="31" y="15" width="82" height="70"/>
 
         <!-- Two-line uniform typography -->
         <text x="72" y="107" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">MUSE</text>
