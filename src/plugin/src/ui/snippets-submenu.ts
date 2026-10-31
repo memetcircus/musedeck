@@ -73,14 +73,6 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     textColor: "#f0fdf4",
     pressEnter: true,
   },
-  "4,1": {
-    line1: "TREE",
-    line2: "GRAPH",
-    subtitle: "WORKSPACE",
-    text: "Analyze workspace directory tree and dependency graph.",
-    borderColor: "#06b6d4",
-    textColor: "#cffafe",
-  },
 };
 
 class SnippetsSubmenuManager {
