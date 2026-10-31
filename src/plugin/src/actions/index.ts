@@ -952,32 +952,122 @@ export class FixBugAction extends SingletonAction {
 // --- KEY 13: COMMIT & PR ---
 @action({ UUID: "com.memetcircus.musedeck.commit-pr" })
 export class CommitPrAction extends SingletonAction {
+  private activeKeys = new Set<KeyAction>();
+  private status: "idle" | "no_focus" | "no_git" | "clean" | "committing" | "committed" = "idle";
+  private resetTimer: NodeJS.Timeout | null = null;
+
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
+
+    this.bridge.onGitCommitResult((result) => {
+      this.clearResetTimer();
+      switch (result) {
+        case "NO_FOCUS":
+          this.status = "no_focus";
+          this.updateVisuals();
+          this.resetTimer = setTimeout(() => {
+            this.status = "idle";
+            this.updateVisuals();
+          }, 1500);
+          break;
+
+        case "NO_GIT":
+          this.status = "no_git";
+          this.updateVisuals();
+          this.resetTimer = setTimeout(() => {
+            this.status = "idle";
+            this.updateVisuals();
+          }, 1500);
+          break;
+
+        case "CLEAN":
+          this.status = "clean";
+          this.updateVisuals();
+          this.resetTimer = setTimeout(() => {
+            this.status = "idle";
+            this.updateVisuals();
+          }, 2000);
+          break;
+
+        case "COMMITTING":
+          this.status = "committing";
+          this.updateVisuals();
+          this.resetTimer = setTimeout(() => {
+            this.status = "committed";
+            this.updateVisuals();
+            this.resetTimer = setTimeout(() => {
+              this.status = "idle";
+              this.updateVisuals();
+            }, 2500);
+          }, 3000);
+          break;
+
+        case "COMMITTED":
+          this.status = "committed";
+          this.updateVisuals();
+          this.resetTimer = setTimeout(() => {
+            this.status = "idle";
+            this.updateVisuals();
+          }, 2500);
+          break;
+
+        default:
+          this.status = "idle";
+          this.updateVisuals();
+          break;
+      }
+    });
+  }
+
+  private clearResetTimer(): void {
+    if (this.resetTimer) {
+      clearTimeout(this.resetTimer);
+      this.resetTimer = null;
+    }
+  }
+
+  private updateVisuals(): void {
+    if (isAnySubmenuActive()) return;
+    const img = SvgKeyRenderer.renderGitCommitKey(this.status);
+    for (const key of this.activeKeys) {
+      if (!museBeamAnimator.isRunning) {
+        void key.setImage(img);
+        void key.setTitle("");
+      }
+    }
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
       attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderCommitKey());
+          void ev.action.setImage(SvgKeyRenderer.renderGitCommitKey(this.status));
+          void ev.action.setTitle("");
         },
         false,
         3,
         2
       );
+      this.updateVisuals();
     }
   }
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Stage all verified changes, create a git commit, and generate a pull request summary");
+    if (this.status !== "idle") return; // prevent duplicate clicks while showing status
+
+    console.log("🌿 [CommitPrAction] Triggering safe git commit...");
+    await this.bridge.gitCommit();
   }
 }
 

@@ -1,4 +1,4 @@
-import { exec, spawn } from "node:child_process";
+import { exec, execSync, spawn } from "node:child_process";
 import { promisify } from "node:util";
 import * as path from "node:path";
 import * as fs from "node:fs";
@@ -602,6 +602,82 @@ end tell
       console.warn("Failed to insert video link into terminal:", err.message);
       return false;
     }
+  }
+
+  /**
+   * Safe Git Commit action with strict focus & repo guards:
+   * 1. Checks if Terminal.app is frontmost and focused on an active Muse terminal window.
+   *    If not focused (defocus): returns "NO_FOCUS" and notifies user.
+   * 2. Checks if current directory is a git repository.
+   *    If not: returns "NO_GIT" and notifies user.
+   * 3. Checks if working tree has any changes (`git status --porcelain`).
+   *    If clean: returns "CLEAN" and notifies user.
+   * 4. If changes exist: types prompt into active Muse terminal:
+   *    "Stage all verified changes, create a git commit with a clear semantic message, and push to origin."
+   *    and returns "COMMITTING".
+   */
+  static async executeSafeGitCommit(rawCwd?: string): Promise<"COMMITTING" | "CLEAN" | "NO_GIT" | "NO_FOCUS" | "ERROR"> {
+    const cwd = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
+
+    // 1. Defocus / Focus Check: Verify Terminal.app is frontmost and active window is Muse Code
+    const focusCheckScript = `
+tell application "System Events"
+  set frontApp to name of first application process whose frontmost is true
+end tell
+if frontApp is not "Terminal" then
+  return "DEFOCUS"
+else
+  tell application "Terminal"
+    if (count of windows) is 0 then return "DEFOCUS"
+    set winName to name of window 1
+    if winName contains "MUSE_ACTIVE_SESSION" or winName contains "muse-bin" or (winName contains "muse" and not (winName contains "codex")) then
+      return "FOCUSED_MUSE"
+    else
+      return "DEFOCUS"
+    end if
+  end tell
+end if
+    `.trim();
+
+    try {
+      const { stdout: focusStatus } = await execAsync(`osascript -e '${this.escapeForCli(focusCheckScript)}'`);
+      if (focusStatus.trim() !== "FOCUSED_MUSE") {
+        console.warn("⚠️ [GitCommit] Defocused: Terminal.app is not frontmost or not running Muse Code");
+        await this.sendSystemNotification("Muse Code terminal is not focused. Focus your active terminal to commit changes.", "MuseDeck");
+        return "NO_FOCUS";
+      }
+    } catch {
+      return "NO_FOCUS";
+    }
+
+    // 2. Check if git repository exists
+    try {
+      execSync("git rev-parse --is-inside-work-tree", { cwd, stdio: "ignore" });
+    } catch {
+      console.warn(`⚠️ [GitCommit] Directory is not a git repository: ${cwd}`);
+      await this.sendSystemNotification("Directory is not a git repository.", "MuseDeck");
+      return "NO_GIT";
+    }
+
+    // 3. Check if working tree has any uncommitted changes
+    try {
+      const porcelain = execSync("git status --porcelain", { cwd }).toString().trim();
+      if (!porcelain) {
+        console.log("ℹ️ [GitCommit] Working tree is clean. Nothing to commit.");
+        await this.sendSystemNotification("Working tree is clean. Nothing to commit.", "MuseDeck");
+        return "CLEAN";
+      }
+    } catch (err: any) {
+      console.warn("Failed to check git status:", err.message);
+      return "ERROR";
+    }
+
+    // 4. Working tree has changes & Muse terminal is focused -> dispatch commit prompt into terminal
+    const commitPrompt = "Stage all verified changes, create a git commit with a clear semantic message, and push to origin.";
+    console.log(`🚀 [GitCommit] Dispatching commit prompt to focused Muse terminal: "${commitPrompt}"`);
+    await this.typeSnippetIntoTerminal(commitPrompt, true);
+    await this.sendSystemNotification("Committing and pushing changes in Muse Code terminal...", "MuseDeck");
+    return "COMMITTING";
   }
 
   /**

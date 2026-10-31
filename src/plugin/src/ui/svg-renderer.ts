@@ -1273,10 +1273,103 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Key 13: Commit Key
+   * Key 13: Git Commit Key with safe focus & repo states
    */
+  static renderGitCommitKey(
+    status: "idle" | "no_focus" | "no_git" | "clean" | "committing" | "committed" = "idle"
+  ): string {
+    switch (status) {
+      case "no_focus":
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#2b1604" stroke="#f59e0b" stroke-width="4"/>
+            <!-- Warning Triangle -->
+            <polygon points="72,20 96,62 48,62" fill="#f59e0b" stroke="#fde047" stroke-width="2.5" stroke-linejoin="round"/>
+            <text x="72" y="55" fill="#000000" font-size="22" font-weight="900" text-anchor="middle">!</text>
+            <text x="72" y="102" fill="#fef08a" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">NO FOCUS</text>
+            <text x="72" y="123" fill="#fca5a5" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">TERMINAL</text>
+          </svg>
+        `);
+
+      case "no_git":
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#2b1604" stroke="#f59e0b" stroke-width="4"/>
+            <polygon points="72,20 96,62 48,62" fill="#f59e0b" stroke="#fde047" stroke-width="2.5" stroke-linejoin="round"/>
+            <text x="72" y="55" fill="#000000" font-size="22" font-weight="900" text-anchor="middle">?</text>
+            <text x="72" y="102" fill="#fef08a" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">NO GIT</text>
+            <text x="72" y="123" fill="#fca5a5" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">NOT REPO</text>
+          </svg>
+        `);
+
+      case "clean":
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#041c30" stroke="#0284c7" stroke-width="4"/>
+            <!-- Blue Check Badge -->
+            <circle cx="72" cy="46" r="26" fill="#0369a1" stroke="#38bdf8" stroke-width="2.5"/>
+            <path d="M58 46 L68 56 L86 38" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="72" y="102" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">CLEAN</text>
+            <text x="72" y="123" fill="#7dd3fc" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">UP TO DATE ✓</text>
+          </svg>
+        `);
+
+      case "committing":
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#041c30" stroke="#38bdf8" stroke-width="4.5"/>
+            <!-- Pulsing Commit Nodes -->
+            <circle cx="72" cy="46" r="24" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6,4"/>
+            <circle cx="72" cy="46" r="10" fill="#38bdf8"/>
+            <text x="72" y="102" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">COMMIT</text>
+            <text x="72" y="123" fill="#7dd3fc" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">STAGING...</text>
+          </svg>
+        `);
+
+      case "committed":
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <rect width="144" height="144" rx="26" fill="#052e16" stroke="#22c55e" stroke-width="4.5"/>
+            <!-- Emerald Check Badge -->
+            <circle cx="72" cy="46" r="26" fill="#15803d" stroke="#86efac" stroke-width="2.5"/>
+            <path d="M58 46 L68 56 L86 38" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="72" y="102" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">GIT</text>
+            <text x="72" y="123" fill="#86efac" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">COMMITTED ✓</text>
+          </svg>
+        `);
+
+      case "idle":
+      default:
+        return this.svgToDataUri(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+            <defs>
+              <linearGradient id="gitIdleBg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#041424"/>
+                <stop offset="100%" stop-color="#020912"/>
+              </linearGradient>
+            </defs>
+            <rect width="144" height="144" rx="26" fill="url(#gitIdleBg)" stroke="#0284c7" stroke-width="3"/>
+            <!-- Git Branch & Node Vector Graph -->
+            <g>
+              <line x1="50" y1="24" x2="50" y2="78" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M50 34 C50 52, 92 42, 92 60" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+              <circle cx="50" cy="34" r="6.5" fill="#38bdf8"/>
+              <circle cx="50" cy="34" r="2.5" fill="#041424"/>
+              <circle cx="50" cy="68" r="6.5" fill="#38bdf8"/>
+              <circle cx="50" cy="68" r="2.5" fill="#041424"/>
+              <circle cx="92" cy="60" r="9" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-dasharray="3,2"/>
+              <circle cx="92" cy="60" r="6" fill="#38bdf8"/>
+              <circle cx="92" cy="60" r="2" fill="#ffffff"/>
+            </g>
+            <text x="72" y="104" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">GIT</text>
+            <text x="72" y="124" fill="#7dd3fc" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">COMMIT</text>
+          </svg>
+        `);
+    }
+  }
+
   static renderCommitKey(): string {
-    return CyberIcons["p1_commit-pr"];
+    return this.renderGitCommitKey("idle");
   }
 
   /**

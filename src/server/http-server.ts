@@ -239,6 +239,12 @@ export class MuseHttpServer {
       res.json({ ok: true });
     });
 
+    this.app.post("/api/git/commit", async (req: Request, res: Response) => {
+      const result = await TerminalAutomation.executeSafeGitCommit(req.body?.projectDir);
+      wsServer?.broadcast({ type: "git_commit_result", result } as any);
+      res.json({ ok: true, result });
+    });
+
     this.app.post("/api/review/trigger-review", (_req: Request, res: Response) => {
       stateMachine.setWaitingApproval(
         {

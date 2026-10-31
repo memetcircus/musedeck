@@ -748,6 +748,15 @@ async function main() {
         break;
       }
 
+      case "git_commit": {
+        console.log("🌿 [Bridge] Received git_commit command from surface");
+        const result = await TerminalAutomation.executeSafeGitCommit(
+          msg.projectDir || process.cwd() || "/Users/akif/Projects/musedeck/musedeck"
+        );
+        wsServer.broadcast({ type: "git_commit_result", result } as any);
+        break;
+      }
+
       case "toggle_img_to_code":
       case "open_img_to_code":
       case "close_img_to_code":
@@ -772,6 +781,7 @@ async function main() {
       case "flow_rec_too_small":
       case "flow_rec_pasted":
       case "flow_rec_cancelled":
+      case "git_commit_result":
       case "preview_launching":
       case "preview_launched":
       case "preview_failed":

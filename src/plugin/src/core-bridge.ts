@@ -44,6 +44,7 @@ export class StreamDeckCoreBridge {
 
   private telemetryListeners = new Set<(telemetry: TelemetryData) => void>();
   private flowRecListeners: FlowRecListener[] = [];
+  private gitCommitListeners: ((result: string) => void)[] = [];
   private httpUrl: string;
   private wsUrl: string;
   private reconnectTimer: NodeJS.Timeout | null = null;
@@ -89,6 +90,23 @@ export class StreamDeckCoreBridge {
         listener(event);
       } catch (err: any) {
         console.error("Error in flowRecListener:", err);
+      }
+    }
+  }
+
+  onGitCommitResult(listener: (result: string) => void): () => void {
+    this.gitCommitListeners.push(listener);
+    return () => {
+      this.gitCommitListeners = this.gitCommitListeners.filter((l) => l !== listener);
+    };
+  }
+
+  notifyGitCommitResult(result: string): void {
+    for (const listener of this.gitCommitListeners) {
+      try {
+        listener(result);
+      } catch (err: any) {
+        console.error("Error in gitCommitListener:", err);
       }
     }
   }
@@ -223,6 +241,8 @@ export class StreamDeckCoreBridge {
             this.notifyFlowRec({ type: "pasted" });
           } else if (msg.type === "flow_rec_cancelled") {
             this.notifyFlowRec({ type: "cancelled" });
+          } else if (msg.type === "git_commit_result") {
+            this.notifyGitCommitResult(msg.result);
           } else if (msg.type === "switch_page") {
             const page = typeof msg.page === "number" ? msg.page : 1;
             console.log(`[Bridge] Received switch_page command to page ${page}`);
@@ -345,6 +365,10 @@ export class StreamDeckCoreBridge {
 
   async stopPromptFlow(): Promise<void> {
     await this.dispatch({ type: "stop_prompt_flow" }, "flow/stop");
+  }
+
+  async gitCommit(projectDir?: string): Promise<void> {
+    await this.dispatch({ type: "git_commit", projectDir }, "git/commit", { projectDir });
   }
 
   async runTask(prompt: string): Promise<void> {

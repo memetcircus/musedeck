@@ -44,6 +44,8 @@ export type SurfaceMessage =
   | { type: "flow_rec_too_small"; width?: number; height?: number }
   | { type: "flow_rec_pasted" }
   | { type: "flow_rec_cancelled" }
+  | { type: "git_commit"; projectDir?: string }
+  | { type: "git_commit_result"; result: string }
   | { type: "toggle_sessions" }
   | { type: "switch_page"; page?: number }
   | { type: "launch_session"; projectDir?: string }
