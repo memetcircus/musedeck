@@ -97,14 +97,10 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
   isThinkingListenerAttached = true;
 
   bridge.onTelemetry((telemetry) => {
-    // 1. AUTO-OPEN REVIEW SUBMENU ON APPROVAL WAIT!
+    // 1. APPROVAL WAIT DETECTED: Let physical Approve (3,0) and Reject (4,0) keys flash on Page 1!
     if (telemetry.state === AgentState.WAITING_APPROVAL) {
       if (museBeamAnimator.isRunning) {
         museBeamAnimator.stop();
-      }
-      if (!reviewSubmenuManager.isActive) {
-        console.log("🚨 [Approval] WAITING_APPROVAL detected -> Automatically presenting 4-option HITL drawer!");
-        reviewSubmenuManager.open();
       }
       return;
     }
@@ -423,9 +419,52 @@ export class DiffSummaryAction extends SingletonAction {
 @action({ UUID: "com.memetcircus.musedeck.approve" })
 export class StructPromptAction extends SingletonAction {
   private activeKeys = new Set<KeyAction>();
+  private flashTimer: NodeJS.Timeout | null = null;
+  private flashPhase = false;
 
   constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
+    if (this.bridge) {
+      this.bridge.onTelemetry((telemetry) => {
+        if (telemetry.state === AgentState.WAITING_APPROVAL) {
+          this.startFlashing();
+        } else {
+          this.stopFlashing();
+        }
+      });
+    }
+  }
+
+  private startFlashing(): void {
+    if (this.flashTimer) return;
+    this.flashPhase = false;
+    this.updateImage();
+    this.flashTimer = setInterval(() => {
+      this.flashPhase = !this.flashPhase;
+      this.updateImage();
+    }, 350);
+  }
+
+  private stopFlashing(): void {
+    if (this.flashTimer) {
+      clearInterval(this.flashTimer);
+      this.flashTimer = null;
+    }
+    this.flashPhase = false;
+    this.updateImage();
+  }
+
+  private updateImage(): void {
+    if (isAnySubmenuActive()) return;
+    const isAwaiting = this.bridge?.getTelemetry().state === AgentState.WAITING_APPROVAL;
+    const img = isAwaiting
+      ? SvgKeyRenderer.renderApproveFlashKey(this.flashPhase)
+      : SvgKeyRenderer.renderStructPromptKey();
+
+    for (const key of this.activeKeys) {
+      void key.setImage(img);
+      void key.setTitle("");
+    }
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
@@ -435,17 +474,18 @@ export class StructPromptAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderStructPromptKey());
-          void ev.action.setTitle("");
+          this.updateImage();
         },
         false,
         3,
         0
       );
+      this.updateImage();
     }
   }
 
   override onWillDisappear(ev: WillDisappearEvent): void {
+    this.stopFlashing();
     unregisterDeckKey(ev);
     for (const key of this.activeKeys) {
       if (key.id === ev.action.id) this.activeKeys.delete(key);
@@ -454,6 +494,15 @@ export class StructPromptAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
+
+    if (this.bridge?.getTelemetry().state === AgentState.WAITING_APPROVAL) {
+      console.log("✅ [ApproveAction] Approving plan/tool execution via Key (3,0)...");
+      await TerminalAutomation.sendApprovalKeystroke("1");
+      await this.bridge.approve();
+      this.stopFlashing();
+      return;
+    }
+
     console.log("📐 [StructPrompt] Typing structured spec prompt into active Muse terminal...");
     const prompt = "Turn this into a structured spec. Create requirements first, then a technical design, then break it into tasks. Do not execute anything until I review and approve the plan.";
     await TerminalAutomation.typePromptIntoTerminal(prompt, true);
@@ -471,17 +520,27 @@ export class SessionsAction extends SingletonAction {
   constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
     if (this.bridge) {
-      this.bridge.onTelemetry(() => {
+      this.bridge.onTelemetry((telemetry) => {
         if (isAnySubmenuActive()) return;
-        const img = SvgKeyRenderer.renderSessionsPageKey(
+        this.updateImage(telemetry);
+      });
+    }
+  }
+
+  private updateImage(telemetry?: TelemetryData): void {
+    if (isAnySubmenuActive()) return;
+    const current = telemetry || this.bridge?.getTelemetry();
+    const isAwaiting = current?.state === AgentState.WAITING_APPROVAL;
+    const img = isAwaiting
+      ? SvgKeyRenderer.renderRejectAlertKey()
+      : SvgKeyRenderer.renderSessionsPageKey(
           sessionsSubmenuManager.sessionCount || 1,
           sessionsSubmenuManager.hasThinkingSession
         );
-        for (const key of this.activeKeys) {
-          void key.setImage(img);
-          void key.setTitle("");
-        }
-      });
+
+    for (const key of this.activeKeys) {
+      void key.setImage(img);
+      void key.setTitle("");
     }
   }
 
@@ -493,18 +552,13 @@ export class SessionsAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(
-            SvgKeyRenderer.renderSessionsPageKey(
-              sessionsSubmenuManager.sessionCount || 1,
-              sessionsSubmenuManager.hasThinkingSession
-            )
-          );
-          void ev.action.setTitle("");
+          this.updateImage();
         },
         true, // EXCLUDED FROM ANIMATION so session count and activity stay visible during thinking!
         4,
         0
       );
+      this.updateImage();
     }
   }
 
@@ -517,6 +571,15 @@ export class SessionsAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
+
+    if (this.bridge?.getTelemetry().state === AgentState.WAITING_APPROVAL) {
+      console.log("❌ [RejectAction] Rejecting plan/execution via Key (4,0)...");
+      await TerminalAutomation.sendApprovalKeystroke("3");
+      await this.bridge.reject();
+      this.updateImage();
+      return;
+    }
+
     console.log("🖥️ [SessionsKey] Tapped -> Opening Sessions Submenu");
     await sessionsSubmenuManager.open();
   }

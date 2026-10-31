@@ -635,6 +635,51 @@ export class SvgKeyRenderer {
   }
 
   /**
+   * Hardware-driven flashing Approve key for HITL confirmation (Key 3,0)
+   * Alternates every 350ms between bright Green and Amber alert phases
+   */
+  static renderApproveFlashKey(phase: boolean): string {
+    const borderColor = phase ? "#22c55e" : "#f59e0b";
+    const bgFill = phase ? "#052e16" : "#451a03";
+    const circleFill = phase ? "#22c55e" : "#f59e0b";
+    const badgeFill = phase ? "#14532d" : "#78350f";
+    const badgeBorder = phase ? "#4ade80" : "#fbbf24";
+    const badgeText = phase ? "#86efac" : "#fde047";
+    const badgeLabel = phase ? "APPROVE" : "CONFIRM";
+    const line1 = phase ? "PRESS TO" : "APPROVAL";
+    const line2 = phase ? "APPROVE (1)" : "REQUIRED";
+    const l2Color = phase ? "#4ade80" : "#fde047";
+
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="${bgFill}" stroke="${borderColor}" stroke-width="4"/>
+        <circle cx="72" cy="72" r="52" fill="${circleFill}" fill-opacity="0.22"/>
+        <rect x="18" y="14" width="108" height="24" rx="8" fill="${badgeFill}" stroke="${badgeBorder}" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="${badgeText}" font-size="12.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${badgeLabel}</text>
+        <text x="72" y="68" fill="#ffffff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${line1}</text>
+        <text x="72" y="104" fill="${l2Color}" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${line2}</text>
+      </svg>
+    `);
+  }
+
+  /**
+   * HITL Reject Alert Key (Key 4,0)
+   * High-contrast red/rose alert key displayed during WAITING_APPROVAL
+   */
+  static renderRejectAlertKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#450a0a" stroke="#ef4444" stroke-width="3.5"/>
+        <circle cx="72" cy="72" r="52" fill="#ef4444" fill-opacity="0.18"/>
+        <rect x="18" y="14" width="108" height="24" rx="8" fill="#7f1d1d" stroke="#f87171" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="#fca5a5" font-size="12.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">REJECT</text>
+        <text x="72" y="68" fill="#ffffff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PRESS TO</text>
+        <text x="72" y="104" fill="#f87171" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REJECT (3)</text>
+      </svg>
+    `);
+  }
+
+  /**
    * Key 3: Physical HITL APPROVE Key (Only visible & active when awaiting review)
    */
   static renderApproveKey(isAwaiting: boolean): string {

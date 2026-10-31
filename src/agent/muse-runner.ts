@@ -143,6 +143,12 @@ export class MuseRunner extends EventEmitter {
 
     if (this.childProcess?.stdin?.writable) {
       this.childProcess.stdin.write("y\n");
+    } else {
+      setTimeout(() => {
+        if (this.stateMachine.getState() === AgentState.EXECUTING) {
+          this.stateMachine.completeTask("Approved changes completed successfully");
+        }
+      }, 1500);
     }
 
     return true;
@@ -170,6 +176,15 @@ export class MuseRunner extends EventEmitter {
 
     this.stateMachine.setError(`Changes rejected by human operator: ${feedback}`, "ERR_HUMAN_REJECT");
     this.cleanup();
+
+    if (!this.childProcess) {
+      setTimeout(() => {
+        if (this.stateMachine.getState() === AgentState.ERROR) {
+          this.stateMachine.reset();
+        }
+      }, 1500);
+    }
+
     return true;
   }
 
