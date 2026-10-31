@@ -1554,42 +1554,74 @@ export class SvgKeyRenderer {
 
   /**
    * Page 1 Key 11: MUSE MEMORY Launcher (replaces Write Tests)
+   * Side-profile neural brain with dissolving particles & two-line typography
    */
   static renderMuseMemoryKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
         <defs>
           <linearGradient id="museMemBg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#110724"/>
-            <stop offset="100%" stop-color="#05020a"/>
+            <stop offset="0%" stop-color="#07111e"/>
+            <stop offset="100%" stop-color="#02070e"/>
           </linearGradient>
         </defs>
-        <rect width="144" height="144" rx="26" fill="url(#museMemBg)" stroke="#c084fc" stroke-width="3"/>
-        <!-- Cybernetic Brain Vector Graphic -->
-        <g transform="translate(72, 46)">
-          <!-- Left Hemisphere -->
-          <path d="M-5 -22 C-18 -22, -26 -12, -26 0 C-26 10, -18 20, -5 22 C-9 14, -10 6, -9 -2 C-15 -3, -17 -11, -12 -16 C-14 -19, -10 -22, -5 -22 Z" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M-6 -10 C-14 -8, -16 2, -10 6" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
-          <path d="M-6 8 C-14 11, -12 16, -6 16" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="-16" cy="-2" r="3" fill="#38bdf8"/>
-          <circle cx="-9" cy="-14" r="2.5" fill="#ffffff"/>
-          <circle cx="-12" cy="12" r="2.5" fill="#a855f7"/>
+        <rect width="144" height="144" rx="26" fill="url(#museMemBg)" stroke="#0ea5e9" stroke-width="3"/>
+        
+        <!-- Centered Profile Brain Icon Group -->
+        <g transform="translate(74, 46) scale(1.18)">
+          <!-- Face & Neck Profile Silhouette (Facing Right) -->
+          <path d="M 6,-33 C 14,-32 20,-24 23,-14 C 25,-8 26,0 27,4 C 28,8 32,10 34,12 C 32,13 29,14 29,16 C 30,17 32,18 31,20 C 29,21 27,21 27,23 C 28,25 29,27 26,30 C 22,33 16,35 13,36 C 11,38 10,43 10,48" 
+                fill="none" stroke="#00d2ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                
+          <!-- Cranium / Brain Lobes (Top & Front Curves) -->
+          <path d="M -12,-30 C -8,-35 0,-36 6,-33 C 12,-30 18,-24 16,-18 C 21,-14 22,-6 18,-1 C 22,4 21,11 17,16 C 13,21 15,28 11,32 C 7,35 0,36 -5,34" 
+                fill="none" stroke="#00a6ff" stroke-width="2.4" stroke-linecap="round"/>
+                
+          <!-- Inner Brain Sulci / Folds -->
+          <path d="M 4,-20 C 11,-16 9,-8 2,-4 C 8,-2 11,4 5,9 C 1,13 -4,15 -7,12" 
+                fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M -2,-2 C 3,0 5,6 0,10" 
+                fill="none" stroke="#7dd3fc" stroke-width="1.8" stroke-linecap="round"/>
 
-          <!-- Right Hemisphere -->
-          <path d="M5 -22 C18 -22, 26 -12, 26 0 C26 10, 18 20, 5 22 C9 14, 10 6, 9 -2 C15 -3, 17 -11, 12 -16 C14 -19, 10 -22, 5 -22 Z" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M6 -10 C14 -8, 16 2, 10 6" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
-          <path d="M6 8 C14 11, 12 16, 6 16" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="16" cy="-2" r="3" fill="#38bdf8"/>
-          <circle cx="9" cy="-14" r="2.5" fill="#ffffff"/>
-          <circle cx="12" cy="12" r="2.5" fill="#a855f7"/>
+          <!-- Neural Network Connector Branches & Mesh (Back / Left) -->
+          <line x1="-12" y1="-28" x2="-4" y2="-16" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-4" y1="-16" x2="-18" y2="-10" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-4" y1="-16" x2="2" y2="-4" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-18" y1="-10" x2="-24" y2="2" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-18" y1="-10" x2="-8" y2="0" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-8" y1="0" x2="5" y2="9" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-24" y1="2" x2="-14" y2="14" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-14" y1="14" x2="-4" y2="12" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-8" y1="0" x2="-4" y2="12" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-14" y1="14" x2="-20" y2="26" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-20" y1="26" x2="-7" y2="30" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-4" y1="12" x2="-7" y2="30" stroke="#00a6ff" stroke-width="2"/>
+          <line x1="-4" y1="12" x2="3" y2="22" stroke="#00a6ff" stroke-width="2"/>
 
-          <!-- Central Neural Bridge -->
-          <line x1="-5" y1="-12" x2="5" y2="-12" stroke="#e9d5ff" stroke-width="2" stroke-dasharray="2,2"/>
-          <line x1="-5" y1="0" x2="5" y2="0" stroke="#38bdf8" stroke-width="2"/>
-          <line x1="-5" y1="12" x2="5" y2="12" stroke="#e9d5ff" stroke-width="2" stroke-dasharray="2,2"/>
-          <circle cx="0" cy="0" r="3.5" fill="#ffffff"/>
+          <!-- Neural Nodes (Circles) -->
+          <circle cx="-12" cy="-28" r="3.2" fill="#00d2ff"/>
+          <circle cx="-4" cy="-16" r="3.5" fill="#38bdf8"/>
+          <circle cx="-18" cy="-10" r="3.2" fill="#00d2ff"/>
+          <circle cx="-24" cy="2" r="3.6" fill="#00a6ff"/>
+          <circle cx="-8" cy="0" r="4.2" fill="#ffffff"/>
+          <circle cx="-4" cy="12" r="4" fill="#00d2ff"/>
+          <circle cx="-14" cy="14" r="3.6" fill="#38bdf8"/>
+          <circle cx="-20" cy="26" r="3.2" fill="#00a6ff"/>
+          <circle cx="-7" cy="30" r="3.6" fill="#38bdf8"/>
+          <circle cx="3" cy="22" r="3" fill="#00d2ff"/>
+
+          <!-- Dispersing Digital Data Particles (Floating Left) -->
+          <circle cx="-31" cy="-8" r="2.6" fill="#38bdf8" opacity="0.95"/>
+          <circle cx="-38" cy="0" r="2" fill="#00d2ff" opacity="0.85"/>
+          <circle cx="-30" cy="8" r="3.2" fill="#00f0ff" opacity="0.95"/>
+          <circle cx="-37" cy="17" r="2.2" fill="#38bdf8" opacity="0.8"/>
+          <circle cx="-27" cy="23" r="2.2" fill="#7dd3fc" opacity="0.85"/>
+          <circle cx="-42" cy="10" r="1.6" fill="#00d2ff" opacity="0.65"/>
         </g>
-        <text x="72" y="112" fill="#ffffff" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.4">MUSE MEMORY</text>
+
+        <!-- Two-line uniform typography -->
+        <text x="72" y="107" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">MUSE</text>
+        <text x="72" y="126" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">MEMORY</text>
       </svg>
     `);
   }
