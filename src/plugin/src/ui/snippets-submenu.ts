@@ -106,22 +106,6 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     borderColor: "#ec4899",
     textColor: "#fdf2f8",
   },
-  "2,2": {
-    line1: "UPLOAD",
-    line2: "FILES",
-    subtitle: "MEDIA ASSETS",
-    text: "Upload media assets to Meta Files API, retrieve file_id, and attach to current coding context.",
-    borderColor: "#14b8a6",
-    textColor: "#ccfbf1",
-  },
-  "3,2": {
-    line1: "FIX FROM",
-    line2: "VIDEO",
-    subtitle: "REC TO FIX",
-    text: "Diagnose and fix the frontend bug from recent screen+audio recording.",
-    borderColor: "#f97316",
-    textColor: "#ffedd5",
-  },
 };
 
 class SnippetsSubmenuManager {
