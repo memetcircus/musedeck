@@ -76,3 +76,4 @@ for dest in [profile_path, profile_path_root]:
             'Profiles/B04B2196-8A5C-4906-94E1-931B265308B7/manifest.json'
         )
     print('Generated:', dest)
+

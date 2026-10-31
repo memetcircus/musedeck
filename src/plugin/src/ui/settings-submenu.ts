@@ -8,8 +8,8 @@ export interface SettingsOption {
   line2: string;
   borderColor: string;
   textColor: string;
-  actionType: "open_web" | "api_status" | "set_model" | "open_workspace" | "reload_bridge";
-  modelId?: "spark" | "sam" | "chat";
+  actionType: "open_web" | "set_model";
+  modelId?: "spark" | "sam";
 }
 
 export const SETTINGS_ITEMS: Record<string, SettingsOption> = {
@@ -21,15 +21,8 @@ export const SETTINGS_ITEMS: Record<string, SettingsOption> = {
     textColor: "#bae6fd",
     actionType: "open_web",
   },
-  "2,0": {
-    line1: "API",
-    line2: "STATUS",
-    borderColor: "#a855f7",
-    textColor: "#e9d5ff",
-    actionType: "api_status",
-  },
 
-  // Row 1 (Middle) - Model Switches
+  // Row 1 (Middle) - Model Switches (Left-column aligned for easy reach)
   "0,1": {
     line1: "SPARK",
     line2: "1.3",
@@ -45,30 +38,6 @@ export const SETTINGS_ITEMS: Record<string, SettingsOption> = {
     textColor: "#fde68a",
     actionType: "set_model",
     modelId: "sam",
-  },
-  "2,1": {
-    line1: "MUSE",
-    line2: "CHAT",
-    borderColor: "#ec4899",
-    textColor: "#fbcfe8",
-    actionType: "set_model",
-    modelId: "chat",
-  },
-
-  // Row 2 (Bottom)
-  "0,2": {
-    line1: "OPEN",
-    line2: "WORKSPACE",
-    borderColor: "#6366f1",
-    textColor: "#c7d2fe",
-    actionType: "open_workspace",
-  },
-  "1,2": {
-    line1: "RELOAD",
-    line2: "BRIDGE",
-    borderColor: "#06b6d4",
-    textColor: "#a5f3fc",
-    actionType: "reload_bridge",
   },
 };
 
@@ -162,23 +131,6 @@ class SettingsSubmenuManager {
           configManager.setActiveModel(item.modelId);
           this.render(); // Re-render to show active badge on newly selected model
         }
-        break;
-      }
-      case "open_workspace": {
-        const wsPath = configManager.load().workspacePath || process.cwd();
-        console.log(`📁 [SettingsSubmenu] Opening workspace folder: ${wsPath}`);
-        exec(`open "${wsPath}"`);
-        break;
-      }
-      case "api_status": {
-        console.log("🔑 [SettingsSubmenu] Checking API status...");
-        exec("open http://localhost:3456/settings");
-        break;
-      }
-      case "reload_bridge": {
-        console.log("🔄 [SettingsSubmenu] Reloading bridge settings...");
-        configManager.load();
-        this.render();
         break;
       }
     }

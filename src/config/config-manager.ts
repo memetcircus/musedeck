@@ -7,7 +7,7 @@ export interface MuseDeckConfig {
   baseUrl: string;
   samModel: string;
   sparkModel: string;
-  activeModel: "spark" | "sam" | "chat";
+  activeModel: "spark" | "sam";
   workspacePath: string;
   museBin: string;
   simulationMode: boolean;
@@ -104,7 +104,7 @@ class ConfigManager {
     return updated;
   }
 
-  setActiveModel(model: "spark" | "sam" | "chat"): MuseDeckConfig {
+  setActiveModel(model: "spark" | "sam"): MuseDeckConfig {
     return this.save({ activeModel: model });
   }
 
