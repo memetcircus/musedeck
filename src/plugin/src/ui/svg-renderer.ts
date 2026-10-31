@@ -1351,18 +1351,17 @@ export class SvgKeyRenderer {
             <rect width="144" height="144" rx="26" fill="url(#gitIdleBg)" stroke="#0284c7" stroke-width="3"/>
             <!-- Git Branch & Node Vector Graph -->
             <g>
-              <line x1="50" y1="24" x2="50" y2="78" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
-              <path d="M50 34 C50 52, 92 42, 92 60" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
-              <circle cx="50" cy="34" r="6.5" fill="#38bdf8"/>
-              <circle cx="50" cy="34" r="2.5" fill="#041424"/>
-              <circle cx="50" cy="68" r="6.5" fill="#38bdf8"/>
-              <circle cx="50" cy="68" r="2.5" fill="#041424"/>
-              <circle cx="92" cy="60" r="9" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-dasharray="3,2"/>
-              <circle cx="92" cy="60" r="6" fill="#38bdf8"/>
-              <circle cx="92" cy="60" r="2" fill="#ffffff"/>
+              <line x1="50" y1="20" x2="50" y2="76" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M50 32 C50 50, 92 40, 92 58" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+              <circle cx="50" cy="32" r="6.5" fill="#38bdf8"/>
+              <circle cx="50" cy="32" r="2.5" fill="#041424"/>
+              <circle cx="50" cy="66" r="6.5" fill="#38bdf8"/>
+              <circle cx="50" cy="66" r="2.5" fill="#041424"/>
+              <circle cx="92" cy="58" r="9" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-dasharray="3,2"/>
+              <circle cx="92" cy="58" r="6" fill="#38bdf8"/>
+              <circle cx="92" cy="58" r="2" fill="#ffffff"/>
             </g>
-            <text x="72" y="104" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">GIT</text>
-            <text x="72" y="124" fill="#7dd3fc" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">COMMIT</text>
+            <text x="72" y="112" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">GIT COMMIT</text>
           </svg>
         `);
     }
