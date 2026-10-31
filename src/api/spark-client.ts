@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import sharp from "sharp";
 import type { MetaModelApiClient } from "./meta-client.js";
 
 export type TargetFramework =
@@ -176,7 +175,14 @@ export class MuseSparkClient {
           const imgBuf = Buffer.isBuffer(imageBufferOrBase64)
             ? imageBufferOrBase64
             : Buffer.from(base64Data, "base64");
-          const meta = await sharp(imgBuf).metadata();
+          let meta: { width?: number; height?: number } = {};
+          if (imgBuf.length >= 24 && imgBuf[0] === 0x89 && imgBuf[1] === 0x50) {
+            meta = { width: imgBuf.readUInt32BE(16), height: imgBuf.readUInt32BE(20) };
+          } else {
+            const sharpMod: any = await import("sharp");
+            const sharp = sharpMod.default || sharpMod;
+            meta = await sharp(imgBuf).metadata();
+          }
           if (meta.width && meta.height) {
             const ratio = meta.width / meta.height;
             if (ratio >= 1.2) {

@@ -1,5 +1,6 @@
 import express, { type Request, type Response } from "express";
 import cors from "cors";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AgentStateMachine } from "../agent/state-machine.js";
@@ -12,6 +13,20 @@ import { exec } from "node:child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+function resolvePublicDir(): string {
+  const candidates = [
+    path.resolve(__dirname, "../public"),
+    path.resolve(__dirname, "../../public"),
+    path.resolve(process.cwd(), "public"),
+  ];
+  for (const dir of candidates) {
+    if (fs.existsSync(path.join(dir, "settings.html"))) {
+      return dir;
+    }
+  }
+  return candidates[1];
+}
 
 export interface HttpServerDependencies {
   stateMachine: AgentStateMachine;
@@ -41,7 +56,7 @@ export class MuseHttpServer {
     this.app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
     // Serve web dashboard console from public directory
-    const publicPath = path.resolve(__dirname, "../../public");
+    const publicPath = resolvePublicDir();
     this.app.use(express.static(publicPath));
     this.app.use("/flutter", express.static("/tmp/musedeck/FlutterPreview/build/web"));
   }
@@ -324,7 +339,7 @@ export class MuseHttpServer {
 
     // Onboarding & Settings Page
     this.app.get("/settings", (_req: Request, res: Response) => {
-      res.sendFile(path.resolve(__dirname, "../../public/settings.html"));
+      res.sendFile(path.join(resolvePublicDir(), "settings.html"));
     });
 
     // Get Settings
@@ -409,6 +424,14 @@ export class MuseHttpServer {
     return new Promise((resolve) => {
       this.server = this.app.listen(this.port, () => {
         console.log(`🌐 [HTTP] MuseDeck bridge running at http://localhost:${this.port}`);
+        resolve();
+      });
+      this.server.on("error", (err: any) => {
+        if (err.code === "EADDRINUSE") {
+          console.log(`ℹ️ [HTTP] Port ${this.port} already active — attaching to existing instance.`);
+        } else {
+          console.error("❌ [HTTP] Server error:", err.message);
+        }
         resolve();
       });
     });

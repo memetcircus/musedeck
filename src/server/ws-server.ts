@@ -63,35 +63,54 @@ export class MuseWsServer {
   }
 
   async start(): Promise<void> {
-    this.wss = new WebSocketServer({ port: this.port });
+    return new Promise((resolve) => {
+      try {
+        this.wss = new WebSocketServer({ port: this.port });
 
-    this.wss.on("connection", (ws) => {
-      console.log("🔌 [WebSocket] Physical Stream Deck / Surface connected");
-      this.clients.add(ws);
+        this.wss.on("listening", () => {
+          console.log(`📡 [WebSocket] MuseDeck WS server listening on port ${this.port}`);
+          resolve();
+        });
 
-      ws.on("message", (raw) => {
-        try {
-          const msg = JSON.parse(raw.toString()) as SurfaceMessage;
-          for (const handler of this.messageHandlers) {
-            handler(msg, ws);
+        this.wss.on("error", (err: any) => {
+          if (err.code === "EADDRINUSE") {
+            console.log(`ℹ️ [WebSocket] Port ${this.port} already active — attaching to existing instance.`);
+          } else {
+            console.error("❌ [WebSocket] Server error:", err.message);
           }
-        } catch (err) {
-          console.error("❌ [WebSocket] Invalid JSON message received:", err);
-        }
-      });
+          resolve();
+        });
 
-      ws.on("close", () => {
-        console.log("🔌 [WebSocket] Physical Surface disconnected");
-        this.clients.delete(ws);
-      });
+        this.wss.on("connection", (ws) => {
+          console.log("🔌 [WebSocket] Physical Stream Deck / Surface connected");
+          this.clients.add(ws);
 
-      ws.on("error", (err) => {
-        console.error("❌ [WebSocket] Connection error:", err);
-        this.clients.delete(ws);
-      });
+          ws.on("message", (raw) => {
+            try {
+              const msg = JSON.parse(raw.toString()) as SurfaceMessage;
+              for (const handler of this.messageHandlers) {
+                handler(msg, ws);
+              }
+            } catch (err) {
+              console.error("❌ [WebSocket] Invalid JSON message received:", err);
+            }
+          });
+
+          ws.on("close", () => {
+            console.log("🔌 [WebSocket] Physical Surface disconnected");
+            this.clients.delete(ws);
+          });
+
+          ws.on("error", (err) => {
+            console.error("❌ [WebSocket] Connection error:", err);
+            this.clients.delete(ws);
+          });
+        });
+      } catch (err: any) {
+        console.error("❌ [WebSocket] Failed to initialize WS server:", err.message);
+        resolve();
+      }
     });
-
-    console.log(`📡 [WebSocket] MuseDeck WS server listening on port ${this.port}`);
   }
 
   broadcastTelemetry(telemetry: TelemetryData): void {

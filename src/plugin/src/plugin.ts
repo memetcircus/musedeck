@@ -28,6 +28,7 @@ console.error = (...args: any[]) => {
 };
 
 import { StreamDeckCoreBridge } from "./core-bridge.js";
+import { startMuseDeckServer } from "../../server/index.js";
 import {
   AgentStatusAction,
   ActiveTaskAction,
@@ -65,6 +66,13 @@ streamDeck.actions.registerAction(new WriteTestsAction(bridge));
 streamDeck.actions.registerAction(new FixBugAction(bridge));
 streamDeck.actions.registerAction(new CommitPrAction(bridge));
 streamDeck.actions.registerAction(new PageNextAction(bridge));
+
+// Automatically launch embedded local bridge server if not already active on port 3456
+try {
+  await startMuseDeckServer();
+} catch (err: any) {
+  console.error("⚠️ [Plugin] Embedded server startup warning:", err?.message || err);
+}
 
 // Start local bridge client and connect to Stream Deck host
 await bridge.start();

@@ -4,7 +4,6 @@ dotenv.config();
 import fs from "node:fs";
 import path from "node:path";
 import { spawn, exec, execSync, type ChildProcess } from "node:child_process";
-import sharp from "sharp";
 import { AgentStateMachine } from "../agent/state-machine.js";
 import { AgentState } from "../agent/types.js";
 import { MuseRunner } from "../agent/muse-runner.js";
@@ -18,16 +17,33 @@ import { TerminalSessionWatcher } from "../agent/terminal-session-watcher.js";
 import { extractVideoFrames, detectMotionDifference, buildTemporalStoryboard } from "../agent/video-storyboard.js";
 import { configManager } from "../config/config-manager.js";
 
-async function main() {
+async function isBridgeAlreadyRunning(httpPort: number): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 350);
+    const res = await fetch(`http://127.0.0.1:${httpPort}/health`, { signal: controller.signal });
+    clearTimeout(timer);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function startMuseDeckServer(): Promise<boolean> {
+  const HTTP_PORT = Number(process.env.PORT) || 3456;
+  const WS_PORT = Number(process.env.WS_PORT) || 3457;
+
+  if (await isBridgeAlreadyRunning(HTTP_PORT)) {
+    console.log(`ℹ️ [MuseDeck] Local bridge server already active on port ${HTTP_PORT} — attaching to existing instance.`);
+    return false;
+  }
+
   console.log(`
 ╔═══════════════════════════════════════════════════════════════════════════╗
 ║                   MUSEDECK - MISSION CONTROL BRIDGE                       ║
 ║       Elgato Stream Deck Physical Console for Meta Muse Code CLI         ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
   `);
-
-  const HTTP_PORT = Number(process.env.PORT) || 3456;
-  const WS_PORT = Number(process.env.WS_PORT) || 3457;
 
   // Ensure runtime temp directory exists
   fs.mkdirSync("/tmp/musedeck", { recursive: true });
@@ -804,9 +820,13 @@ async function main() {
 
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
+  return true;
 }
 
-main().catch((err) => {
-  console.error("Fatal error starting MuseDeck bridge:", err);
-  process.exit(1);
-});
+const entryArg = process.argv[1] || "";
+if (entryArg.endsWith("server/index.js") || entryArg.endsWith("server/index.ts")) {
+  startMuseDeckServer().catch((err) => {
+    console.error("Fatal error starting MuseDeck bridge:", err);
+    process.exit(1);
+  });
+}

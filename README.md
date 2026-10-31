@@ -303,13 +303,28 @@ Tapping Key **[3, 1]** (`MUSE SETTINGS`) on your physical Stream Deck instantly 
 
 ## Quickstart
 
-### 1. Prerequisites
+### Option A: One-Click Stream Deck Installer (Recommended)
+
+MuseDeck ships as a **self-contained `.streamDeckPlugin` installer** with the Mission Control Bridge Server (`http://localhost:3456` & WebSocket `3457`), terminal session watcher, and 15-key hardware profile embedded directly inside the Stream Deck plugin runtime. No terminal background process or manual `npm start` is required.
+
+1. **Download the Installer**:
+   Download **`com.memetcircus.musedeck.streamDeckPlugin`** from the latest **[GitHub Release](https://github.com/memetcircus/musedeck/releases/latest)**.
+2. **Double-Click to Install**:
+   Double-click the downloaded `.streamDeckPlugin` file on macOS. The **Elgato Stream Deck** app will automatically install the plugin, prompt you to load the **MuseDeck** 15-key hardware profile, and launch the embedded bridge server in the background.
+3. **Configure API Key & Workspace**:
+   Press **`CONFIG`** on your Stream Deck (or open **[http://localhost:3456/settings](http://localhost:3456/settings)** in your browser) to enter your **Meta Model API Key**, verify your **Model API Credits**, and select your active project workspace directory.
+
+---
+
+### Option B: Build from Source (Developer Setup)
+
+#### 1. Prerequisites
 * macOS 13+ (Apple Silicon or Intel)
 * Node.js 20+ (Node 24 recommended)
 * Elgato Stream Deck app (v7.1+)
 * Meta Muse Code CLI (`muse`) installed on PATH
 
-### 2. Installation
+#### 2. Installation & Packaging
 ```bash
 # Clone the repository
 git clone https://github.com/memetcircus/musedeck.git
@@ -318,12 +333,12 @@ cd musedeck
 # Install dependencies
 npm install
 
-# Build server and Stream Deck plugin bundle
+# Build server, bundle Stream Deck plugin, and generate .streamDeckPlugin installer in dist/
 npm run pack
 ```
 
-### 3. Environment Configuration
-Copy `.env.example` to `.env` and provide your Meta API credentials:
+#### 3. Environment Configuration (Optional)
+You can configure all settings via the Web UI (`http://localhost:3456/settings`) or copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
@@ -342,20 +357,13 @@ CLI_TIMEOUT_MS=180000
 
 > **Simulation Mode**: If you do not have an active Meta Muse Code child process running, set `MUSE_CODE_SIMULATION=true` to test the state machine, 650ms breathing alert animations, and HITL review submenu gates immediately.
 
-### 4. Running MuseDeck Bridge
-Start the background mission control server:
-```bash
-npm run dev
-# or: npm start
-```
-Open the Web Mission Control console at **[http://localhost:3456](http://localhost:3456)**.
-
-### 5. Stream Deck Plugin Installation
-Symlink the built plugin directly into your Elgato Stream Deck directory:
+#### 4. Live Development & Symlink Installation
+Either double-click `dist/com.memetcircus.musedeck.streamDeckPlugin` or symlink the plugin folder for live development:
 ```bash
 ln -sfn "$(pwd)/com.memetcircus.musedeck.sdPlugin" ~/Library/Application\ Support/com.elgato.StreamDeck/Plugins/com.memetcircus.musedeck.sdPlugin
+npx @elgato/cli restart com.memetcircus.musedeck
 ```
-Restart the Stream Deck app, and **MuseDeck** will automatically load with the default 15-key profile!
+Open the Web Mission Control console at **[http://localhost:3456/settings](http://localhost:3456/settings)**.
 
 ---
 

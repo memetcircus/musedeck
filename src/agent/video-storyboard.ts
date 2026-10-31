@@ -1,7 +1,15 @@
 import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
-import sharp from "sharp";
+
+async function getSharp(): Promise<any | null> {
+  try {
+    const mod: any = await import("sharp");
+    return mod.default || mod;
+  } catch {
+    return null;
+  }
+}
 
 export interface StoryboardFrameMeta {
   index: number;
@@ -93,6 +101,10 @@ export async function detectMotionDifference(
     const lastFrame = framePaths[framePaths.length - 1];
 
     if (fs.existsSync(firstFrame) && fs.existsSync(lastFrame)) {
+      const sharp = await getSharp();
+      if (!sharp) {
+        return { motionPercent: 10.0, isStatic: false };
+      }
       const b1 = await sharp(firstFrame).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
       const bLast = await sharp(lastFrame).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
 
@@ -135,82 +147,98 @@ export async function buildTemporalStoryboard(
 
   const count = framePaths.length;
   const frameMetaList: StoryboardFrameMeta[] = [];
+  const sharp = await getSharp();
 
-  // Generate badge-overlaid frames
-  const framedBuffers = await Promise.all(
-    framePaths.map(async (fp, idx) => {
+  if (sharp) {
+    // Generate badge-overlaid frames
+    const framedBuffers = await Promise.all(
+      framePaths.map(async (fp, idx) => {
+        const timeSec = count > 1 ? Number(((idx * durationSeconds) / (count - 1)).toFixed(2)) : 0;
+        const label = `#${idx + 1}  ${timeSec.toFixed(2)}s`;
+
+        frameMetaList.push({
+          index: idx + 1,
+          timeSeconds: timeSec,
+          label,
+          path: fp,
+        });
+
+        let baseBuffer: Buffer;
+        if (fs.existsSync(fp)) {
+          baseBuffer = await sharp(fp)
+            .resize(frameWidth, frameHeight, { fit: "cover", position: "center" })
+            .toBuffer();
+        } else {
+          baseBuffer = await sharp({
+            create: {
+              width: frameWidth,
+              height: frameHeight,
+              channels: 4,
+              background: { r: 15, g: 23, b: 42, alpha: 1 },
+            },
+          })
+            .png()
+            .toBuffer();
+        }
+
+        // Render crisp SVG timestamp badge
+        const badgeWidth = 84;
+        const badgeHeight = 22;
+        const badgeSvg = Buffer.from(`
+          <svg width="${frameWidth}" height="${frameHeight}">
+            <rect x="8" y="8" width="${badgeWidth}" height="${badgeHeight}" rx="4" fill="rgba(10, 15, 28, 0.88)" stroke="rgba(56, 189, 248, 0.6)" stroke-width="1"/>
+            <text x="14" y="23" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif" font-size="11" font-weight="700" fill="#38bdf8">${label}</text>
+          </svg>
+        `);
+
+        return sharp(baseBuffer)
+          .composite([{ input: badgeSvg, left: 0, top: 0 }])
+          .png()
+          .toBuffer();
+      })
+    );
+
+    // Layout onto montage canvas
+    const compositeList: Array<{ input: Buffer; left: number; top: number }> = [];
+    for (let idx = 0; idx < framedBuffers.length; idx++) {
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      compositeList.push({
+        input: framedBuffers[idx],
+        left: col * frameWidth,
+        top: row * frameHeight,
+      });
+    }
+
+    // Composite full filmstrip grid
+    const totalWidth = frameWidth * cols;
+    const totalHeight = frameHeight * rows;
+
+    await sharp({
+      create: {
+        width: totalWidth,
+        height: totalHeight,
+        channels: 4,
+        background: { r: 10, g: 15, b: 28, alpha: 1 },
+      },
+    })
+      .composite(compositeList)
+      .png()
+      .toFile(montagePath);
+  } else {
+    framePaths.forEach((fp, idx) => {
       const timeSec = count > 1 ? Number(((idx * durationSeconds) / (count - 1)).toFixed(2)) : 0;
-      const label = `#${idx + 1}  ${timeSec.toFixed(2)}s`;
-
       frameMetaList.push({
         index: idx + 1,
         timeSeconds: timeSec,
-        label,
+        label: `#${idx + 1}  ${timeSec.toFixed(2)}s`,
         path: fp,
       });
-
-      let baseBuffer: Buffer;
-      if (fs.existsSync(fp)) {
-        baseBuffer = await sharp(fp)
-          .resize(frameWidth, frameHeight, { fit: "cover", position: "center" })
-          .toBuffer();
-      } else {
-        baseBuffer = await sharp({
-          create: {
-            width: frameWidth,
-            height: frameHeight,
-            channels: 4,
-            background: { r: 15, g: 23, b: 42, alpha: 1 },
-          },
-        })
-          .png()
-          .toBuffer();
-      }
-
-      // Render crisp SVG timestamp badge
-      const badgeWidth = 84;
-      const badgeHeight = 22;
-      const badgeSvg = Buffer.from(`
-        <svg width="${frameWidth}" height="${frameHeight}">
-          <rect x="8" y="8" width="${badgeWidth}" height="${badgeHeight}" rx="4" fill="rgba(10, 15, 28, 0.88)" stroke="rgba(56, 189, 248, 0.6)" stroke-width="1"/>
-          <text x="14" y="23" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif" font-size="11" font-weight="700" fill="#38bdf8">${label}</text>
-        </svg>
-      `);
-
-      return sharp(baseBuffer)
-        .composite([{ input: badgeSvg, left: 0, top: 0 }])
-        .png()
-        .toBuffer();
-    })
-  );
-
-  // Layout onto montage canvas
-  const compositeList: Array<{ input: Buffer; left: number; top: number }> = [];
-  for (let idx = 0; idx < framedBuffers.length; idx++) {
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    compositeList.push({
-      input: framedBuffers[idx],
-      left: col * frameWidth,
-      top: row * frameHeight,
     });
+    if (framePaths[0] && fs.existsSync(framePaths[0])) {
+      fs.copyFileSync(framePaths[0], montagePath);
+    }
   }
-
-  // Composite full filmstrip grid
-  const totalWidth = frameWidth * cols;
-  const totalHeight = frameHeight * rows;
-
-  await sharp({
-    create: {
-      width: totalWidth,
-      height: totalHeight,
-      channels: 4,
-      background: { r: 10, g: 15, b: 28, alpha: 1 },
-    },
-  })
-    .composite(compositeList)
-    .png()
-    .toFile(montagePath);
 
   // Write structured temporal manifest
   const manifest: StoryboardManifest = {
