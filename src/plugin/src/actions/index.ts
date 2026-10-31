@@ -4,6 +4,7 @@ import { reviewSubmenuManager } from "../ui/review-submenu.js";
 import { sessionsSubmenuManager } from "../ui/sessions-submenu.js";
 import { imgToCodeSubmenuManager } from "../ui/img-to-code-submenu.js";
 import { vidToCodeSubmenuManager } from "../ui/vid-to-code-submenu.js";
+import { gitSubmenuManager } from "../ui/git-submenu.js";
 import {
   action,
   SingletonAction,
@@ -31,7 +32,8 @@ export function isAnySubmenuActive(): boolean {
     sessionsSubmenuManager.isActive ||
     telemetrySubmenuManager.isActive ||
     imgToCodeSubmenuManager.isActive ||
-    vidToCodeSubmenuManager.isActive
+    vidToCodeSubmenuManager.isActive ||
+    gitSubmenuManager.isActive
   );
 }
 
@@ -52,6 +54,11 @@ function checkSubmenuKeyDown(ev: any): boolean {
 
   if (vidToCodeSubmenuManager.isActive) {
     void vidToCodeSubmenuManager.handleKeyDown(col, row);
+    return true;
+  }
+
+  if (gitSubmenuManager.isActive) {
+    void gitSubmenuManager.handleKeyDown(col, row);
     return true;
   }
 
@@ -104,6 +111,9 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
     if (vidToCodeSubmenuManager.isActive) {
       return;
     }
+    if (gitSubmenuManager.isActive) {
+      return;
+    }
     if (sessionsSubmenuManager.isActive) {
       void sessionsSubmenuManager.refreshSessions();
       return;
@@ -154,6 +164,8 @@ function registerDeckKey(
     imgToCodeSubmenuManager.render();
   } else if (vidToCodeSubmenuManager.isActive) {
     vidToCodeSubmenuManager.render();
+  } else if (gitSubmenuManager.isActive) {
+    gitSubmenuManager.render();
   } else if (telemetrySubmenuManager.isActive) {
     telemetrySubmenuManager.render();
   } else if (!museBeamAnimator.isRunning || excludeFromAnimation) {
@@ -171,6 +183,9 @@ function unregisterDeckKey(ev: WillDisappearEvent): void {
   }
   if (vidToCodeSubmenuManager.isActive) {
     vidToCodeSubmenuManager.forceClose();
+  }
+  if (gitSubmenuManager.isActive) {
+    gitSubmenuManager.forceClose();
   }
   if (reviewSubmenuManager.isActive) {
     reviewSubmenuManager.forceClose();
@@ -949,86 +964,41 @@ export class FixBugAction extends SingletonAction {
   }
 }
 
-// --- KEY 13: COMMIT & PR ---
+// --- KEY 13: GIT COMMANDS SUBMENU ---
 @action({ UUID: "com.memetcircus.musedeck.commit-pr" })
 export class CommitPrAction extends SingletonAction {
   private activeKeys = new Set<KeyAction>();
-  private status: "idle" | "no_focus" | "no_git" | "clean" | "committing" | "committed" = "idle";
-  private resetTimer: NodeJS.Timeout | null = null;
 
   constructor(private readonly bridge: StreamDeckCoreBridge) {
     super();
 
     this.bridge.onGitCommitResult((result) => {
-      this.clearResetTimer();
       switch (result) {
         case "NO_FOCUS":
-          this.status = "no_focus";
-          this.updateVisuals();
-          this.resetTimer = setTimeout(() => {
-            this.status = "idle";
-            this.updateVisuals();
-          }, 1500);
+          gitSubmenuManager.setCommitStatus("no_focus");
           break;
-
         case "NO_GIT":
-          this.status = "no_git";
-          this.updateVisuals();
-          this.resetTimer = setTimeout(() => {
-            this.status = "idle";
-            this.updateVisuals();
-          }, 1500);
+          gitSubmenuManager.setCommitStatus("no_git");
           break;
-
         case "CLEAN":
-          this.status = "clean";
-          this.updateVisuals();
-          this.resetTimer = setTimeout(() => {
-            this.status = "idle";
-            this.updateVisuals();
-          }, 2000);
+          gitSubmenuManager.setCommitStatus("clean");
           break;
-
         case "COMMITTING":
-          this.status = "committing";
-          this.updateVisuals();
-          this.resetTimer = setTimeout(() => {
-            this.status = "committed";
-            this.updateVisuals();
-            this.resetTimer = setTimeout(() => {
-              this.status = "idle";
-              this.updateVisuals();
-            }, 2500);
-          }, 3000);
+          gitSubmenuManager.setCommitStatus("committing");
           break;
-
         case "COMMITTED":
-          this.status = "committed";
-          this.updateVisuals();
-          this.resetTimer = setTimeout(() => {
-            this.status = "idle";
-            this.updateVisuals();
-          }, 2500);
+          gitSubmenuManager.setCommitStatus("committed");
           break;
-
         default:
-          this.status = "idle";
-          this.updateVisuals();
+          gitSubmenuManager.setCommitStatus("idle");
           break;
       }
     });
   }
 
-  private clearResetTimer(): void {
-    if (this.resetTimer) {
-      clearTimeout(this.resetTimer);
-      this.resetTimer = null;
-    }
-  }
-
   private updateVisuals(): void {
     if (isAnySubmenuActive()) return;
-    const img = SvgKeyRenderer.renderGitCommitKey(this.status);
+    const img = SvgKeyRenderer.renderGitCommandsKey();
     for (const key of this.activeKeys) {
       if (!museBeamAnimator.isRunning) {
         void key.setImage(img);
@@ -1044,7 +1014,7 @@ export class CommitPrAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderGitCommitKey(this.status));
+          void ev.action.setImage(SvgKeyRenderer.renderGitCommandsKey());
           void ev.action.setTitle("");
         },
         false,
@@ -1060,14 +1030,21 @@ export class CommitPrAction extends SingletonAction {
     for (const key of this.activeKeys) {
       if (key.id === ev.action.id) this.activeKeys.delete(key);
     }
+    if (gitSubmenuManager.isActive) {
+      gitSubmenuManager.forceClose();
+    }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    if (this.status !== "idle") return; // prevent duplicate clicks while showing status
 
-    console.log("🌿 [CommitPrAction] Triggering safe git commit...");
-    await this.bridge.gitCommit();
+    if (gitSubmenuManager.isActive) {
+      console.log("🔙 [CommitPrAction] Closing Git Submenu");
+      gitSubmenuManager.close();
+    } else {
+      console.log("🌿 [CommitPrAction] Opening Git Submenu");
+      gitSubmenuManager.open();
+    }
   }
 }
 

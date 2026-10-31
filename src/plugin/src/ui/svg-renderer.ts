@@ -1367,8 +1367,193 @@ export class SvgKeyRenderer {
     }
   }
 
+  static renderGitCommandsKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <defs>
+          <linearGradient id="gitCmdBg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#041424"/>
+            <stop offset="100%" stop-color="#020912"/>
+          </linearGradient>
+        </defs>
+        <rect width="144" height="144" rx="26" fill="url(#gitCmdBg)" stroke="#0284c7" stroke-width="3"/>
+        <!-- Git Branch & Node Vector Graph -->
+        <g>
+          <line x1="50" y1="20" x2="50" y2="76" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M50 32 C50 50, 92 40, 92 58" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="50" cy="32" r="6.5" fill="#38bdf8"/>
+          <circle cx="50" cy="32" r="2.5" fill="#041424"/>
+          <circle cx="50" cy="66" r="6.5" fill="#38bdf8"/>
+          <circle cx="50" cy="66" r="2.5" fill="#041424"/>
+          <circle cx="92" cy="58" r="9" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-dasharray="3,2"/>
+          <circle cx="92" cy="58" r="6" fill="#38bdf8"/>
+          <circle cx="92" cy="58" r="2" fill="#ffffff"/>
+        </g>
+        <text x="72" y="112" fill="#ffffff" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.3">GIT COMMANDS</text>
+      </svg>
+    `);
+  }
+
   static renderCommitKey(): string {
-    return this.renderGitCommitKey("idle");
+    return this.renderGitCommandsKey();
+  }
+
+  static renderGitStatusSubKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#041424" stroke="#0ea5e9" stroke-width="3"/>
+        <!-- Radar / Status Target Icon -->
+        <circle cx="72" cy="46" r="24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4,3"/>
+        <circle cx="72" cy="46" r="14" fill="#0369a1" stroke="#38bdf8" stroke-width="2"/>
+        <circle cx="72" cy="46" r="5" fill="#ffffff"/>
+        <text x="72" y="102" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">STATUS</text>
+        <text x="72" y="122" fill="#7dd3fc" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">CHECK WORKTREE</text>
+      </svg>
+    `);
+  }
+
+  static renderGitPullKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#041424" stroke="#0284c7" stroke-width="3"/>
+        <!-- Pull Downward Arrow -->
+        <circle cx="72" cy="46" r="24" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2"/>
+        <path d="M72 32 L72 58 M60 48 L72 60 L84 48" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="102" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">GIT PULL</text>
+        <text x="72" y="122" fill="#7dd3fc" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">FETCH &amp; MERGE</text>
+      </svg>
+    `);
+  }
+
+  static renderGitPushKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#041424" stroke="#0284c7" stroke-width="3"/>
+        <!-- Push Upward Arrow -->
+        <circle cx="72" cy="46" r="24" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2"/>
+        <path d="M72 60 L72 34 M60 44 L72 32 L84 44" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="102" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">GIT PUSH</text>
+        <text x="72" y="122" fill="#7dd3fc" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">TO REMOTE</text>
+      </svg>
+    `);
+  }
+
+  static renderGitDiffKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#041424" stroke="#0ea5e9" stroke-width="3"/>
+        <!-- Diff Split Plus/Minus -->
+        <rect x="48" y="28" width="48" height="36" rx="4" fill="#0369a1" stroke="#38bdf8" stroke-width="2"/>
+        <text x="60" y="52" fill="#86efac" font-size="18" font-weight="900" text-anchor="middle">+</text>
+        <text x="84" y="52" fill="#fca5a5" font-size="18" font-weight="900" text-anchor="middle">−</text>
+        <text x="72" y="102" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">VIEW DIFF</text>
+        <text x="72" y="122" fill="#7dd3fc" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">SHOW CHANGES</text>
+      </svg>
+    `);
+  }
+
+  static renderGitStashSaveKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#0f172a" stroke="#6366f1" stroke-width="3"/>
+        <!-- Stash Box / Tray Icon -->
+        <rect x="50" y="32" width="44" height="28" rx="4" fill="#312e81" stroke="#818cf8" stroke-width="2"/>
+        <path d="M72 24 L72 44 M64 36 L72 44 L80 36" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="102" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">STASH SAVE</text>
+        <text x="72" y="122" fill="#a5b4fc" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">STORE WORK</text>
+      </svg>
+    `);
+  }
+
+  static renderGitStashPopKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#0f172a" stroke="#6366f1" stroke-width="3"/>
+        <!-- Stash Pop Upward Arrow -->
+        <rect x="50" y="34" width="44" height="28" rx="4" fill="#312e81" stroke="#818cf8" stroke-width="2"/>
+        <path d="M72 46 L72 26 M64 34 L72 26 L80 34" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="102" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">STASH POP</text>
+        <text x="72" y="122" fill="#a5b4fc" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">RESTORE WORK</text>
+      </svg>
+    `);
+  }
+
+  static renderGitDiscardKey(isConfirming = false): string {
+    const stroke = isConfirming ? "#ef4444" : "#f59e0b";
+    const bg = isConfirming ? "#3b0707" : "#1f1305";
+    const title = isConfirming ? "CONFIRM?" : "DISCARD";
+    const subtitle = isConfirming ? "TAP TO WIPE" : "ROLLBACK";
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="${bg}" stroke="${stroke}" stroke-width="${isConfirming ? 4.5 : 3}"/>
+        <!-- Trash / Rollback Icon -->
+        <circle cx="72" cy="46" r="22" fill="none" stroke="${stroke}" stroke-width="2.5"/>
+        <path d="M60 46 A12 12 0 1 1 76 58" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+        <polygon points="56,40 60,48 68,44" fill="#ffffff"/>
+        <text x="72" y="102" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${title}</text>
+        <text x="72" y="122" fill="${isConfirming ? "#fca5a5" : "#fde68a"}" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${subtitle}</text>
+      </svg>
+    `);
+  }
+
+  static renderGitMainKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#041424" stroke="#10b981" stroke-width="3"/>
+        <!-- Branch Crown / Trunk Icon -->
+        <circle cx="72" cy="46" r="24" fill="#064e3b" stroke="#34d399" stroke-width="2"/>
+        <path d="M60 40 L72 30 L84 40 L80 56 L64 56 Z" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="102" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">MAIN</text>
+        <text x="72" y="122" fill="#6ee7b7" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">CHECKOUT</text>
+      </svg>
+    `);
+  }
+
+  static renderGitPrKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#0b0f19" stroke="#8b5cf6" stroke-width="3"/>
+        <!-- PR Merge Git Icon -->
+        <circle cx="58" cy="38" r="7" fill="none" stroke="#c084fc" stroke-width="2.5"/>
+        <circle cx="58" cy="58" r="7" fill="none" stroke="#c084fc" stroke-width="2.5"/>
+        <line x1="58" y1="45" x2="58" y2="51" stroke="#c084fc" stroke-width="2.5"/>
+        <circle cx="86" cy="48" r="7" fill="#8b5cf6" stroke="#e9d5ff" stroke-width="2.5"/>
+        <path d="M58 38 C74 38, 74 48, 79 48" fill="none" stroke="#c084fc" stroke-width="2.5"/>
+        <text x="72" y="102" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">CREATE PR</text>
+        <text x="72" y="122" fill="#d8b4fe" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">IN BROWSER</text>
+      </svg>
+    `);
+  }
+
+  static renderGitRepoKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#0b0f19" stroke="#3b82f6" stroke-width="3"/>
+        <!-- GitHub Octocat / Browser Icon -->
+        <circle cx="72" cy="46" r="22" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2"/>
+        <path d="M62 46 C62 38, 82 38, 82 46 C82 54, 62 54, 62 46" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+        <line x1="72" y1="26" x2="72" y2="66" stroke="#ffffff" stroke-width="2"/>
+        <text x="72" y="102" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">OPEN REPO</text>
+        <text x="72" y="122" fill="#93c5fd" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">GITHUB WEB</text>
+      </svg>
+    `);
+  }
+
+  static renderGitLogKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#041424" stroke="#0ea5e9" stroke-width="3"/>
+        <!-- Git Log List Icon -->
+        <circle cx="56" cy="36" r="5" fill="#38bdf8"/>
+        <line x1="68" y1="36" x2="92" y2="36" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="56" cy="48" r="5" fill="#38bdf8"/>
+        <line x1="68" y1="48" x2="92" y2="48" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="56" cy="60" r="5" fill="#38bdf8"/>
+        <line x1="68" y1="60" x2="92" y2="60" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <text x="72" y="102" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">GIT LOG</text>
+        <text x="72" y="122" fill="#7dd3fc" font-size="12" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">LAST 10</text>
+      </svg>
+    `);
   }
 
   /**

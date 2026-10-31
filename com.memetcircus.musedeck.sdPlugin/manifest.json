@@ -138,10 +138,10 @@
       "States": [{ "Image": "imgs/actions/fix-bug/key" }]
     },
     {
-      "Name": "Commit & PR",
+      "Name": "Git Commands",
       "UUID": "com.memetcircus.musedeck.commit-pr",
       "Icon": "imgs/actions/commit-pr/icon",
-      "Tooltip": "Stages verified changes, generates semantic commit message, and prepares pull request.",
+      "Tooltip": "Opens the Git Commands sub-dashboard (Status, Commit, Pull, Push, Diff, Stash, PR, Repo, Log).",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/commit-pr/key" }]
     },
