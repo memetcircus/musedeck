@@ -247,7 +247,7 @@ end tell
    * Resume an existing historical session in a new Terminal window
    */
   static async resumeMuseSession(sessionId: string): Promise<void> {
-    const command = `muse resume ${sessionId.trim()}`;
+    const command = `muse resume ${sessionId.trim()}; exec $SHELL`;
     const appleScript = `
 tell application "Terminal"
   activate
@@ -291,8 +291,8 @@ end tell
     }
 
     const command = prompt
-      ? `cd ${this.escapeForShell(projectDir)} && muse ${this.escapeForShell(prompt)}`
-      : `cd ${this.escapeForShell(projectDir)} && muse`;
+      ? `cd ${this.escapeForShell(projectDir)} && muse ${this.escapeForShell(prompt)}; exec $SHELL`
+      : `cd ${this.escapeForShell(projectDir)} && muse; exec $SHELL`;
 
     const appleScript = `
 tell application "Terminal"
@@ -389,7 +389,7 @@ end tell
     }
 
     const chosenPrompt = fileExists ? updatePrompt : initialPrompt;
-    const command = `cd ${this.escapeForShell(projectDir)} && muse ${this.escapeForShell(chosenPrompt)}`;
+    const command = `cd ${this.escapeForShell(projectDir)} && muse ${this.escapeForShell(chosenPrompt)}; exec $SHELL`;
 
     const launchScript = `
 tell application "Terminal"
