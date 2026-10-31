@@ -125,6 +125,86 @@ async function main() {
   ];
   await renderGrid(telemetryKeys, "./assets/deck_telemetry_submenu.png");
 
+  // 5. SNIPPETS SUBMENU
+  const snippetsKeys = [
+    SvgKeyRenderer.renderUpBackKey(),
+    SvgKeyRenderer.renderSnippetCard("BE", "HONEST", "", "#f59e0b", "#fde68a"),
+    SvgKeyRenderer.renderSnippetCard("DON'T", "CODE", "", "#ef4444", "#fca5a5"),
+    null, null,
+
+    SvgKeyRenderer.renderSnippetCard("SHOW", "OPTIONS", "", "#38bdf8", "#bae6fd"),
+    SvgKeyRenderer.renderSnippetCard("EXPLAIN", "WHY", "", "#818cf8", "#c7d2fe"),
+    SvgKeyRenderer.renderSnippetCard("KEEP", "SHORT", "", "#10b981", "#a7f3d0"),
+    null, null,
+
+    SvgKeyRenderer.renderSnippetCard("NO", "TESTS", "", "#ec4899", "#fbcfe8"),
+    SvgKeyRenderer.renderSnippetCard("GO!", "", "", "#22c55e", "#4ade80"),
+    null, null, null
+  ];
+  await renderGrid(snippetsKeys, "./assets/deck_snippets_submenu.png");
+
+  // 6. MUSE MEMORY SUBMENU
+  const memoryKeys = [
+    SvgKeyRenderer.renderUpBackKey(),
+    SvgKeyRenderer.renderMemoryRulesKey(),
+    SvgKeyRenderer.renderMemorySpecKey(),
+    SvgKeyRenderer.renderMemoryPlanKey(),
+    SvgKeyRenderer.renderMemoryTodoKey(),
+
+    SvgKeyRenderer.renderMemoryArchKey(),
+    SvgKeyRenderer.renderMemoryProgressKey(),
+    SvgKeyRenderer.renderMemoryReadmeKey(),
+    SvgKeyRenderer.renderMemoryDecisionsKey(),
+    SvgKeyRenderer.renderMemoryApiKey(),
+
+    SvgKeyRenderer.renderMemoryTestingKey(),
+    SvgKeyRenderer.renderMemorySyncKey(),
+    SvgKeyRenderer.renderMemoryUpdateKey(),
+    null, null
+  ];
+  await renderGrid(memoryKeys, "./assets/deck_memory_submenu.png");
+
+  // 7. MUSE OPS SUBMENU
+  const opsKeys = [
+    SvgKeyRenderer.renderUpBackKey(),
+    SvgKeyRenderer.renderOpsCard("FIX", "ERROR", "#ef4444", "#fca5a5"),
+    SvgKeyRenderer.renderOpsCard("REFACTOR", "CODE", "#f59e0b", "#fde68a"),
+    SvgKeyRenderer.renderOpsCard("OPTIMIZE", "PERF", "#06b6d4", "#67e8f9"),
+    null,
+
+    SvgKeyRenderer.renderOpsCard("EXPLAIN", "CODE", "#a855f7", "#d8b4fe"),
+    SvgKeyRenderer.renderOpsCard("FIND", "SYMBOL", "#3b82f6", "#93c5fd"),
+    SvgKeyRenderer.renderOpsCard("CODE", "REVIEW", "#ec4899", "#f472b6"),
+    null, null,
+
+    SvgKeyRenderer.renderOpsCard("RUN", "TESTS", "#22c55e", "#4ade80"),
+    SvgKeyRenderer.renderOpsCard("RUN", "BUILD", "#84cc16", "#bef264"),
+    SvgKeyRenderer.renderOpsCard("TYPE", "CHECK", "#38bdf8", "#7dd3fc"),
+    null, null
+  ];
+  await renderGrid(opsKeys, "./assets/deck_ops_submenu.png");
+
+  // 8. GIT COMMANDS SUBMENU
+  const gitKeys = [
+    SvgKeyRenderer.renderUpBackKey(),
+    SvgKeyRenderer.renderGitStatusSubKey(),
+    SvgKeyRenderer.renderGitCommitKey("idle"),
+    SvgKeyRenderer.renderGitPullKey(),
+    SvgKeyRenderer.renderGitPushKey(),
+
+    SvgKeyRenderer.renderGitDiffKey(),
+    SvgKeyRenderer.renderGitStashSaveKey(),
+    SvgKeyRenderer.renderGitStashPopKey(),
+    SvgKeyRenderer.renderGitDiscardKey(false),
+    SvgKeyRenderer.renderGitMainKey(),
+
+    SvgKeyRenderer.renderGitPrKey(),
+    SvgKeyRenderer.renderGitRepoKey(),
+    SvgKeyRenderer.renderGitLogKey(),
+    null, null
+  ];
+  await renderGrid(gitKeys, "./assets/deck_git_submenu.png");
+
   console.log("All deck grids rendered successfully!");
 }
 

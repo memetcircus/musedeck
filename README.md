@@ -13,86 +13,172 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 * **Multimodal Bottlenecks**: Manually taking screenshots of Figma designs or recording buggy UI animations, saving files, and typing long prompts into terminal windows.
 
 **MuseDeck** solves this by turning the **Elgato Stream Deck MK.2** into a dedicated, physical mission control console:
-1. **Physical Human-in-the-Loop (HITL) Review Gate**: When Muse Code pauses for confirmation, the top-left key pulses with a 650ms breathing alert. Tapping it surfaces the active terminal and opens a tactile Review Submenu (`APPROVE`, `ALWAYS`, `REJECT`, `FEEDBACK`).
+1. **Physical Human-in-the-Loop (HITL) Review Gate**: When Muse Code pauses for confirmation, the top-left key pulses with a calm 650ms breathing alert. Tapping it surfaces the active terminal and opens a tactile Review Submenu (`APPROVE`, `ALWAYS`, `REJECT`, `FEEDBACK`).
 2. **Multimodal Visual Engineering (Image-to-Code & Video-to-Code)**: One-touch screen snip powered by **Meta SAM 3.1** component segmentation and frontend synthesis via **Muse Spark 1.3**. Plus, desktop interaction recording for dynamic UI bugs uploaded via Meta Files API for automated regression patching.
 3. **Voice Transcribe Streaming**: Physical `VOICE` key toggles hardware `Option+V` microphone transcription directly at the active terminal prompt with zero typing.
-4. **Session Switcher & Resurrection Drawer**: Physical session drawer monitoring active terminal tabs and scanning historical sessions across workspaces, rendering high-contrast date badges (`TODAY`, `YESTRDY`, `OCT 29`).
+4. **Session Switcher & History Drawer**: Physical session drawer monitoring active terminal tabs and scanning historical sessions across workspaces with high-contrast date badges (`TODAY`, `YESTRDY`, `OCT 29`).
 5. **Living Developer Memory & Ops Cockpit**: One-touch access to architecture docs, living prompt qualifiers (`BE HONEST`, `DONT CODE`, `SHORT`, `SHOW OPTS`), a 13-key Git dashboard, and an emergency `HALT` switch.
 
 ---
 
-## 📸 Stream Deck Hardware Consoles
+## 📸 Primary Console (Page 1)
 
-### 1. Primary Mission Control (Page 1)
 ![MuseDeck Page 1 Master Console](assets/deck_page1.png)
 
-### 2. Physical Human-in-the-Loop (HITL) Review Submenu
+### 🎛️ Page 1 Key Layout
+
+| Tuş | Buton | İşlev ve Geliştirici Yeteneği |
+|---|---|---|
+| **[0, 0]** | **READY / REVIEW** | Canlı ajan durum göstergesi (`READY`, `PLAN`, `RUNNING`). Ajan onay beklediğinde (`WAITING_APPROVAL`) 650 ms ritimle yanıp söner; basıldığında **Review Submenüsü** açılır. |
+| **[1, 0]** | **VOICE** | Meta Muse Voice Transcribe donanım tuşu. `⌥+V` mikrofon ses akışını doğrudan aktif terminaldeki imlece aktarır. |
+| **[2, 0]** | **SNIPPETS** | Hızlı yönlendirme niteleyicileri çekmecesi (`BE HONEST`, `DON'T CODE`, `SHORT`, `SHOW OPTS`). |
+| **[3, 0]** | **PROMPT (SPEC)** | Yapılandırılmış mühendislik şartnamesi formatlayıcı (Gereksinimler → Teknik Tasarım → Görev Listesi → Onay Kapısı). |
+| **[4, 0]** | **SESSIONS** | Açık oturum sayısını gösteren çekmece butonu. Basıldığında **13 Tuşlu Oturum Değiştirici** açılır. |
+| **[0, 1]** | **SCREENSHOT** | İnteraktif macOS ekran kırpma aracı. Meta SAM 3.1 ile UI bileşenlerini segmente eder ve koordinatları terminal imlecine iletir. |
+| **[1, 1]** | **IMG TO CODE** | Meta Muse Spark 1.3 görsel kod sentezleyici. Kırpılan UI parçalarından React + Tailwind, Flutter veya Streamlit kodu üretir. |
+| **[2, 1]** | **VID TO CODE** | Video-to-Code hata analizcisi. Masaüstü arayüz video kaydını Meta Files API'ye yükler, dinamik hataları tespit edip yama yazar. |
+| **[3, 1]** | **MUSE SETTINGS** | Yerel web konsolunu (`http://localhost:3456`) tarayıcıda açar. |
+| **[4, 1]** | **CREDITS HUD** | Kalan Meta Model API bakiyesini gösterir (`$149.97`). Basıldığında **10 Tuşlu Telemetri Paneli** açılır. |
+| **[0, 2]** | **VIDEO RECORD** | Masaüstü hata akışlarını ve UI glitch'lerini tek tıkla kaydetme tuşu. |
+| **[1, 2]** | **MUSE MEMORY** | Yaşayan hafıza çekmecesi (`MUSE RULES`, `SPEC.md`, `ARCH.md`, `DECISIONS.md`, `SYNC CONTEXT`). |
+| **[2, 2]** | **MUSE OPS** | Geliştirici operasyonları (`FIX ERROR`, `REFACTOR`, `OPTIMIZE`, `EXPLAIN`, `RUN TESTS`). |
+| **[3, 2]** | **GIT COMMANDS** | 13 tuşlu dokunsal Git kontrol paneli (`STATUS`, `COMMIT`, `PULL`, `PUSH`, `DIFF`, `PR`). |
+| **[4, 2]** | **HALT** | Acil durdurma anahtarı. Kontrolden çıkan ajan işlemlerine anında `SIGINT` / `SIGKILL` gönderir. |
+
+---
+
+## 📂 Submenüler ve Detaylı Açıklamaları
+
+### 1. Human-in-the-Loop (HITL) Review Submenüsü
+Ajan dosyalarda değişiklik yapıp onay istediğinde sol üst buton yanıp söner ve tıklandığında bu onay ekranı açılır:
+
 ![MuseDeck Review Submenu Modal](assets/deck_review_submenu.png)
 
-### 3. Session Switcher & History Drawer
+* **[0, 0] ↑ BACK:** Karar vermeden ana konsola geri döner.
+* **[1, 0] OPTION 1 (APPROVE ONCE):** Değişikliği bu adım için onaylar (terminale `1` gönderir) ve ajanı çalıştırmaya devam eder.
+* **[2, 0] OPTION 2 (ALWAYS ALLOW):** Mevcut oturum boyunca bu araç/komut için bir daha sormadan izin verir (`2`).
+* **[3, 0] OPTION 3 (REJECT / DENY):** Değişikliği reddeder (`3`) ve ajanın adımı iptal etmesini sağlar.
+* **[4, 0] OPTION 4 (TELL WHY / FEEDBACK):** İşlemi durdurur ve geliştiricinin terminalden neden reddettiğini gerekçelendirmesine olanak tanır (`4`).
+
+---
+
+### 2. Sessions Drawer (Oturum Değiştirici) Submenüsü
+Birden fazla terminal penceresi veya geçmişte çalışılmış oturumlar arasında sıfır terminal komutuyla geçiş sağlar:
+
 ![MuseDeck Sessions Drawer Submenu](assets/deck_sessions_submenu.png)
 
-### 4. Real-Time Telemetry & AI Credits Dashboard
+* **[0, 0] ↑ BACK:** Ana konsola dönüş.
+* **[1, 0] + NEW SESSION:** Temiz, bağımsız yeni bir Meta Muse oturumu başlatır.
+* **Kartlar [2..14]:** Disk geçmişinden ve aktif terminallerden taranan oturumlar. Üzerinde büyük tarih rozetleri (`TODAY`, `YESTRDY`, `OCT 29`), proje ismi (`MUSEDECK`, `GLOBAL`, `GRID`) ve oturum saati yer alır. Tıklandığında doğrudan o oturumun penceresi öne gelir ve bağlamı yüklenir.
+
+---
+
+### 3. Prompt Snippets Submenüsü
+Terminalde uzun yönlendirme komutları yazmak yerine tek dokunuşla ajanın davranışını kısıtlayan niteleyiciler ekler:
+
+![MuseDeck Snippets Submenu](assets/deck_snippets_submenu.png)
+
+* **BE HONEST:** *"Dürüst ve eleştirel ol. Hataları ve eksikleri açıkça söyle, daha iyi alternatifler öner."* promptunu iletir.
+* **DON'T CODE:** *"Henüz kod yazma. Önce planı ve yaklaşımı açıkla, ben onayladıktan sonra uygula."* talimatını verir.
+* **SHOW OPTIONS:** *"Her birinin artı ve eksileriyle birlikte 2-3 farklı alternatif yaklaşım göster."*
+* **EXPLAIN WHY:** *"Harekete geçmeden önce gerekçeni ve tasarım ödünleşimlerini açıkla."*
+* **KEEP SHORT:** *"Özet ve odaklı tut. Sadece gerekeni söyle, gereksiz laf kalabalığı yapma."*
+* **NO TESTS:** *"Testleri şimdilik atla, doğrudan ana mantığı kodla."*
+* **GO!:** İmleçteki komutu doğrudan Enter tuşuyla çalıştırır.
+
+---
+
+### 4. Muse Memory (Yaşayan Hafıza & Dokümantasyon) Submenüsü
+Ajanın projeyi unutmaması ve bağlamı kaybetmemesi için projenin kök dizinindeki hafıza dosyalarını tek tıkla terminale besler:
+
+![MuseDeck Memory Submenu](assets/deck_memory_submenu.png)
+
+* **MUSE RULES:** `rules.txt` kurallarını terminale yükler.
+* **SPEC.md & PLAN.md:** Proje teknik tasarım ve uygulama planı dosyalarını açar/senkronize eder.
+* **TODO.md & PROGRESS.md:** Kalan maddeleri ve mevcut ilerlemeyi kontrol ettirir.
+* **ARCH.md & DECISIONS.md:** Mimari prensipleri ve alınan teknik kararları ajana hatırlatır.
+* **SYNC CONTEXT:** Projedeki tüm hafıza dosyalarını tek seferde tarayıp ajan bağlamını yeniler.
+* **UPDATE LOG:** Son yapılan değişiklikleri proje günlüğüne işletir.
+
+---
+
+### 5. Muse Ops (Geliştirici Operasyonları) Submenüsü
+Günlük kodlama ve sorun giderme operasyonlarını tek tuşla tetikler:
+
+![MuseDeck Ops Submenu](assets/deck_ops_submenu.png)
+
+* **FIX ERROR:** Panodaki veya terminaldeki son stack trace / hata çıktısını analiz ettirip otomatik yama üretir.
+* **REFACTOR CODE:** Seçili kodu okunabilirlik ve DRY/KISS prensiplerine göre yeniden düzenletir.
+* **OPTIMIZE PERF:** Algoritmik karmaşıklık ve bellek darboğazlarını analiz ettirip kodu optimize eder.
+* **EXPLAIN CODE:** Kodun çalışma mantığını ve kritik sınır durumlarını adım adım açıklatır.
+* **FIND SYMBOL:** Fonksiyon veya sınıfın proje genelindeki tanımlarını ve kullanımlarını taratır.
+* **CODE REVIEW:** Son git değişikliklerine güvenlik ve kalite odaklı detaylı kod incelemesi yaptırır.
+* **RUN TESTS / RUN BUILD / TYPE CHECK:** Proje testlerini, derleme komutlarını ve TypeScript tip denetimlerini çalıştırıp raporlar.
+
+---
+
+### 6. Git Commands Submenüsü
+Terminalde git komutları yazmadan tüm versiyon kontrolünü fiziksel butonlarla yönetir:
+
+![MuseDeck Git Submenu](assets/deck_git_submenu.png)
+
+* **GIT STATUS & VIEW DIFF:** Değişen dosyaları ve diff özetini görüntüler.
+* **GIT COMMIT:** Yapılan değişiklikleri analiz ederek kurallara uygun semantik commit mesajı üretir ve commitler.
+* **GIT PULL & PUSH:** Uzak depodan çekme ve gönderme işlemlerini yürütür.
+* **STASH SAVE & POP:** Geçici değişiklikleri saklar veya geri yükler.
+* **DISCARD (2-Tık Korumalı):** Kazara kod kaybını önlemek için çift tıklama onayıyla değişiklikleri temizler.
+* **CREATE PR:** Otomatik PR açıklaması hazırlayıp GitHub üzerinde Pull Request açar.
+
+---
+
+### 7. Credits & Telemetry Submenüsü
+Meta Model API kullanım metriklerini ve harcamalarını anlık olarak gösterir:
+
 ![MuseDeck Credits and Telemetry Submenu](assets/deck_telemetry_submenu.png)
+
+* **REMAINING CREDITS:** Kalan API bakiyesi (`$149.97`).
+* **TOTAL SPEND & REQUESTS:** Toplam harcama (`$0.00`) ve çağrı sayısı (`21`).
+* **INPUT & OUTPUT TOKENS:** Giriş ve çıkış token hacmi (`433.9k in / 19.4k out`).
+* **CACHE HIT RATE:** Model prompt önbellek başarı oranı (`57.7%`).
+* **LATENCY:** Ortalama API yanıt süresi (`38 ms`).
+* **BILLING CONSOLE ↗:** Meta Model API faturalandırma ve kota yönetim sayfasını tarayıcıda açar.
 
 ---
 
 ## 🎨 Multimodal Engine: Image-to-Code & Video-to-Code
 
-MuseDeck treats multimodal inputs as first-class physical primitives:
-
 ### 🖼️ Image-to-Code (`IMG TO CODE` + SAM 3.1)
-1. **Interactive macOS Region Snip**: Tapping the `SCREENSHOT` key activates interactive cursor selection.
-2. **Meta SAM 3.1 Segmentation**: The image is dispatched to Meta's **Segment Anything Model 3.1** via Meta Model API to isolate foreground UI components and compute visual bounding boxes.
-3. **Direct Terminal Coordinate Injection**: Screen coordinates are pasted directly at the active Muse Code cursor without overwriting existing prompt text.
-4. **Muse Spark 1.3 Synthesis**: Tapping `IMG TO CODE` feeds the segmented visual component to **Muse Spark 1.3** to synthesize production-ready React + Tailwind CSS, Flutter, or Python Streamlit code.
+1. **İnteraktif macOS Ekran Kırpma:** `SCREENSHOT` tuşuna basıldığında ekran seçim aracı açılır.
+2. **Meta SAM 3.1 Segmentasyonu:** Görüntü Meta Model API üzerindeki **Segment Anything Model 3.1**'e gönderilir. Arka plan temizlenir, UI bileşenleri izole edilir ve koordinatlar hesaplanır.
+3. **İmlece Doğrudan Enjeksiyon:** Terminaldeki mevcut metin silinmeden koordinatlar Meta Muse promptuna eklenir.
+4. **Muse Spark 1.3 Sentezi:** `IMG TO CODE` tuşuna basıldığında kırpılan bileşen **Muse Spark 1.3** modeline beslenir ve saniyeler içinde React + Tailwind CSS, Flutter veya Streamlit kodu üretilir.
 
 ### 🎥 Video-to-Code (`VID TO CODE`)
-Dynamic UI glitches (broken animations, layout shifts, timing race conditions) are impossible to capture in a static screenshot:
-1. **One-Touch Workflow Recording**: Tapping `VIDEO RECORD` starts a focused screen recording session while you reproduce the glitch.
-2. **Meta Files API Dispatch**: The captured video (`.mp4`) is packaged and uploaded directly to the Meta Files API.
-3. **Temporal Multi-Frame Analysis**: Meta's multimodal pipeline inspects frame transitions, pinpoints the faulty CSS keyframe or state transition, and writes the fix directly into the codebase.
+Dinamik arayüz hataları (kırık animasyonlar, geçiş aksaklıkları, state senkronizasyon bozuklukları) statik ekran görüntüleriyle yakalanamaz:
+1. **Tek Dokunuşla Kayıt:** `VIDEO RECORD` tuşuyla hata akışı ekranda yeniden canlandırılırken kayıt başlatılır.
+2. **Meta Files API:** Kaydedilen video (`.mp4`) otomatik olarak Meta Files API'ye yüklenir.
+3. **Çok Kareli Zamansal Analiz:** Meta multimodal hattı kareler arasındaki geçişleri ve CSS hatalarını tespit eder, ardından hatayı düzelten kod yamasını doğrudan projeye uygular.
 
 ---
 
-## 🎛️ 15-Key Layout Mapping (Stream Deck MK.2)
+## 🏛️ Mimari Şemalar
 
-| Key Coordinate | Primary Label | Action UUID | Description & Submenu Integration |
-|---|---|---|---|
-| **Col 0, Row 0** | **READY / REVIEW** | `com.memetcircus.musedeck.status` | Real-time agent status badge. Pulses 650ms breathing alert when `WAITING_APPROVAL`. Tap opens **Review Submenu**. |
-| **Col 1, Row 0** | **VOICE** | `com.memetcircus.musedeck.task` | Hardware `⌥+V` trigger for Meta Muse Voice Transcribe audio streaming directly into active Terminal. |
-| **Col 2, Row 0** | **SNIPPETS** | `com.memetcircus.musedeck.diff` | Quick prompt modifier drawer (`BE HONEST`, `DONT CODE`, `SHORT`, `SHOW OPTS`, `GO!`). |
-| **Col 3, Row 0** | **PROMPT (SPEC)** | `com.memetcircus.musedeck.approve` | Structured spec transformer (Requirements → Tech Design → Task Breakdown → Review Gate). |
-| **Col 4, Row 0** | **SESSIONS** | `com.memetcircus.musedeck.reject` | Session drawer key displaying open session count. Tap opens **13-Session Switcher**. |
-| **Col 0, Row 1** | **SCREENSHOT** | `com.memetcircus.musedeck.sam-snip` | Interactive macOS screen region snip with SAM 3.1 component segmentation. |
-| **Col 1, Row 1** | **IMG TO CODE** | `com.memetcircus.musedeck.spark-code` | Visual component synthesis via Meta Muse Spark 1.3 (React, Tailwind, Flutter, Streamlit). |
-| **Col 2, Row 1** | **VID TO CODE** | `com.memetcircus.musedeck.run-muse` | Video-to-Code: Temporal desktop recording → Meta Files API → Automated bug diagnostic & patch. |
-| **Col 3, Row 1** | **MUSE SETTINGS** | `com.memetcircus.musedeck.web-console` | Launches local Web Mission Control configuration console at `http://localhost:3456`. |
-| **Col 4, Row 1** | **CREDITS HUD** | `com.memetcircus.musedeck.api-status` | Live Meta Model API credits tracker (`$149.97`). Tap opens **10-Key Telemetry Dashboard**. |
-| **Col 0, Row 2** | **VIDEO RECORD** | `com.memetcircus.musedeck.prompt-task` | One-touch desktop video recording for bug reproduction and UI flow capture. |
-| **Col 1, Row 2** | **MUSE MEMORY** | `com.memetcircus.musedeck.write-tests` | Living architecture memory drawer (Rules, Specs, Architecture, Decisions, Context Sync). |
-| **Col 2, Row 2** | **MUSE OPS** | `com.memetcircus.musedeck.fix-bug` | Developer operations drawer (Terminal focus, test runner, git worktree tools). |
-| **Col 3, Row 2** | **GIT COMMANDS** | `com.memetcircus.musedeck.commit-pr` | 13-Key tactile Git control deck (Status, Diff, Pull, Push, Branch, Stash, PR). |
-| **Col 4, Row 2** | **HALT** | `com.memetcircus.musedeck.halt` | Physical emergency stop: Sends `SIGINT` / `SIGKILL` to abort runaway agent actions immediately. |
-
----
-
-## 🏛️ System Architecture
+### Sistem Mimarisi
 
 ```mermaid
 flowchart TD
-    subgraph Hardware["Physical Hardware Layer"]
+    subgraph Hardware["Fiziksel Donanım Katmanı"]
         SD["Elgato Stream Deck MK.2"]
-        MIC["Mac Microphone (Opt+V)"]
+        MIC["Mac Mikrofon (Opt+V)"]
     end
 
-    subgraph BridgeLayer["MuseDeck Bridge Layer (Port 3456 / 3457)"]
-        Plugin["Stream Deck Plugin (Node.js SDK)"]
+    subgraph BridgeLayer["MuseDeck Köprü Katmanı (Port 3456 / 3457)"]
+        Plugin["Stream Deck Eklentisi (Node.js SDK)"]
         Server["Express REST API & WS Broadcaster"]
-        Automator["Terminal Automation (AppleScript / Native C Engine)"]
+        Automator["Terminal Otomasyonu (AppleScript / Native C Engine)"]
     end
 
-    subgraph MetaStack["Meta AI & CLI Stack"]
+    subgraph MetaStack["Meta AI & CLI Ekosistemi"]
         MuseCLI["Meta Muse Code CLI (`muse`)"]
         SAM["Meta SAM 3.1 (Segment Anything)"]
         Spark["Meta Muse Spark 1.3 (Vision & Code)"]
@@ -100,42 +186,42 @@ flowchart TD
         VoiceAPI["Meta Muse Voice Transcribe"]
     end
 
-    SD <-->|"Bidirectional WebSocket"| Plugin
-    Plugin <-->|"WebSocket Telemetry & Action Dispatch"| Server
+    SD <-->|"Çift Yönlü WebSocket"| Plugin
+    Plugin <-->|"Telemetri & Eylem İletimi"| Server
     Server --> Automator
-    Automator -->|"Zero-latency keystrokes & focus"| MuseCLI
-    Server <-->|"REST & Polling"| MuseCLI
+    Automator -->|"Sıfır gecikmeli tuş vuruşu ve pencere odağı"| MuseCLI
+    Server <-->|"REST & Durum Sorgusu"| MuseCLI
 
-    MIC -->|"Native Stream"| VoiceAPI
-    VoiceAPI -->|"Audio-to-text"| MuseCLI
+    MIC -->|"Doğrudan Akış"| VoiceAPI
+    VoiceAPI -->|"Sesten metne dönüştürme"| MuseCLI
 
-    Server <-->|"Bounding segmentation"| SAM
-    Server <-->|"Multimodal code synthesis"| Spark
-    Server <-->|"Video frame diagnostic"| FilesAPI
+    Server <-->|"Sınır segmentasyonu"| SAM
+    Server <-->|"Görsel kod sentezi"| Spark
+    Server <-->|"Video kare hata analizi"| FilesAPI
 ```
 
 ---
 
-## 🔄 Multimodal Data Pipeline
+### Multimodal Veri Akışı
 
 ```mermaid
 flowchart LR
-    subgraph Ingestion["Input Capture"]
-        Snip["SAM 3.1 Screen Snip"]
-        Video["Desktop Video Recorder"]
-        Voice["Option+V Microphone"]
+    subgraph Ingestion["Girdi Yakalama"]
+        Snip["SAM 3.1 Ekran Kırpma"]
+        Video["Masaüstü Video Kaydedici"]
+        Voice["Option+V Mikrofon"]
     end
 
-    subgraph MetaProcessing["Meta Multimodal Processing"]
-        SAM_Proc["SAM 3.1 Boundary Segmentation"]
-        Files_Proc["Meta Files API Chunked Upload"]
-        Spark_Proc["Muse Spark 1.3 Code Engine"]
+    subgraph MetaProcessing["Meta Multimodal İşleme"]
+        SAM_Proc["SAM 3.1 Bileşen Segmentasyonu"]
+        Files_Proc["Meta Files API Parçalı Yükleme"]
+        Spark_Proc["Muse Spark 1.3 Kod Motoru"]
     end
 
-    subgraph Synthesis["Tactile Output"]
-        Deck["Stream Deck Dynamic LCD Key"]
-        Term["Active Muse Terminal Buffer"]
-        Patch["Git Patch & Code Commit"]
+    subgraph Synthesis["Dokunsal Çıktı"]
+        Deck["Stream Deck Dinamik LCD Tuş"]
+        Term["Aktif Muse Terminal Tamponu"]
+        Patch["Git Yaması ve Kod Değişikliği"]
     end
 
     Snip --> SAM_Proc --> Spark_Proc --> Deck
@@ -145,65 +231,65 @@ flowchart LR
 
 ---
 
-## ⚖️ Human-in-the-Loop (HITL) Execution Sequence
+### Human-in-the-Loop (HITL) Onay Sıralaması
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Dev as Developer
-    participant SD as Stream Deck Key (0, 0)
-    participant Server as MuseDeck Bridge
+    participant Dev as Geliştirici
+    participant SD as Stream Deck Tuş (0, 0)
+    participant Server as MuseDeck Köprüsü
     participant Muse as Meta Muse Code CLI
 
-    Muse->>Server: State Transition -> WAITING_APPROVAL (Diff generated)
-    Server->>SD: Broadcast Telemetry (Breathing Alert Flashing, 650ms)
+    Muse->>Server: Durum Değişimi -> WAITING_APPROVAL (Diff oluşturuldu)
+    Server->>SD: Canlı Telemetri (650 ms Ritimli Uyarı Animasyonu)
     Note over SD: Sol üst buton Yeşil / Sarı ritminde yanıp söner
-    Dev->>SD: Tap Key (0, 0)
-    SD->>Server: Open Review Submenu
-    Server->>Dev: Bring active Muse Terminal to front
-    Note over SD: Review Submenu açılır (Approve, Always, Reject, Feedback)
-    Dev->>SD: Press Key (1, 0) [OPTION 1: APPROVE]
-    SD->>Server: Dispatch Keystroke "1" + approve()
-    Server->>Muse: Inject '1' + Enter into Terminal
-    Muse->>Server: State Transition -> EXECUTING
-    Server->>SD: Restore Page 1 Standard Layout
+    Dev->>SD: Tuşa Bas [READY / REVIEW]
+    SD->>Server: Review Submenüsünü Aç
+    Server->>Dev: Aktif Muse terminalini öne getir
+    Note over SD: Review Submenüsü açılır (Approve, Always, Reject, Feedback)
+    Dev->>SD: Tuşa Bas [OPTION 1: APPROVE]
+    SD->>Server: "1" Tuş Vuruşu ve approve() sinyali gönder
+    Server->>Muse: Terminale '1' + Enter bas
+    Muse->>Server: Durum Değişimi -> EXECUTING
+    Server->>SD: Ana Konsolu Geri Yükle
 ```
 
 ---
 
 ## 🖥️ Web Mission Control (`http://localhost:3456`)
 
-In addition to physical hardware control, MuseDeck provides a local glassmorphism web console:
-* **Interactive 5x3 Virtual Deck**: Mirrors the exact physical Stream Deck state with real-time key SVG rendering.
-* **Live Diffs & Telemetry**: Visualizes git changes (`+X / -Y`), memory usage, and token consumption.
-* **Environment System Health**: Real-time status for Meta Muse Code CLI, AppleScript Terminal Automation, Stream Deck Core Bridge, and Meta Model API latency.
-* **Settings Cockpit**: Manage API keys, model parameters (`muse-spark-1.3`, `sam-3.1`), and persistent configs (`~/.musedeck/config.json`).
+Fiziksel donanıma ek olarak MuseDeck yerel bir web konsolu sunar:
+* **İnteraktif 5x3 Sanal Deck:** Fiziksel Stream Deck'teki LCD durumunu tarayıcıda birebir yansıtır.
+* **Canlı Diff ve Telemetri:** Yapılan kod değişikliklerini (`+X / -Y`), bellek ve token tüketimini izler.
+* **Sistem Sağlığı:** Meta Muse Code CLI, AppleScript Terminal Otomasyonu, Stream Deck Köprüsü ve Meta Model API gecikmesini gerçek zamanlı doğrular.
+* **Ayarlar Paneli:** API anahtarlarını, model seçimlerini (`muse-spark-1.3`, `sam-3.1`) ve çalışma klasörü yollarını yönetir (`~/.musedeck/config.json`).
 
 ---
 
-## 🚀 Quickstart
+## 🚀 Hızlı Başlangıç
 
-### 1. Prerequisites
-* macOS 13+ (Apple Silicon or Intel)
-* Node.js 20+ (Node 24 recommended)
-* Elgato Stream Deck app (v7.1+)
-* Meta Muse Code CLI (`muse`) installed on PATH
+### 1. Gereksinimler
+* macOS 13+ (Apple Silicon veya Intel)
+* Node.js 20+ (Node 24 önerilir)
+* Elgato Stream Deck uygulaması (v7.1+)
+* Meta Muse Code CLI (`muse`) PATH üzerinde kurulu olmalıdır
 
-### 2. Installation
+### 2. Kurulum
 ```bash
-# Clone the repository
+# Depoyu klonlayın
 git clone https://github.com/memetcircus/musedeck.git
 cd musedeck
 
-# Install dependencies
+# Bağımlılıkları yükleyin
 npm install
 
-# Build server and Stream Deck plugin bundle
+# Sunucuyu ve Stream Deck eklenti paketini derleyin
 npm run pack
 ```
 
-### 3. Environment Configuration
-Copy `.env.example` to `.env` and provide your Meta API credentials:
+### 3. Ortam Değişkenleri
+`.env.example` dosyasını `.env` olarak kopyalayın ve Meta API bilgilerinizi girin:
 ```bash
 cp .env.example .env
 ```
@@ -211,7 +297,7 @@ cp .env.example .env
 ```ini
 PORT=3456
 WS_PORT=3457
-META_MODEL_API_KEY=your_meta_model_api_key_here
+META_MODEL_API_KEY=meta_model_api_anahtariniz
 META_API_BASE_URL=https://api.meta.ai/v1
 SAM_MODEL_NAME=sam-3.1
 SPARK_MODEL_NAME=muse-spark-1.3
@@ -220,38 +306,37 @@ MUSE_CODE_SIMULATION=false
 CLI_TIMEOUT_MS=180000
 ```
 
-> **Simulation Mode**: If you do not have an active Meta Muse Code child process running, set `MUSE_CODE_SIMULATION=true` to test the state machine, breathing alert animations, and HITL review submenu gates immediately.
+> **Simülasyon Modu:** Bilgisayarınızda aktif bir Meta Muse Code oturumu yoksa `MUSE_CODE_SIMULATION=true` yaparak durum makinesini, 650 ms animasyonları ve HITL onay submenüsünü anında deneyimleyebilirsiniz.
 
-### 4. Running MuseDeck Bridge
-Start the background mission control server:
+### 4. MuseDeck Köprüsünü Başlatma
 ```bash
 npm run dev
-# or: npm start
+# veya: npm start
 ```
-Open the Web Mission Control console at **[http://localhost:3456](http://localhost:3456)**.
+Web Mission Control konsolunu tarayıcınızda açın: **[http://localhost:3456](http://localhost:3456)**.
 
-### 5. Stream Deck Plugin Installation
-Symlink the built plugin directly into your Elgato Stream Deck directory:
+### 5. Stream Deck Eklentisini Yükleme
+Derlenen eklentiyi Elgato Stream Deck klasörüne bağlayın:
 ```bash
 ln -sfn "$(pwd)/com.memetcircus.musedeck.sdPlugin" ~/Library/Application\ Support/com.elgato.StreamDeck/Plugins/com.memetcircus.musedeck.sdPlugin
 ```
-Restart the Stream Deck app, and **MuseDeck** will automatically load with the default 15-key profile!
+Stream Deck uygulamasını yeniden başlattığınızda **MuseDeck** 15 tuşlu varsayılan profiliyle kullanıma hazır olacaktır.
 
 ---
 
-## 🧪 Testing
+## 🧪 Testler
 
-Run the automated test suites:
+Otomatik test paketlerini çalıştırın:
 ```bash
-# Test Agent State Machine, Transitions & HITL Gates
+# Ajan Durum Makinesi, Geçişler ve HITL Onay Kapıları
 npm run test:agent
 
-# Test Meta Model API Client, SAM 3.1 & Muse Spark Synthesis
+# Meta Model API İstemcisi, SAM 3.1 ve Muse Spark Sentezi
 npm run test:meta
 ```
 
 ---
 
-## 🛡️ License
+## 🛡️ Lisans
 
-Apache-2.0 License.
+Apache-2.0 Lisansı.
