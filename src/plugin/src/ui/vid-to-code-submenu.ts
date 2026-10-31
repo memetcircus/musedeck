@@ -1,29 +1,6 @@
-import fs from "node:fs";
-import path from "node:path";
 import { keyRegistry } from "./key-registry.js";
 import { SvgKeyRenderer } from "./svg-renderer.js";
 import type { StreamDeckCoreBridge } from "../core-bridge.js";
-
-function hasExistingComponent(): boolean {
-  try {
-    const tempDir = "/tmp/musedeck";
-    if (!fs.existsSync(tempDir)) return false;
-    const validExts = [".swift", ".tsx", ".jsx", ".html", ".vue", ".kt", ".dart", ".py"];
-    const files = fs.readdirSync(tempDir);
-    return files.some((f) => {
-      const ext = path.extname(f).toLowerCase();
-      return (
-        validExts.includes(ext) &&
-        (f.startsWith("Animated") ||
-          f.startsWith("animated") ||
-          f.startsWith("Extracted") ||
-          f.startsWith("extracted"))
-      );
-    });
-  } catch {
-    return false;
-  }
-}
 
 export interface VidToCodeOption {
   title: string;
@@ -156,7 +133,7 @@ class VidToCodeSubmenuManager {
     this.isRecording = false;
     this.lastTappedCoord = null;
     this.countdownSeconds = 5;
-    this.hasGeneratedCode = hasExistingComponent();
+    this.hasGeneratedCode = false;
     this.bannerMode = "idle";
     this.stopBannerAnimation();
     this.render();
@@ -165,6 +142,7 @@ class VidToCodeSubmenuManager {
 
   close(): void {
     this.active = false;
+    this.hasGeneratedCode = false;
     this.isProcessing = false;
     this.isRecording = false;
     this.lastTappedCoord = null;
@@ -175,6 +153,7 @@ class VidToCodeSubmenuManager {
 
   forceClose(): void {
     this.active = false;
+    this.hasGeneratedCode = false;
     this.isProcessing = false;
     this.isRecording = false;
     this.lastTappedCoord = null;
