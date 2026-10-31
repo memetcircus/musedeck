@@ -188,3 +188,4 @@ class SettingsSubmenuManager {
 }
 
 export const settingsSubmenuManager = new SettingsSubmenuManager();
+
