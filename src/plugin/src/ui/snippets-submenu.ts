@@ -14,7 +14,7 @@ export interface SnippetDefinition {
 }
 
 export const SNIPPETS: Record<string, SnippetDefinition> = {
-  // Row 0
+  // Row 0 (Top): Left columns (0,0 is BACK)
   "1,0": {
     line1: "BE",
     line2: "HONEST",
@@ -31,7 +31,9 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     borderColor: "#ef4444",
     textColor: "#fca5a5",
   },
-  "3,0": {
+
+  // Row 1 (Middle): Left columns 0, 1, 2
+  "0,1": {
     line1: "SHOW",
     line2: "OPTIONS",
     subtitle: "",
@@ -39,7 +41,7 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     borderColor: "#38bdf8",
     textColor: "#bae6fd",
   },
-  "4,0": {
+  "1,1": {
     line1: "EXPLAIN",
     line2: "WHY",
     subtitle: "",
@@ -47,8 +49,7 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     borderColor: "#818cf8",
     textColor: "#c7d2fe",
   },
-  // Row 1
-  "0,1": {
+  "2,1": {
     line1: "KEEP",
     line2: "SHORT",
     subtitle: "",
@@ -56,7 +57,9 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     borderColor: "#10b981",
     textColor: "#a7f3d0",
   },
-  "1,1": {
+
+  // Row 2 (Bottom): Left columns 0, 1
+  "0,2": {
     line1: "NO",
     line2: "TESTS",
     subtitle: "",
@@ -64,7 +67,7 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     borderColor: "#ec4899",
     textColor: "#fbcfe8",
   },
-  "2,1": {
+  "1,2": {
     line1: "GO!",
     line2: "",
     subtitle: "",
