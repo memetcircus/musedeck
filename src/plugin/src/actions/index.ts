@@ -257,7 +257,7 @@ export class AgentStatusAction extends SingletonAction {
     this.flashTimer = setInterval(() => {
       this.flashPhase = !this.flashPhase;
       this.updateFlashImage();
-    }, 350);
+    }, 650);
   }
 
   private updateFlashImage(): void {
