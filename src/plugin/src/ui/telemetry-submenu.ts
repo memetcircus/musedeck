@@ -57,28 +57,29 @@ class TelemetrySubmenuManager {
 
       if (row === 0) {
         if (col === 0) {
-          // Top-left: Plain Minimal Back Arrow
-          image = SvgKeyRenderer.renderPlainBackKey();
+          // Top-left: Prominent Back Arrow
+          image = SvgKeyRenderer.renderUpBackKey();
         } else if (col === 1) {
-          image = SvgKeyRenderer.renderTelemetryCard("CREDITS", credits, "REMAINING", "#1b352b", "#34d399", "#10b981");
+          image = SvgKeyRenderer.renderTelemetryCard("CREDITS", credits, "#22c55e", "#4ade80");
         } else if (col === 2) {
-          image = SvgKeyRenderer.renderTelemetryCard("SPEND", spent, "TOTAL", "#1e2433", "#ffffff", "#94a3b8");
+          image = SvgKeyRenderer.renderTelemetryCard("SPEND", spent, "#38bdf8", "#7dd3fc");
         } else if (col === 3) {
-          image = SvgKeyRenderer.renderTelemetryCard("REQUESTS", reqs, "CALLS", "#1e2433", "#ffffff", "#94a3b8");
+          image = SvgKeyRenderer.renderTelemetryCard("REQUESTS", reqs, "#6366f1", "#a5b4fc");
         } else if (col === 4) {
-          image = SvgKeyRenderer.renderTelemetryCard("BILLING ↗", "CONSOLE", "OPEN WEB", "#2a2d45", "#a5b4fc", "#818cf8");
+          // Top-right: Prominent Action Button for Billing
+          image = SvgKeyRenderer.renderActionKey("OPEN", "BILLING ↗", "#06b6d4", "#67e8f9");
         }
       } else if (row === 1) {
         if (col === 0) {
-          image = SvgKeyRenderer.renderTelemetryCard("INPUT", inTokens, "TOKENS", "#1e2433", "#ffffff", "#94a3b8");
+          image = SvgKeyRenderer.renderTelemetryCard("INPUT", inTokens, "#38bdf8", "#bae6fd");
         } else if (col === 1) {
-          image = SvgKeyRenderer.renderTelemetryCard("OUTPUT", outTokens, "TOKENS", "#1e2433", "#ffffff", "#94a3b8");
+          image = SvgKeyRenderer.renderTelemetryCard("OUTPUT", outTokens, "#818cf8", "#c7d2fe");
         } else if (col === 2) {
-          image = SvgKeyRenderer.renderTelemetryCard("CACHE", cacheHit, "HIT RATE", "#1e2433", "#ffffff", "#94a3b8");
+          image = SvgKeyRenderer.renderTelemetryCard("CACHE", cacheHit, "#10b981", "#6ee7b7");
         } else if (col === 3) {
-          image = SvgKeyRenderer.renderTelemetryCard("LATENCY", "38ms", "AVERAGE", "#362a1b", "#fde68a", "#f59e0b");
+          image = SvgKeyRenderer.renderTelemetryCard("LATENCY", "38ms", "#f59e0b", "#fde68a");
         } else if (col === 4) {
-          image = SvgKeyRenderer.renderTelemetryCard("MODEL", model, "ACTIVE", "#1e2433", "#ffffff", "#94a3b8");
+          image = SvgKeyRenderer.renderTelemetryCard("SPARK", "1.3", "#22c55e", "#86efac", "ACTIVE");
         }
       } else if (row === 2) {
         // Row 2: Clean empty tiles

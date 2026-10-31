@@ -1945,43 +1945,52 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Render Plain Back Key for Submenus (clean minimalist vector arrow)
+   * Render action button for submenus (e.g. OPEN BILLING)
+   * High-visibility clickable button appearance
    */
-  static renderPlainBackKey(): string {
+  static renderActionKey(
+    line1: string,
+    line2: string,
+    borderColor = "#06b6d4",
+    textColor = "#67e8f9"
+  ): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect x="4" y="4" width="136" height="136" rx="20" fill="#0c1017" stroke="#1e2433" stroke-width="1.6"/>
-        <circle cx="72" cy="72" r="30" fill="#151b26" stroke="#2a3447" stroke-width="1.5"/>
-        <path d="M72 52 L56 68 M72 52 L88 68 M72 52 L72 92" fill="none" stroke="#f1f5f9" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect width="144" height="144" rx="26" fill="#070a16" stroke="${borderColor}" stroke-width="3"/>
+        <circle cx="72" cy="72" r="52" fill="${borderColor}" fill-opacity="0.16"/>
+        <text x="72" y="56" fill="#ffffff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
+        <text x="72" y="94" fill="${textColor}" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>
       </svg>
     `);
   }
 
   /**
    * Render individual clean plain telemetry card for the 15-key Sub-Menu
+   * Matches the high-contrast 2-line plain design with large bold typography
    */
   static renderTelemetryCard(
-    label: string,
-    value: string,
-    subtitle: string,
-    borderColor = "#1e2433",
-    valColor = "#ffffff",
-    labelColor = "#94a3b8"
+    line1: string,
+    line2: string,
+    borderColor = "#38bdf8",
+    textColor = "#ffffff",
+    badge = ""
   ): string {
-    const valSize = value.length > 8 ? 20 : value.length > 6 ? 23 : 26;
+    const l1Size = line1.length > 8 ? 19 : 22;
+    const l2Size = line2.length > 7 ? 22 : 26;
+    const badgeHtml = badge
+      ? `<rect x="24" y="14" width="96" height="20" rx="10" fill="${borderColor}" fill-opacity="0.2" stroke="${borderColor}" stroke-width="1.5"/>
+         <text x="72" y="28" fill="${textColor}" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${badge}</text>`
+      : "";
+    const y1 = badge ? 68 : 56;
+    const y2 = badge ? 102 : 94;
+
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <!-- Clean Plain Tile Background & Subtle Border -->
-        <rect x="4" y="4" width="136" height="136" rx="20" fill="#0c1017" stroke="${borderColor}" stroke-width="1.6"/>
-
-        <!-- Top Label: Clean & Legible -->
-        <text x="72" y="38" fill="${labelColor}" font-size="13" font-weight="700" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${label}</text>
-
-        <!-- Center Value: Crisp, High-Contrast Typography -->
-        <text x="72" y="80" fill="${valColor}" font-size="${valSize}" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${value}</text>
-
-        <!-- Bottom Subtitle: Crisp Muted Description -->
-        <text x="72" y="118" fill="#64748b" font-size="12" font-weight="600" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${subtitle}</text>
+        <rect width="144" height="144" rx="26" fill="#070a16" stroke="${borderColor}" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="52" fill="${borderColor}" fill-opacity="0.08"/>
+        ${badgeHtml}
+        <text x="72" y="${y1}" fill="#ffffff" font-size="${l1Size}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
+        <text x="72" y="${y2}" fill="${textColor}" font-size="${l2Size}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>
       </svg>
     `);
   }
