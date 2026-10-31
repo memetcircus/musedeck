@@ -27,23 +27,23 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 
 ### 🎛️ Page 1 Key Layout
 
-| Key | Button | Function & Developer Capability |
-|---|---|---|
-| **[0, 0]** | **READY / REVIEW** | Dynamic agent status telemetry (`READY`, `PLAN`, `RUNNING`). When awaiting human approval (`WAITING_APPROVAL`), pulses with a calm 650ms breathing alert; tap opens the **Review Submenu**. |
-| **[1, 0]** | **VOICE** | Hardware `⌥+V` trigger for Meta Muse Voice Transcribe. Streams microphone audio directly into the active terminal cursor for zero-typing steering. |
-| **[2, 0]** | **SNIPPETS** | Rapid steering qualifier drawer (`BE HONEST`, `DON'T CODE`, `SHORT`, `SHOW OPTS`, `GO!`). |
-| **[3, 0]** | **PROMPT (SPEC)** | Structured spec transformer (Requirements → Technical Design → Task Breakdown → Review Gate). |
-| **[4, 0]** | **SESSIONS** | Active session counter. Tap opens the tactile **13-Key Session Switcher & Drawer**. |
-| **[0, 1]** | **SCREENSHOT** | Interactive macOS screen region snip. Dispatches to Meta SAM 3.1 to segment foreground UI components and injects coordinates at cursor. |
-| **[1, 1]** | **IMG TO CODE** | Meta Muse Spark 1.3 visual frontend synthesizer. Transforms UI snips and mocks into clean React + Tailwind, Flutter, or Streamlit code. |
-| **[2, 1]** | **VID TO CODE** | Video-to-Code bug diagnostic engine. Records desktop interactions, uploads via Meta Files API, analyzes transitions, and synthesizes regression patches. |
-| **[3, 1]** | **MUSE SETTINGS** | Launches the local Web Mission Control configuration console in your browser (`http://localhost:3456`). |
-| **[4, 1]** | **CREDITS HUD** | Live Meta Model API credits tracker (`$149.97`). Tap opens the **10-Key Telemetry Dashboard**. |
-| **[0, 2]** | **VIDEO RECORD** | One-touch desktop video recording trigger for capturing reproducible bug flows and UI glitches. |
-| **[1, 2]** | **MUSE MEMORY** | Living architecture memory drawer (`MUSE RULES`, `SPEC.md`, `ARCH.md`, `DECISIONS.md`, `SYNC CONTEXT`). |
-| **[2, 2]** | **MUSE OPS** | Developer operations drawer (`FIX ERROR`, `REFACTOR`, `OPTIMIZE`, `EXPLAIN`, `RUN TESTS`). |
-| **[3, 2]** | **GIT COMMANDS** | 13-key tactile Git control deck (`STATUS`, `COMMIT`, `PULL`, `PUSH`, `DIFF`, `PR`). |
-| **[4, 2]** | **HALT** | Physical emergency stop switch. Instantly sends `SIGINT` / `SIGKILL` to abort runaway agent actions. |
+| Key [Col, Row] | Button | Function & Developer Capability |
+|:---:|:---:|---|
+| **[0,&nbsp;0]** | **READY&nbsp;/&nbsp;REVIEW** | Dynamic agent status telemetry (`READY`, `PLAN`, `RUNNING`). When awaiting human approval (`WAITING_APPROVAL`), pulses with a calm 650ms breathing alert; tap opens the **Review Submenu**. |
+| **[1,&nbsp;0]** | **VOICE** | Hardware `⌥+V` trigger for Meta Muse Voice Transcribe. Streams microphone audio directly into the active terminal cursor for zero-typing steering. |
+| **[2,&nbsp;0]** | **SNIPPETS** | Rapid steering qualifier drawer (`BE HONEST`, `DON'T CODE`, `SHORT`, `SHOW OPTS`, `GO!`). |
+| **[3,&nbsp;0]** | **PROMPT&nbsp;(SPEC)** | Structured spec transformer (Requirements → Technical Design → Task Breakdown → Review Gate). |
+| **[4,&nbsp;0]** | **SESSIONS** | Active session counter. Tap opens the tactile **13-Key Session Switcher & Drawer**. |
+| **[0,&nbsp;1]** | **SCREENSHOT** | Interactive macOS screen region snip. Dispatches to Meta SAM 3.1 to segment foreground UI components and injects coordinates at cursor. |
+| **[1,&nbsp;1]** | **IMG&nbsp;TO&nbsp;CODE** | Meta Muse Spark 1.3 visual frontend synthesizer. Transforms UI snips and mocks into clean React + Tailwind, Flutter, or Streamlit code. |
+| **[2,&nbsp;1]** | **VID&nbsp;TO&nbsp;CODE** | Video-to-Code bug diagnostic engine. Records desktop interactions, uploads via Meta Files API, analyzes transitions, and synthesizes regression patches. |
+| **[3,&nbsp;1]** | **MUSE&nbsp;SETTINGS** | Launches the local Web Mission Control configuration console in your browser (`http://localhost:3456`). |
+| **[4,&nbsp;1]** | **CREDITS&nbsp;HUD** | Live Meta Model API credits tracker (`$149.97`). Tap opens the **10-Key Telemetry Dashboard**. |
+| **[0,&nbsp;2]** | **VIDEO&nbsp;RECORD** | One-touch desktop video recording trigger for capturing reproducible bug flows and UI glitches. |
+| **[1,&nbsp;2]** | **MUSE&nbsp;MEMORY** | Living architecture memory drawer (`MUSE RULES`, `SPEC.md`, `ARCH.md`, `DECISIONS.md`, `SYNC CONTEXT`). |
+| **[2,&nbsp;2]** | **MUSE&nbsp;OPS** | Developer operations drawer (`FIX ERROR`, `REFACTOR`, `OPTIMIZE`, `EXPLAIN`, `RUN TESTS`). |
+| **[3,&nbsp;2]** | **GIT&nbsp;COMMANDS** | 13-key tactile Git control deck (`STATUS`, `COMMIT`, `PULL`, `PUSH`, `DIFF`, `PR`). |
+| **[4,&nbsp;2]** | **HALT** | Physical emergency stop switch. Instantly sends `SIGINT` / `SIGKILL` to abort runaway agent actions. |
 
 ---
 
