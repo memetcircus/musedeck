@@ -73,14 +73,6 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     textColor: "#f0fdf4",
     pressEnter: true,
   },
-  "3,1": {
-    line1: "STYLE",
-    line2: "THEME",
-    subtitle: "TAILWIND",
-    text: "Perform UI style transfer and modernize theme aesthetic using Tailwind CSS.",
-    borderColor: "#a855f7",
-    textColor: "#f3e8ff",
-  },
   "4,1": {
     line1: "TREE",
     line2: "GRAPH",
@@ -88,23 +80,6 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     text: "Analyze workspace directory tree and dependency graph.",
     borderColor: "#06b6d4",
     textColor: "#cffafe",
-  },
-  // Row 2
-  "0,2": {
-    line1: "MOBILE",
-    line2: "VIEW",
-    subtitle: "RESPONSIVE",
-    text: "Inspect mobile viewport recording and fix responsive design bugs.",
-    borderColor: "#3b82f6",
-    textColor: "#eff6ff",
-  },
-  "1,2": {
-    line1: "SPARK",
-    line2: "CHAT",
-    subtitle: "CREATIVE",
-    text: "Start interactive creative coding session with Meta Muse Spark.",
-    borderColor: "#ec4899",
-    textColor: "#fdf2f8",
   },
 };
 
