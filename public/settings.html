@@ -347,25 +347,63 @@
     }
 
     .toast {
-      padding: 12px 24px;
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 10000;
+      padding: 14px 24px;
       border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      display: none;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(16px);
       text-align: center;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transform: translateY(-16px);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
 
     .toast.success {
-      display: block;
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid #22c55e;
-      color: #86efac;
+      background: rgba(16, 185, 129, 0.25);
+      border: 1px solid #10b981;
+      color: #6ee7b7;
     }
 
     .toast.error {
-      display: block;
-      background: rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.25);
       border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+
+    /* Inline Ping Result Badge */
+    .ping-result-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .ping-result-badge.success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #86efac;
+    }
+
+    .ping-result-badge.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
       color: #fca5a5;
     }
   </style>
@@ -399,6 +437,7 @@
           <button class="btn btn-secondary" id="toggleApiKey">Show</button>
           <button class="btn btn-secondary" id="testApiBtn">Test Ping</button>
         </div>
+        <div id="apiPingFeedback"></div>
         <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
           Config is persistently saved to <code style="color: var(--purple);">~/.musedeck/config.json</code> across all sessions.
         </p>
@@ -472,6 +511,16 @@
           </div>
           <span class="pill pill-green">ONLINE</span>
         </div>
+        <div class="check-item">
+          <div class="check-item-info">
+            <span class="check-icon">☁️</span>
+            <div>
+              <div class="check-name">Meta Model API Connection</div>
+              <div class="check-desc" id="apiHealthDesc">Cloud API key configured & verified</div>
+            </div>
+          </div>
+          <span class="pill pill-green" id="apiHealthBadge">CONNECTED</span>
+        </div>
       </div>
     </div>
 
@@ -496,11 +545,41 @@
       }
     });
 
+    let toastTimer = null;
     function showToast(text, isError = false) {
       const toast = document.getElementById('toastMsg');
       toast.textContent = text;
-      toast.className = 'toast ' + (isError ? 'error' : 'success');
-      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+      toast.className = 'toast show ' + (isError ? 'error' : 'success');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.className = 'toast ' + (isError ? 'error' : 'success');
+      }, 4000);
+    }
+
+    function updateApiStatusUI(ok, model = '', latencyMs = 0, error = '') {
+      const feedback = document.getElementById('apiPingFeedback');
+      const healthBadge = document.getElementById('apiHealthBadge');
+      const healthDesc = document.getElementById('apiHealthDesc');
+
+      if (ok) {
+        feedback.innerHTML = `<div class="ping-result-badge success">✓ Meta Model API Connected (${model}) · Latency: ${latencyMs}ms</div>`;
+        if (healthBadge) {
+          healthBadge.textContent = 'CONNECTED';
+          healthBadge.className = 'pill pill-green';
+        }
+        if (healthDesc) {
+          healthDesc.textContent = `Active (${latencyMs}ms · ${model})`;
+        }
+      } else {
+        feedback.innerHTML = `<div class="ping-result-badge error">✗ ${error || 'Connection Failed'}</div>`;
+        if (healthBadge) {
+          healthBadge.textContent = 'DISCONNECTED';
+          healthBadge.className = 'pill pill-orange';
+        }
+        if (healthDesc) {
+          healthDesc.textContent = error || 'Please enter a valid Meta API key';
+        }
+      }
     }
 
     // Load Initial Config
@@ -509,7 +588,13 @@
         const res = await fetch('/api/settings');
         if (res.ok) {
           const cfg = await res.json();
-          if (cfg.apiKey) apiKeyInput.value = cfg.apiKey;
+          if (cfg.apiKey) {
+            apiKeyInput.value = cfg.apiKey;
+            // Validate existing API key on load
+            testApiConnection(cfg.apiKey, false);
+          } else {
+            updateApiStatusUI(false, '', 0, 'No API key configured yet');
+          }
         }
       } catch (err) {
         console.error('Failed to load settings:', err);
@@ -539,43 +624,59 @@
       }
     }
 
-    // Test API Key Ping
-    document.getElementById('testApiBtn').addEventListener('click', async () => {
-      const btn = document.getElementById('testApiBtn');
-      btn.textContent = 'Testing...';
+    // Helper: Test API Connection
+    async function testApiConnection(key, showToastNotification = true) {
+      const testKey = key || apiKeyInput.value.trim();
+      if (!testKey) {
+        updateApiStatusUI(false, '', 0, 'API key field is empty');
+        if (showToastNotification) showToast('✗ Please enter an API key first', true);
+        return;
+      }
+
       try {
         const res = await fetch('/api/settings/test', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey: apiKeyInput.value })
+          body: JSON.stringify({ apiKey: testKey })
         });
         const data = await res.json();
         if (data.ok) {
-          showToast(`✓ Meta Model API Connected! (${data.model})`);
+          updateApiStatusUI(true, data.model, data.latencyMs);
+          if (showToastNotification) showToast(`✓ Meta Model API Connected! (${data.model})`);
         } else {
-          showToast(`✗ Test Ping Failed: ${data.error}`, true);
+          updateApiStatusUI(false, '', 0, data.error);
+          if (showToastNotification) showToast(`✗ Ping Failed: ${data.error}`, true);
         }
       } catch (err) {
-        showToast('✗ Network error reaching server', true);
-      } finally {
-        btn.textContent = 'Test Ping';
+        updateApiStatusUI(false, '', 0, 'Network error reaching local bridge');
+        if (showToastNotification) showToast('✗ Network error reaching server', true);
       }
+    }
+
+    // Test API Key Ping Button
+    document.getElementById('testApiBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('testApiBtn');
+      btn.textContent = 'Testing...';
+      await testApiConnection(apiKeyInput.value.trim(), true);
+      btn.textContent = 'Test Ping';
     });
 
     // Save Settings
     document.getElementById('saveBtn').addEventListener('click', async () => {
       const btn = document.getElementById('saveBtn');
       btn.textContent = 'Saving...';
+      const keyVal = apiKeyInput.value.trim();
       try {
         const res = await fetch('/api/settings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            apiKey: apiKeyInput.value.trim()
+            apiKey: keyVal
           })
         });
         if (res.ok) {
-          showToast('✓ Settings saved to ~/.musedeck/config.json and Stream Deck updated!');
+          showToast('✓ Settings saved and Stream Deck updated!');
+          testApiConnection(keyVal, false);
         } else {
           showToast('✗ Failed to save settings', true);
         }
