@@ -257,3 +257,4 @@ class MemorySubmenuManager {
 }
 
 export const memorySubmenuManager = new MemorySubmenuManager();
+

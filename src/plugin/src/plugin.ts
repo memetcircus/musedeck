@@ -64,7 +64,7 @@ streamDeck.actions.registerAction(new PromptTaskAction(bridge));
 streamDeck.actions.registerAction(new WriteTestsAction(bridge));
 streamDeck.actions.registerAction(new FixBugAction(bridge));
 streamDeck.actions.registerAction(new CommitPrAction(bridge));
-streamDeck.actions.registerAction(new WebConsoleAction());
+streamDeck.actions.registerAction(new WebConsoleAction(bridge));
 streamDeck.actions.registerAction(new PageNextAction(bridge));
 
 // Page 2 Actions

@@ -468,10 +468,8 @@ export class SessionsAction extends SingletonAction {
           sessionsSubmenuManager.hasThinkingSession
         );
         for (const key of this.activeKeys) {
-          if (!museBeamAnimator.isRunning) {
-            void key.setImage(img);
-            void key.setTitle("");
-          }
+          void key.setImage(img);
+          void key.setTitle("");
         }
       });
     }
@@ -493,7 +491,7 @@ export class SessionsAction extends SingletonAction {
           );
           void ev.action.setTitle("");
         },
-        false,
+        true, // EXCLUDED FROM ANIMATION so session count and activity stay visible during thinking!
         4,
         0
       );
@@ -691,37 +689,32 @@ export class RunMuseAction extends SingletonAction {
   }
 }
 
-// --- KEY 8: HALT / CANCEL KEY (EXCLUDED FROM ANIMATION) ---
+// --- KEY 8 (PAGE 1: COL 3, ROW 1): RESERVED BLANK TILE ---
 @action({ UUID: "com.memetcircus.musedeck.halt" })
 export class HaltAction extends SingletonAction {
   private activeKeys = new Set<KeyAction>();
 
-  constructor(private readonly bridge: StreamDeckCoreBridge) {
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
-    this.bridge.onTelemetry((telemetry) => {
-      if (isAnySubmenuActive()) return;
-      const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
-      const img = SvgKeyRenderer.renderHaltKey(isThinking);
-      for (const key of this.activeKeys) {
-        void key.setImage(img);
-      }
-    });
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
       this.activeKeys.add(ev.action);
-      attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          const isThinking = this.bridge.getTelemetry().state === AgentState.PLANNING || this.bridge.getTelemetry().state === AgentState.EXECUTING;
-          void ev.action.setImage(SvgKeyRenderer.renderHaltKey(isThinking));
+          void ev.action.setImage(SvgKeyRenderer.renderEmptyTile());
+          void ev.action.setTitle("");
         },
-        true, // ALWAYS EXCLUDE from animation so developer can emergency stop anytime!
+        false,
         3,
         1
       );
+      if (!isAnySubmenuActive()) {
+        void ev.action.setImage(SvgKeyRenderer.renderEmptyTile());
+        void ev.action.setTitle("");
+      }
     }
   }
 
@@ -733,9 +726,7 @@ export class HaltAction extends SingletonAction {
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
-    if (checkSubmenuKeyDown(_ev)) return;
-    await TerminalAutomation.sendInterruptEscape();
-    await this.bridge.halt();
+    // Deliberately blank slot per user design (reserved for future feature)
   }
 }
 
@@ -1078,85 +1069,119 @@ export class CommitPrAction extends SingletonAction {
   }
 }
 
-// --- KEY 14 (PAGE 1): NAVIGATION TO PAGE 2 ---
+// --- KEY 14 (PAGE 1: COL 4, ROW 2): HALT / EMERGENCY STOP (EXCLUDED FROM ANIMATION) ---
 @action({ UUID: "com.memetcircus.musedeck.page-next" })
 export class PageNextAction extends SingletonAction {
+  private activeKeys = new Set<KeyAction>();
+
   constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
+    if (this.bridge) {
+      this.bridge.onTelemetry((telemetry) => {
+        if (isAnySubmenuActive()) return;
+        const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
+        const img = SvgKeyRenderer.renderHaltKey(isThinking);
+        for (const key of this.activeKeys) {
+          void key.setImage(img);
+          void key.setTitle("");
+        }
+      });
+    }
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
       if (this.bridge) attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderNextPageKey());
+          const isThinking = this.bridge?.getTelemetry().state === AgentState.PLANNING || this.bridge?.getTelemetry().state === AgentState.EXECUTING;
+          void ev.action.setImage(SvgKeyRenderer.renderHaltKey(Boolean(isThinking)));
           void ev.action.setTitle("");
         },
-        false,
+        true, // ALWAYS EXCLUDE from animation so developer can emergency stop anytime!
         4,
         2
       );
+      if (!isAnySubmenuActive()) {
+        const isThinking = this.bridge?.getTelemetry().state === AgentState.PLANNING || this.bridge?.getTelemetry().state === AgentState.EXECUTING;
+        void ev.action.setImage(SvgKeyRenderer.renderHaltKey(Boolean(isThinking)));
+        void ev.action.setTitle("");
+      }
     }
   }
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    if (checkSubmenuKeyDown(ev)) return;
-    const deviceId = ev.action.device.id;
-    console.log(`[PageNext] Switching to Page 2 on device ${deviceId}...`);
-    try {
-      await streamDeck.profiles.switchToProfile(deviceId, "MuseDeck", 1);
-    } catch (e: any) {
-      console.warn("[PageNext] switchToProfile with name failed:", e?.message);
-    }
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
+    console.log("🛑 [HALT Key at 4,2] Emergency Stop triggered!");
+    await TerminalAutomation.sendInterruptEscape();
+    await this.bridge?.halt();
   }
 }
 
-// --- KEY 14 (LEGACY COMPANION): REPLACED CONSOLE KEY WITH PAGE 2 NAVIGATION ---
+// --- KEY 14 (LEGACY COMPANION): WEB CONSOLE ACTION (ALIASED TO HALT) ---
 @action({ UUID: "com.memetcircus.musedeck.web-console" })
 export class WebConsoleAction extends SingletonAction {
-  constructor() {
+  private activeKeys = new Set<KeyAction>();
+
+  constructor(private readonly bridge?: StreamDeckCoreBridge) {
     super();
+    if (this.bridge) {
+      this.bridge.onTelemetry((telemetry) => {
+        if (isAnySubmenuActive()) return;
+        const isThinking = telemetry.state === AgentState.PLANNING || telemetry.state === AgentState.EXECUTING;
+        const img = SvgKeyRenderer.renderHaltKey(isThinking);
+        for (const key of this.activeKeys) {
+          void key.setImage(img);
+          void key.setTitle("");
+        }
+      });
+    }
   }
 
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     if (ev.action.isKey()) {
+      this.activeKeys.add(ev.action);
+      if (this.bridge) attachGlobalThinkingListener(this.bridge);
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderNextPageKey());
+          const isThinking = this.bridge?.getTelemetry().state === AgentState.PLANNING || this.bridge?.getTelemetry().state === AgentState.EXECUTING;
+          void ev.action.setImage(SvgKeyRenderer.renderHaltKey(Boolean(isThinking)));
           void ev.action.setTitle("");
         },
-        false,
+        true,
         4,
         2
       );
+      if (!isAnySubmenuActive()) {
+        const isThinking = this.bridge?.getTelemetry().state === AgentState.PLANNING || this.bridge?.getTelemetry().state === AgentState.EXECUTING;
+        void ev.action.setImage(SvgKeyRenderer.renderHaltKey(Boolean(isThinking)));
+        void ev.action.setTitle("");
+      }
     }
   }
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    for (const key of this.activeKeys) {
+      if (key.id === ev.action.id) this.activeKeys.delete(key);
+    }
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    if (checkSubmenuKeyDown(ev)) return;
-    const deviceId = ev.action.device.id;
-    console.log(`[WebConsole/PageNext] Switching to Page 2 on device ${deviceId}...`);
-    try {
-      await streamDeck.profiles.switchToProfile(deviceId, "MuseDeck", 1);
-    } catch (e: any) {
-      console.warn("[WebConsole/PageNext] switchToProfile with name failed:", e?.message);
-    }
-    try {
-      await streamDeck.profiles.switchToProfile(deviceId, undefined, 1);
-    } catch (e: any) {
-      console.warn("[WebConsole/PageNext] switchToProfile without name failed:", e?.message);
-    }
+  override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+    if (checkSubmenuKeyDown(_ev)) return;
+    console.log("🛑 [HALT/WebConsole Key at 4,2] Emergency Stop triggered!");
+    await TerminalAutomation.sendInterruptEscape();
+    await this.bridge?.halt();
   }
 }
 

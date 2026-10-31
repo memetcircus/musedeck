@@ -73,6 +73,55 @@ export const SNIPPETS: Record<string, SnippetDefinition> = {
     textColor: "#f0fdf4",
     pressEnter: true,
   },
+  "3,1": {
+    line1: "STYLE",
+    line2: "THEME",
+    subtitle: "TAILWIND",
+    text: "Perform UI style transfer and modernize theme aesthetic using Tailwind CSS.",
+    borderColor: "#a855f7",
+    textColor: "#f3e8ff",
+  },
+  "4,1": {
+    line1: "TREE",
+    line2: "GRAPH",
+    subtitle: "WORKSPACE",
+    text: "Analyze workspace directory tree and dependency graph.",
+    borderColor: "#06b6d4",
+    textColor: "#cffafe",
+  },
+  // Row 2
+  "0,2": {
+    line1: "MOBILE",
+    line2: "VIEW",
+    subtitle: "RESPONSIVE",
+    text: "Inspect mobile viewport recording and fix responsive design bugs.",
+    borderColor: "#3b82f6",
+    textColor: "#eff6ff",
+  },
+  "1,2": {
+    line1: "SPARK",
+    line2: "CHAT",
+    subtitle: "CREATIVE",
+    text: "Start interactive creative coding session with Meta Muse Spark.",
+    borderColor: "#ec4899",
+    textColor: "#fdf2f8",
+  },
+  "2,2": {
+    line1: "UPLOAD",
+    line2: "FILES",
+    subtitle: "MEDIA ASSETS",
+    text: "Upload media assets to Meta Files API, retrieve file_id, and attach to current coding context.",
+    borderColor: "#14b8a6",
+    textColor: "#ccfbf1",
+  },
+  "3,2": {
+    line1: "FIX FROM",
+    line2: "VIDEO",
+    subtitle: "REC TO FIX",
+    text: "Diagnose and fix the frontend bug from recent screen+audio recording.",
+    borderColor: "#f97316",
+    textColor: "#ffedd5",
+  },
 };
 
 class SnippetsSubmenuManager {

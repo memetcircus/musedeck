@@ -98,10 +98,10 @@
       "States": [{ "Image": "imgs/actions/run-muse/key" }]
     },
     {
-      "Name": "Halt / Stop",
+      "Name": "Reserved Slot",
       "UUID": "com.memetcircus.musedeck.halt",
       "Icon": "imgs/actions/halt/icon",
-      "Tooltip": "Emergency stop. Immediately halts child processes and cancels running agent workflows.",
+      "Tooltip": "Reserved slot for future expansion.",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/halt/key" }]
     },
@@ -154,12 +154,12 @@
       "States": [{ "Image": "imgs/actions/web-console/key" }]
     },
     {
-      "Name": "Page 2 →",
+      "Name": "Halt / Stop",
       "UUID": "com.memetcircus.musedeck.page-next",
-      "Icon": "imgs/actions/page-next/icon",
-      "Tooltip": "Navigate to Page 2 (Multimodal Video & Deep Workflows).",
+      "Icon": "imgs/actions/halt/icon",
+      "Tooltip": "Emergency stop. Immediately halts child processes and cancels running agent workflows.",
       "Controllers": ["Keypad"],
-      "States": [{ "Image": "imgs/actions/page-next/key" }]
+      "States": [{ "Image": "imgs/actions/halt/key" }]
     },
     {
       "Name": "Record to Fix",
