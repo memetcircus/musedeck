@@ -12,7 +12,9 @@
     "build": "npm run build:server && npm run build:plugin",
     "pack": "npm run build && npx @elgato/cli pack com.memetcircus.musedeck.sdPlugin -o dist/ --force",
     "test:agent": "tsx test/test-agent.ts",
-    "test:meta": "tsx test/test-meta.ts"
+    "test:meta": "tsx test/test-meta.ts",
+    "test:storyboard": "tsx test/test-storyboard.ts",
+    "test": "npm run test:agent && npm run test:meta && npm run test:storyboard"
   },
   "keywords": [
     "streamdeck",

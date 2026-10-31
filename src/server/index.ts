@@ -15,6 +15,7 @@ import { MuseSparkClient } from "../api/spark-client.js";
 import { MuseHttpServer } from "./http-server.js";
 import { MuseWsServer, type SurfaceMessage } from "./ws-server.js";
 import { TerminalSessionWatcher } from "../agent/terminal-session-watcher.js";
+import { extractVideoFrames, detectMotionDifference, buildTemporalStoryboard } from "../agent/video-storyboard.js";
 
 async function main() {
   console.log(`
@@ -206,42 +207,12 @@ async function main() {
         return;
       }
 
-      // Extract 8 sequential keyframes from the 5-second recording (2 FPS storyboard)
-      const frameCount = 8;
-      const framePaths: string[] = [];
-      for (let i = 1; i <= frameCount; i++) {
-        framePaths.push(`/tmp/musedeck/flow_f${i}.png`);
-      }
-
-      await new Promise<void>((resolve) => {
-        exec(
-          `/opt/homebrew/bin/ffmpeg -y -i "${videoPath}" -vf "fps=1.6" -vframes 8 /tmp/musedeck/flow_f%01d.png || /usr/bin/ffmpeg -y -i "${videoPath}" -vf "fps=1.6" -vframes 8 /tmp/musedeck/flow_f%01d.png`,
-          () => resolve()
-        );
-      });
+      // Extract 8 sequential keyframes from the 5-second recording
+      const framePaths = await extractVideoFrames(videoPath, "/tmp/musedeck", 8, 1.6);
 
       // Smart Motion Detection: check if frames are static/identical
-      let motionPercent = 0;
-      let isStatic = false;
-      try {
-        const firstFrame = framePaths[0];
-        const lastFrame = framePaths[frameCount - 1];
-        if (fs.existsSync(firstFrame) && fs.existsSync(lastFrame)) {
-          const b1 = await sharp(firstFrame).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
-          const bLast = await sharp(lastFrame).resize(64, 64, { fit: "fill" }).grayscale().raw().toBuffer();
-          let diffSum = 0;
-          for (let i = 0; i < b1.length; i++) {
-            diffSum += Math.abs(b1[i] - bLast[i]);
-          }
-          motionPercent = (diffSum / (b1.length * 255)) * 100;
-          console.log(`📊 [VidToCode] Motion difference detected: ${motionPercent.toFixed(2)}%`);
-          if (motionPercent < 1.5) {
-            isStatic = true;
-          }
-        }
-      } catch (motionErr: any) {
-        console.warn("Motion detection check skipped:", motionErr.message);
-      }
+      const { motionPercent, isStatic } = await detectMotionDifference(framePaths);
+      console.log(`📊 [VidToCode] Motion difference detected: ${motionPercent.toFixed(2)}%`);
 
       if (isStatic) {
         console.warn(`⚠️ [VidToCode] Static screen detected (${motionPercent.toFixed(2)}% change). Prompting user to use IMG TO CODE.`);
@@ -263,46 +234,24 @@ async function main() {
       // Notify surfaces of synthesis phase
       wsServer.broadcast({ type: "vid_synthesizing", target: targetFramework } as any);
 
-      // Assemble 8-frame 2x4 storyboard grid (flow_montage.png)
+      // Assemble 8-frame 4x2 temporal storyboard contact sheet with timecode badges + manifest
       const montagePath = "/tmp/musedeck/flow_montage.png";
-      const frameW = 280;
-      const frameH = 210;
-      const cols = 4;
-      const rows = 2;
+      const manifestPath = "/tmp/musedeck/flow_manifest.json";
+      let storyboardManifest: any = null;
       try {
-        const buffers = await Promise.all(
-          framePaths.map(async (fp) => {
-            if (fs.existsSync(fp)) {
-              return sharp(fp).resize(frameW, frameH, { fit: "inside" }).toBuffer();
-            }
-            return sharp({
-              create: { width: frameW, height: frameH, channels: 4, background: { r: 14, g: 20, b: 35, alpha: 1 } },
-            }).png().toBuffer();
-          })
-        );
-
-        const compositeList: Array<{ input: Buffer; left: number; top: number }> = [];
-        for (let idx = 0; idx < buffers.length; idx++) {
-          const col = idx % cols;
-          const row = Math.floor(idx / cols);
-          compositeList.push({
-            input: buffers[idx],
-            left: col * frameW,
-            top: row * frameH,
-          });
-        }
-
-        await sharp({
-          create: {
-            width: frameW * cols,
-            height: frameH * rows,
-            channels: 4,
-            background: { r: 10, g: 15, b: 28, alpha: 1 },
-          },
-        })
-          .composite(compositeList)
-          .png()
-          .toFile(montagePath);
+        const { manifest } = await buildTemporalStoryboard({
+          framePaths,
+          durationSeconds: 5.0,
+          montagePath,
+          manifestPath,
+          cols: 4,
+          rows: 2,
+          frameWidth: 320,
+          frameHeight: 200,
+          motionPercent,
+        });
+        storyboardManifest = manifest;
+        console.log(`🎬 [VidToCode] Built temporal contact sheet (${manifest.frameCount} frames, ${manifest.durationSeconds}s) -> ${montagePath}`);
       } catch (montageErr: any) {
         console.warn("Could not create multi-frame montage:", montageErr.message);
       }
@@ -323,8 +272,8 @@ async function main() {
       // Open in developer's active editor
       await TerminalAutomation.openFileInEditor(res.filePath);
 
-      // Feed prompt into active Muse terminal
-      const prompt = `Synthesized interactive ${res.frameworkName} UI flow component (${res.filename}): ${res.filePath}. Integrate this flow into our workspace.`;
+      // Feed prompt into active Muse terminal with temporal metadata
+      const prompt = `Synthesized interactive ${res.frameworkName} UI flow component (${res.filename}) from 8-frame temporal storyboard (5.0s sequence, ${motionPercent.toFixed(1)}% motion change): ${res.filePath}. Integrate this animated transition into our workspace.`;
       await TerminalAutomation.typeSnippetIntoTerminal(prompt, false);
 
       // Broadcast completion to Stream Deck
@@ -333,6 +282,7 @@ async function main() {
         filename: res.filename,
         filePath: res.filePath,
         framework: res.frameworkName,
+        manifest: storyboardManifest,
       } as any);
     } catch (err: any) {
       console.error("VidToCode synthesis error:", err.message);

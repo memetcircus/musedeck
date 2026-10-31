@@ -34,7 +34,7 @@ export type SurfaceMessage =
   | { type: "vid_recording_started"; duration: number }
   | { type: "vid_countdown"; seconds: number }
   | { type: "vid_synthesizing"; target?: string }
-  | { type: "vid_spark_completed"; filename?: string; filePath?: string; framework?: string }
+  | { type: "vid_spark_completed"; filename?: string; filePath?: string; framework?: string; manifest?: any }
   | { type: "vid_spark_failed"; reason?: string; error?: string }
   | { type: "record_prompt_flow" }
   | { type: "stop_prompt_flow" }
