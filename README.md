@@ -156,17 +156,29 @@ Real-time hardware HUD tracking Meta Model API resource utilization and cloud in
 ## Multimodal Engine: Image-to-Code & Video-to-Code
 
 ### Image-to-Code (`IMG TO CODE` + SAM 3.1)
-1. **Interactive macOS Screen Snip:** Tapping `SCREENSHOT` activates native crosshair region selection.
+1. **Interactive macOS Screen Snip:** Tapping `SCREENSHOT` or any framework key inside `IMG TO CODE` activates native crosshair region selection.
 2. **Meta SAM 3.1 Segmentation:** Dispatched to Meta's **Segment Anything Model 3.1** via Meta Model API to isolate foreground UI elements and compute spatial bounding coordinates.
 3. **Cursor Injection:** Coordinates and image references are pasted directly into the active Muse CLI prompt without wiping user text.
-4. **Muse Spark 1.3 Synthesis:** Tapping `IMG TO CODE` feeds the isolated UI component to **Muse Spark 1.3** to synthesize clean React + Tailwind CSS, Flutter, or Streamlit frontend code.
+4. **Muse Spark 1.3 Synthesis & Live Preview:** Selecting a target framework key (`REACT`, `HTML5`, `SWIFTUI`, `COMPOSE`, or `FLUTTER`) feeds the isolated UI component to **Muse Spark 1.3**, synthesizes production-ready code, and automatically launches a live interactive preview via the `RUN PREVIEW` hardware key.
 
 ### Video-to-Code (`VID TO CODE`)
-Dynamic UI defects (broken animation curves, layout jitter, state desyncs) cannot be conveyed in static images:
-1. **One-Touch Workflow Recording:** Tapping `VID TO CODE` or `VIDEO RECORD` captures a focused 5-second screen recording of the interaction glitch.
+Dynamic UI interactions (animations, modal transitions, multi-step flows, layout jitter) cannot be conveyed in a single static image:
+1. **Interactive Region Video Capture:** Tapping `REACT`, `HTML5`, `SWIFTUI`, `COMPOSE`, or `FLUTTER` inside the `VID TO CODE` submenu selects a screen region and records the live UI interaction (`STOP REC` finishes recording).
 2. **Perceptual Motion Detection:** Evaluates pixel delta across keyframes using Sharp. If motion is static (< 1.5% delta), it advises switching to `IMG TO CODE` to prevent wasted tokens.
-3. **Temporal Filmstrip & Contact Sheet Assembly:** Extracts 8 sequential keyframes, overlays individual timecode badges (`#1  0.00s` to `#8  5.00s`), and stitches them into a unified 4×2 contact sheet (`flow_montage.png`) alongside a structured `flow_manifest.json`.
-4. **Multi-Frame Temporal Synthesis:** Dispatches the contact sheet and temporal timeline metadata to Meta Muse Spark 1.3 to analyze state transitions and synthesize reactive code or regression patches directly into the repository.
+3. **Temporal Filmstrip & Contact Sheet Assembly:** Extracts 8 sequential keyframes via FFmpeg, overlays individual timecode badges (`#1  0.00s` to `#8  5.00s`), and stitches them into a unified 4×2 contact sheet (`flow_montage.png`) alongside a structured `flow_manifest.json`.
+4. **Multi-Frame Temporal Synthesis & Live Preview:** Dispatches the contact sheet and temporal timeline metadata to **Meta Muse Spark 1.3** to synthesize animated components in React, HTML5/CSS, SwiftUI, Jetpack Compose, or Flutter, ready for instant execution via `RUN PREVIEW`.
+
+### Live Preview Toolchain Requirements (`IMG TO CODE` & `VID TO CODE`)
+To use the **`RUN PREVIEW`** button inside the `IMG TO CODE` and `VID TO CODE` hardware submenus across all 5 target frameworks, install the corresponding SDKs/IDEs on macOS:
+
+| Hardware Key | Target Framework | Live Preview Mechanism | Required Local Toolchain |
+| :--- | :--- | :--- | :--- |
+| **`REACT`** | React + Tailwind CSS | Interactive browser sandbox (`preview.html`) | **None** (Runs in default macOS browser) |
+| **`HTML5`** | HTML5 + CSS3 / JS | Native browser rendering | **None** (Runs in default macOS browser) |
+| **`SWIFTUI`** | Apple SwiftUI (`.swift`) | Native macOS SwiftUI app compiled via `swiftc -parse-as-library` | **Xcode** & Command Line Tools (`xcode-select --install`) |
+| **`COMPOSE`** | Android Jetpack Compose (`.kt`) | Scaffolds `/tmp/musedeck/ComposePreview` & opens `@Preview` LayoutLib canvas | **Android Studio** (`/Applications/Android Studio.app`) |
+| **`FLUTTER`** | Flutter (`.dart`) | Scaffolds `/tmp/musedeck/FlutterPreview`, runs `flutter build web`, and serves at `http://localhost:3456/flutter` | **Flutter SDK** (`brew install --cask flutter` or `flutter` on `PATH`) |
+| **`VID TO CODE`** | All 5 Frameworks (Video Input) | 8-frame temporal contact sheet extraction (`flow_montage.png`) | **FFmpeg** (`brew install ffmpeg`) |
 
 ---
 
@@ -313,6 +325,11 @@ MuseDeck ships as a **self-contained `.streamDeckPlugin` installer** with the Mi
    Double-click the downloaded `.streamDeckPlugin` file on macOS. The **Elgato Stream Deck** app will automatically install the plugin, prompt you to load the **MuseDeck** 15-key hardware profile, and launch the embedded bridge server in the background.
 3. **Configure API Key & Workspace**:
    Press **`CONFIG`** on your Stream Deck (or open **[http://localhost:3456/settings](http://localhost:3456/settings)** in your browser) to enter your **Meta Model API Key**, verify your **Model API Credits**, and select your active project workspace directory.
+4. **Install Live Preview Toolchains (For `IMG TO CODE` & `VID TO CODE`)**:
+   - **SwiftUI (`SWIFTUI` key)**: Install **Xcode** and run `xcode-select --install` so `swiftc` can compile and launch native SwiftUI desktop previews.
+   - **Jetpack Compose (`COMPOSE` key)**: Install **Android Studio** (`/Applications/Android Studio.app`) to open and render `@Preview` Compose screens.
+   - **Flutter (`FLUTTER` key)**: Install the **Flutter SDK** in your terminal (`brew install --cask flutter`) so MuseDeck can build and serve live Flutter previews.
+   - **Video Storyboard (`VID TO CODE` key)**: Install **FFmpeg** (`brew install ffmpeg`) for 8-frame temporal contact sheet extraction.
 
 ---
 
@@ -323,6 +340,7 @@ MuseDeck ships as a **self-contained `.streamDeckPlugin` installer** with the Mi
 * Node.js 20+ (Node 24 recommended)
 * Elgato Stream Deck app (v7.1+)
 * Meta Muse Code CLI (`muse`) installed on PATH
+* **Live Preview SDKs** (for `IMG TO CODE` / `VID TO CODE` previews): **Xcode** (`swiftc` for `SWIFTUI`), **Android Studio** (for `COMPOSE`), **Flutter CLI** (`flutter` for `FLUTTER`), and **FFmpeg** (`ffmpeg` for `VID TO CODE`).
 
 #### 2. Installation & Packaging
 ```bash
