@@ -358,4 +358,4 @@ npm run test:meta
 
 ## 🛡️ License
 
-Apache-2.0 License.
+Licensed under the [Apache-2.0 License](LICENSE).
