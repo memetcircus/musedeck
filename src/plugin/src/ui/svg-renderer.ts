@@ -503,41 +503,30 @@ export class SvgKeyRenderer {
 
   /**
    * New Session Key in Sessions Submenu (Col 1, Row 0)
+   * Plain high-contrast design matching our Stream Deck design language
    */
   static renderNewSessionKey(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#06b6d4" stroke-width="3"/>
-        <!-- Corner reticle brackets -->
-        <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M 132 28 L 132 12 L 116 12" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M 12 116 L 12 132 L 28 132" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M 132 116 L 132 132 L 116 132" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round"/>
-
-        <!-- Plus icon inside cyber circle -->
-        <circle cx="72" cy="42" r="22" fill="#083344" fill-opacity="0.75" stroke="#22d3ee" stroke-width="2.5"/>
-        <line x1="72" y1="31" x2="72" y2="53" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
-        <line x1="61" y1="42" x2="83" y2="42" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
-
-        <text x="72" y="96" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">NEW</text>
-        <text x="72" y="122" fill="#22d3ee" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">SESSION</text>
+        <rect width="144" height="144" rx="26" fill="#070a16" stroke="#06b6d4" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="52" fill="#06b6d4" fill-opacity="0.12"/>
+        <text x="72" y="56" fill="#ffffff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">+ NEW</text>
+        <text x="72" y="94" fill="#22d3ee" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">SESSION</text>
       </svg>
     `);
   }
 
   /**
    * Historical / Resumable Session Card in Sessions Submenu
-   * Time-based color themes, large readable time, and edge-to-edge layout without corner brackets.
+   * Time-based color themes, large readable date & time, plain edge-to-edge layout without numerators.
    */
   static renderHistoricalSessionCard(
-    sessionIndex: number,
+    _sessionIndex: number,
     project: string,
     timeBadge: string,
     timeStr: string,
     ageCategory: "today" | "yesterday" | "older" = "today"
   ): string {
-    const numStr = sessionIndex < 10 ? `#0${sessionIndex}` : `#${sessionIndex}`;
-
     // Color palettes based on age
     let borderColor = "#00f0ff";
     let badgeFill = "#083344";
@@ -559,132 +548,87 @@ export class SvgKeyRenderer {
       timeColor = "#c084fc";
     }
 
-    // Left pill: Session Index
-    const numPill = `
-      <rect x="12" y="14" width="46" height="24" rx="6" fill="#1e293b" stroke="${borderColor}" stroke-width="1.5"/>
-      <text x="35" y="31" fill="#ffffff" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${numStr}</text>
-    `;
-
-    // Right pill: Time Badge ([TODAY], [YESTRDY], [OCT 27])
-    const statusPill = `
-      <rect x="66" y="14" width="66" height="24" rx="6" fill="${badgeFill}" fill-opacity="0.8" stroke="${badgeBorder}" stroke-width="1.5"/>
-      <text x="99" y="31" fill="${badgeText}" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${timeBadge}</text>
+    // Wide, prominent centered Date Badge (no cramped numerator pill)
+    const dateBadge = `
+      <rect x="18" y="13" width="108" height="25" rx="8" fill="${badgeFill}" fill-opacity="0.85" stroke="${badgeBorder}" stroke-width="1.5"/>
+      <text x="72" y="30.5" fill="${badgeText}" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${timeBadge}</text>
     `;
 
     const displayProject = project.length > 9 ? project.substring(0, 8) + "…" : project;
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <!-- Clean Edge-to-edge card container without obstructive corner brackets -->
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
-        
-        <!-- Subtle background glow -->
-        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
+        <rect width="144" height="144" rx="26" fill="#070a16" stroke="${borderColor}" stroke-width="2.5"/>
+        <circle cx="72" cy="72" r="52" fill="${borderColor}" fill-opacity="0.06"/>
 
-        <!-- Header: Session Number & Time Badge -->
-        ${numPill}
-        ${statusPill}
+        <!-- Header: Centered Large Date Badge -->
+        ${dateBadge}
 
         <!-- Center: Project Name -->
-        <text x="72" y="73" fill="#ffffff" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${displayProject}</text>
-        <line x1="16" y1="84" x2="128" y2="84" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.5"/>
+        <text x="72" y="74" fill="#ffffff" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${displayProject}</text>
+        <line x1="20" y1="85" x2="124" y2="85" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.4"/>
 
-        <!-- Bottom: Large, ultra-readable Time (No redundant RESTORE label) -->
-        <text x="72" y="121" fill="${timeColor}" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">${timeStr}</text>
+        <!-- Bottom: Large, ultra-readable Time -->
+        <text x="72" y="122" fill="${timeColor}" font-size="25" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${timeStr}</text>
       </svg>
     `);
   }
 
   /**
-   * Session Card in Sessions Submenu with cyber badges and high-contrast typography
+   * Session Card in Sessions Submenu with plain status badges and high-contrast typography
    */
   static renderSessionCard(
-    sessionIndex: number,
+    _sessionIndex: number,
     project: string,
     isActive: boolean,
     isThinking: boolean
   ): string {
     const borderColor = isThinking ? "#a855f7" : isActive ? "#22c55e" : "#38bdf8";
-    const borderWidth = isThinking || isActive ? 3.5 : 2.5;
+    const borderWidth = isThinking || isActive ? 3 : 2.5;
 
-    // Left pill: Session Index (#01, #02...)
-    const numStr = sessionIndex < 10 ? `#0${sessionIndex}` : `#${sessionIndex}`;
-    const numPill = `
-      <rect x="12" y="14" width="46" height="24" rx="6" fill="#1e293b" stroke="${borderColor}" stroke-width="1.5"/>
-      <text x="35" y="31" fill="#f8fafc" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${numStr}</text>
-    `;
-
-    // Right pill: Status badge (Replaces the tiny dot!)
+    // Single centered status pill (no cramped numerator pill)
     let statusPill = "";
     if (isThinking) {
       statusPill = `
-        <rect x="66" y="14" width="66" height="24" rx="6" fill="#581c87" stroke="#c084fc" stroke-width="1.5">
-          <animate attributeName="stroke" values="#c084fc;#f472b6;#c084fc" dur="1s" repeatCount="indefinite"/>
-        </rect>
-        <text x="99" y="31" fill="#f5d0fe" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">⚡ BUSY</text>
+        <rect x="20" y="13" width="104" height="25" rx="8" fill="#581c87" stroke="#c084fc" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="#f5d0fe" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">BUSY</text>
       `;
     } else if (isActive) {
       statusPill = `
-        <rect x="66" y="14" width="66" height="24" rx="6" fill="#14532d" stroke="#4ade80" stroke-width="1.5"/>
-        <text x="99" y="31" fill="#86efac" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">ACTIVE</text>
+        <rect x="20" y="13" width="104" height="25" rx="8" fill="#14532d" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="#86efac" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">ACTIVE</text>
       `;
     } else {
       statusPill = `
-        <rect x="66" y="14" width="66" height="24" rx="6" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>
-        <text x="99" y="31" fill="#94a3b8" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">IDLE</text>
-      `;
-    }
-
-    // Status footer: Bold status or flowing nodes if thinking
-    let footerSvg = "";
-    if (isThinking) {
-      footerSvg = `
-        <text x="72" y="104" fill="#e9d5ff" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">THINKING...</text>
-        <g transform="translate(39, 122)">
-          <!-- Node 1 -->
-          <circle cx="14" cy="0" r="4.5" fill="#38bdf8">
-            <animate attributeName="opacity" values="0.2;1;0.2" dur="0.8s" begin="0s" repeatCount="indefinite"/>
-            <animate attributeName="r" values="3;6;3" dur="0.8s" begin="0s" repeatCount="indefinite"/>
-          </circle>
-          <!-- Node 2 -->
-          <circle cx="33" cy="0" r="4.5" fill="#a855f7">
-            <animate attributeName="opacity" values="0.2;1;0.2" dur="0.8s" begin="0.25s" repeatCount="indefinite"/>
-            <animate attributeName="r" values="3;6;3" dur="0.8s" begin="0.25s" repeatCount="indefinite"/>
-          </circle>
-          <!-- Node 3 -->
-          <circle cx="52" cy="0" r="4.5" fill="#38bdf8">
-            <animate attributeName="opacity" values="0.2;1;0.2" dur="0.8s" begin="0.5s" repeatCount="indefinite"/>
-            <animate attributeName="r" values="3;6;3" dur="0.8s" begin="0.5s" repeatCount="indefinite"/>
-          </circle>
-        </g>
-      `;
-    } else if (isActive) {
-      footerSvg = `
-        <text x="72" y="106" fill="#86efac" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">CURRENT</text>
-        <text x="72" y="126" fill="#4ade80" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">● CONNECTED</text>
-      `;
-    } else {
-      footerSvg = `
-        <text x="72" y="106" fill="#f1f5f9" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STANDBY</text>
-        <text x="72" y="126" fill="#94a3b8" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">READY</text>
+        <rect x="20" y="13" width="104" height="25" rx="8" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="#94a3b8" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">IDLE</text>
       `;
     }
 
     const displayProject = project.length > 9 ? project.substring(0, 8) + "…" : project;
 
+    let footerSvg = "";
+    if (isThinking) {
+      footerSvg = `
+        <text x="72" y="116" fill="#e9d5ff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">THINKING...</text>
+      `;
+    } else if (isActive) {
+      footerSvg = `
+        <text x="72" y="118" fill="#4ade80" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">LIVE</text>
+      `;
+    } else {
+      footerSvg = `
+        <text x="72" y="118" fill="#64748b" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">READY</text>
+      `;
+    }
+
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <!-- Clean Edge-to-edge container without corner brackets -->
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="${borderWidth}"/>
-        
-        <!-- Header: Session Number Pill and Status Badge Pill -->
-        ${numPill}
+        <rect width="144" height="144" rx="26" fill="#070a16" stroke="${borderColor}" stroke-width="${borderWidth}"/>
+        <circle cx="72" cy="72" r="52" fill="${borderColor}" fill-opacity="0.08"/>
         ${statusPill}
-
-        <!-- Project name in center -->
-        <text x="72" y="73" fill="#ffffff" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${displayProject}</text>
-        <line x1="16" y1="84" x2="128" y2="84" stroke="${borderColor}" stroke-width="2" stroke-opacity="0.7"/>
-
+        <text x="72" y="74" fill="#ffffff" font-size="21" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${displayProject}</text>
+        <line x1="20" y1="85" x2="124" y2="85" stroke="${borderColor}" stroke-width="1.5" stroke-opacity="0.4"/>
         ${footerSvg}
       </svg>
     `);
