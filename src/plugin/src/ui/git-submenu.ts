@@ -262,3 +262,4 @@ class GitSubmenuManager {
 }
 
 export const gitSubmenuManager = new GitSubmenuManager();
+

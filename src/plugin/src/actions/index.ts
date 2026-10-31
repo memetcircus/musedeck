@@ -5,6 +5,7 @@ import { sessionsSubmenuManager } from "../ui/sessions-submenu.js";
 import { imgToCodeSubmenuManager } from "../ui/img-to-code-submenu.js";
 import { vidToCodeSubmenuManager } from "../ui/vid-to-code-submenu.js";
 import { gitSubmenuManager } from "../ui/git-submenu.js";
+import { memorySubmenuManager } from "../ui/memory-submenu.js";
 import {
   action,
   SingletonAction,
@@ -33,7 +34,8 @@ export function isAnySubmenuActive(): boolean {
     telemetrySubmenuManager.isActive ||
     imgToCodeSubmenuManager.isActive ||
     vidToCodeSubmenuManager.isActive ||
-    gitSubmenuManager.isActive
+    gitSubmenuManager.isActive ||
+    memorySubmenuManager.isActive
   );
 }
 
@@ -59,6 +61,11 @@ function checkSubmenuKeyDown(ev: any): boolean {
 
   if (gitSubmenuManager.isActive) {
     void gitSubmenuManager.handleKeyDown(col, row);
+    return true;
+  }
+
+  if (memorySubmenuManager.isActive) {
+    void memorySubmenuManager.handleKeyDown(col, row);
     return true;
   }
 
@@ -114,6 +121,9 @@ function attachGlobalThinkingListener(bridge: StreamDeckCoreBridge): void {
     if (gitSubmenuManager.isActive) {
       return;
     }
+    if (memorySubmenuManager.isActive) {
+      return;
+    }
     if (sessionsSubmenuManager.isActive) {
       void sessionsSubmenuManager.refreshSessions();
       return;
@@ -166,6 +176,8 @@ function registerDeckKey(
     vidToCodeSubmenuManager.render();
   } else if (gitSubmenuManager.isActive) {
     gitSubmenuManager.render();
+  } else if (memorySubmenuManager.isActive) {
+    memorySubmenuManager.render();
   } else if (telemetrySubmenuManager.isActive) {
     telemetrySubmenuManager.render();
   } else if (!museBeamAnimator.isRunning || excludeFromAnimation) {
@@ -186,6 +198,9 @@ function unregisterDeckKey(ev: WillDisappearEvent): void {
   }
   if (gitSubmenuManager.isActive) {
     gitSubmenuManager.forceClose();
+  }
+  if (memorySubmenuManager.isActive) {
+    memorySubmenuManager.forceClose();
   }
   if (reviewSubmenuManager.isActive) {
     reviewSubmenuManager.forceClose();
@@ -900,7 +915,7 @@ export class PromptTaskAction extends SingletonAction {
   }
 }
 
-// --- KEY 11: WRITE TESTS ---
+// --- KEY 11: MUSE MEMORY & LIVING FILES (REPLACES WRITE TESTS) ---
 @action({ UUID: "com.memetcircus.musedeck.write-tests" })
 export class WriteTestsAction extends SingletonAction {
   constructor(private readonly bridge: StreamDeckCoreBridge) {
@@ -913,22 +928,37 @@ export class WriteTestsAction extends SingletonAction {
       registerDeckKey(
         ev,
         () => {
-          void ev.action.setImage(SvgKeyRenderer.renderTestsKey());
+          void ev.action.setImage(SvgKeyRenderer.renderMuseMemoryKey());
+          void ev.action.setTitle("");
         },
         false,
         1,
         2
       );
+      if (!isAnySubmenuActive()) {
+        void ev.action.setImage(SvgKeyRenderer.renderMuseMemoryKey());
+        void ev.action.setTitle("");
+      }
     }
   }
 
   override onWillDisappear(ev: WillDisappearEvent): void {
     unregisterDeckKey(ev);
+    if (memorySubmenuManager.isActive) {
+      memorySubmenuManager.forceClose();
+    }
   }
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    await TerminalAutomation.launchMuseCodeTerminal(process.cwd(), "Generate complete unit tests for all state machine transitions");
+
+    if (memorySubmenuManager.isActive) {
+      console.log("🔙 [MuseMemoryAction] Closing Muse Memory Submenu");
+      memorySubmenuManager.close();
+    } else {
+      console.log("🧠 [MuseMemoryAction] Opening Muse Memory Submenu");
+      memorySubmenuManager.open();
+    }
   }
 }
 

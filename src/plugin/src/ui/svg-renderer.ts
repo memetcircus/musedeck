@@ -1548,6 +1548,220 @@ export class SvgKeyRenderer {
     `);
   }
 
+  // ==========================================
+  // --- MUSE MEMORY & LIVING FILES SUBMENU ---
+  // ==========================================
+
+  /**
+   * Page 1 Key 11: MUSE MEMORY Launcher (replaces Write Tests)
+   */
+  static renderMuseMemoryKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <defs>
+          <linearGradient id="museMemBg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#110724"/>
+            <stop offset="100%" stop-color="#05020a"/>
+          </linearGradient>
+        </defs>
+        <rect width="144" height="144" rx="26" fill="url(#museMemBg)" stroke="#c084fc" stroke-width="3"/>
+        <!-- Cybernetic Brain Vector Graphic -->
+        <g transform="translate(72, 46)">
+          <!-- Left Hemisphere -->
+          <path d="M-5 -22 C-18 -22, -26 -12, -26 0 C-26 10, -18 20, -5 22 C-9 14, -10 6, -9 -2 C-15 -3, -17 -11, -12 -16 C-14 -19, -10 -22, -5 -22 Z" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M-6 -10 C-14 -8, -16 2, -10 6" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+          <path d="M-6 8 C-14 11, -12 16, -6 16" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="-16" cy="-2" r="3" fill="#38bdf8"/>
+          <circle cx="-9" cy="-14" r="2.5" fill="#ffffff"/>
+          <circle cx="-12" cy="12" r="2.5" fill="#a855f7"/>
+
+          <!-- Right Hemisphere -->
+          <path d="M5 -22 C18 -22, 26 -12, 26 0 C26 10, 18 20, 5 22 C9 14, 10 6, 9 -2 C15 -3, 17 -11, 12 -16 C14 -19, 10 -22, 5 -22 Z" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 -10 C14 -8, 16 2, 10 6" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6 8 C14 11, 12 16, 6 16" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="16" cy="-2" r="3" fill="#38bdf8"/>
+          <circle cx="9" cy="-14" r="2.5" fill="#ffffff"/>
+          <circle cx="12" cy="12" r="2.5" fill="#a855f7"/>
+
+          <!-- Central Neural Bridge -->
+          <line x1="-5" y1="-12" x2="5" y2="-12" stroke="#e9d5ff" stroke-width="2" stroke-dasharray="2,2"/>
+          <line x1="-5" y1="0" x2="5" y2="0" stroke="#38bdf8" stroke-width="2"/>
+          <line x1="-5" y1="12" x2="5" y2="12" stroke="#e9d5ff" stroke-width="2" stroke-dasharray="2,2"/>
+          <circle cx="0" cy="0" r="3.5" fill="#ffffff"/>
+        </g>
+        <text x="72" y="112" fill="#ffffff" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.4">MUSE MEMORY</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryRulesKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#090d16" stroke="#38bdf8" stroke-width="3"/>
+        <!-- Shield / Rules Agreement Icon -->
+        <path d="M72 26 L92 34 C92 52, 84 66, 72 72 C60 66, 52 52, 52 34 Z" fill="#0369a1" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M64 48 L70 54 L80 42" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="112" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.4">MUSE RULES</text>
+      </svg>
+    `);
+  }
+
+  static renderMemorySpecKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#05131e" stroke="#0ea5e9" stroke-width="3"/>
+        <!-- Document with Target Icon -->
+        <rect x="52" y="26" width="40" height="46" rx="4" fill="#0369a1" stroke="#38bdf8" stroke-width="2"/>
+        <circle cx="72" cy="49" r="12" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="3,2"/>
+        <circle cx="72" cy="49" r="5" fill="#38bdf8"/>
+        <circle cx="72" cy="49" r="2" fill="#ffffff"/>
+        <text x="72" y="112" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SPEC.md</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryPlanKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#051a14" stroke="#10b981" stroke-width="3"/>
+        <!-- Roadmap Flag & Milestone Path -->
+        <path d="M52 68 L52 28 L76 36 L52 46" fill="#064e3b" stroke="#34d399" stroke-width="2.5" stroke-linejoin="round"/>
+        <line x1="52" y1="28" x2="52" y2="70" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="68" cy="62" r="4" fill="#34d399"/>
+        <circle cx="86" cy="54" r="5" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+        <path d="M52 68 C60 68, 62 62, 68 62 C74 62, 78 54, 86 54" fill="none" stroke="#6ee7b7" stroke-width="2.5" stroke-linecap="round"/>
+        <text x="72" y="112" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">PLAN.md</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryTodoKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#061826" stroke="#06b6d4" stroke-width="3"/>
+        <!-- Checklist Checkbox Icon -->
+        <rect x="48" y="28" width="16" height="16" rx="3" fill="#083344" stroke="#22d3ee" stroke-width="2"/>
+        <path d="M52 36 L56 40 L62 32" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="72" y1="36" x2="96" y2="36" stroke="#67e8f9" stroke-width="3" stroke-linecap="round"/>
+        <rect x="48" y="52" width="16" height="16" rx="3" fill="#083344" stroke="#22d3ee" stroke-width="2"/>
+        <path d="M52 60 L56 64 L62 56" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="72" y1="60" x2="96" y2="60" stroke="#67e8f9" stroke-width="3" stroke-linecap="round"/>
+        <text x="72" y="112" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TODO.md</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryArchKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#110b24" stroke="#8b5cf6" stroke-width="3"/>
+        <!-- Blueprint / Architecture Blocks Icon -->
+        <rect x="58" y="26" width="28" height="18" rx="3" fill="#4c1d95" stroke="#a78bfa" stroke-width="2"/>
+        <rect x="44" y="52" width="24" height="18" rx="3" fill="#4c1d95" stroke="#a78bfa" stroke-width="2"/>
+        <rect x="76" y="52" width="24" height="18" rx="3" fill="#4c1d95" stroke="#a78bfa" stroke-width="2"/>
+        <path d="M72 44 L72 48 M56 48 L88 48 M56 48 L56 52 M88 48 L88 52" fill="none" stroke="#c084fc" stroke-width="2"/>
+        <text x="72" y="112" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">ARCH.md</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryProgressKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#1f1305" stroke="#f59e0b" stroke-width="3"/>
+        <!-- Timeline DevLog Graph Icon -->
+        <circle cx="50" cy="56" r="6" fill="#f59e0b"/>
+        <circle cx="72" cy="36" r="6" fill="#fde047"/>
+        <circle cx="94" cy="46" r="6" fill="#22c55e"/>
+        <path d="M50 56 L72 36 L94 46" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="72" y="112" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.3">PROGRESS.md</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryReadmeKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#081520" stroke="#38bdf8" stroke-width="3"/>
+        <!-- Open Book / Handbook Icon -->
+        <path d="M72 36 C64 30, 48 30, 48 34 L48 64 C48 60, 64 60, 72 66 C80 60, 96 60, 96 64 L96 34 C96 30, 80 30, 72 36 Z" fill="#0369a1" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round"/>
+        <line x1="72" y1="36" x2="72" y2="66" stroke="#ffffff" stroke-width="2.5"/>
+        <text x="72" y="112" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.4">README.md</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryDecisionsKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#1a0f2e" stroke="#a855f7" stroke-width="3"/>
+        <!-- Decision Split Scales Icon -->
+        <path d="M72 26 L72 68 M50 36 L94 36" fill="none" stroke="#c084fc" stroke-width="3" stroke-linecap="round"/>
+        <path d="M44 48 L56 48 L50 36 Z" fill="#581c87" stroke="#e9d5ff" stroke-width="2"/>
+        <path d="M88 44 L100 44 L94 36 Z" fill="#581c87" stroke="#e9d5ff" stroke-width="2"/>
+        <text x="72" y="112" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.3">DECISIONS.md</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryApiKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#061922" stroke="#06b6d4" stroke-width="3"/>
+        <!-- Network API Endpoints Icon -->
+        <circle cx="50" cy="48" r="8" fill="#083344" stroke="#22d3ee" stroke-width="2.5"/>
+        <circle cx="94" cy="36" r="8" fill="#083344" stroke="#22d3ee" stroke-width="2.5"/>
+        <circle cx="94" cy="60" r="8" fill="#083344" stroke="#22d3ee" stroke-width="2.5"/>
+        <path d="M58 48 L86 36 M58 48 L86 60" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <text x="72" y="112" fill="#ffffff" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">API.md</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryTestingKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#1a1005" stroke="#f59e0b" stroke-width="3"/>
+        <!-- Chemistry Flask Icon -->
+        <path d="M68 28 L76 28 L76 42 L88 64 C90 68, 86 72, 80 72 L64 72 C58 72, 54 68, 56 64 L68 42 Z" fill="#451a03" stroke="#f59e0b" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M62 58 Q72 54 82 58" fill="none" stroke="#fde047" stroke-width="2"/>
+        <circle cx="70" cy="64" r="2" fill="#ffffff"/>
+        <circle cx="76" cy="62" r="1.5" fill="#ffffff"/>
+        <text x="72" y="112" fill="#ffffff" font-size="17" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.4">TESTING.md</text>
+      </svg>
+    `);
+  }
+
+  static renderMemorySyncKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#041c2c" stroke="#00f0ff" stroke-width="3"/>
+        <!-- Dual Sync Circular Arrows with Core Hub -->
+        <circle cx="72" cy="46" r="22" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="8, 4"/>
+        <path d="M60 38 A14 14 0 0 1 84 38" fill="none" stroke="#00f0ff" stroke-width="3.5" stroke-linecap="round"/>
+        <polygon points="86,34 90,42 82,42" fill="#00f0ff"/>
+        <path d="M84 54 A14 14 0 0 1 60 54" fill="none" stroke="#00f0ff" stroke-width="3.5" stroke-linecap="round"/>
+        <polygon points="58,58 54,50 62,50" fill="#00f0ff"/>
+        <circle cx="72" cy="46" r="4.5" fill="#ffffff"/>
+        <text x="72" y="112" fill="#ffffff" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.4">SYNC CONTEXT</text>
+      </svg>
+    `);
+  }
+
+  static renderMemoryUpdateKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect width="144" height="144" rx="26" fill="#081f14" stroke="#10b981" stroke-width="3"/>
+        <!-- Update Log Checkpad & Pen Icon -->
+        <rect x="52" y="28" width="34" height="42" rx="4" fill="#064e3b" stroke="#34d399" stroke-width="2.5"/>
+        <path d="M58 42 L64 48 L76 36" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="58" y1="56" x2="78" y2="56" stroke="#6ee7b7" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="88,24 96,32 92,36 84,28" fill="#34d399"/>
+        <text x="72" y="112" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.4">UPDATE LOG</text>
+      </svg>
+    `);
+  }
+
   /**
    * Key 14: Web Console Key replaced with Next Page Key
    */

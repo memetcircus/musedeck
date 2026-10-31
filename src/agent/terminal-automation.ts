@@ -315,6 +315,118 @@ end tell
     }
   }
 
+  /**
+   * Focus an existing Terminal session with a dedicated session title, or launch a new one.
+   * If any candidate document file exists on disk, launches in update/refine mode.
+   * If it does not exist, launches in initial creation / SDD interview mode.
+   */
+  static async focusOrLaunchDocSession(
+    docKey: string,
+    fileCandidates: string[],
+    initialPrompt: string,
+    updatePrompt: string,
+    rawCwd?: string
+  ): Promise<void> {
+    let projectDir = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
+    if (projectDir.includes(".sdPlugin")) {
+      projectDir = projectDir.split(/[\/\\]com\.memetcircus\.musedeck\.sdPlugin/)[0] || "/Users/akif/Projects/musedeck/musedeck";
+    }
+
+    const sessionTitle = `MUSE_${docKey.toUpperCase()}_SESSION`;
+
+    // 1. Try to find an existing Terminal window or tab with this sessionTitle
+    const focusAppleScript = `
+tell application "Terminal"
+  set targetWin to missing value
+  repeat with w in windows
+    repeat with t in tabs of w
+      try
+        if custom title of t is "${sessionTitle}" then
+          set targetWin to w
+          set selected tab of w to t
+          exit repeat
+        end if
+      end try
+    end repeat
+    if targetWin is not missing value then exit repeat
+  end repeat
+
+  if targetWin is not missing value then
+    set index of targetWin to 1
+    activate
+    return "FOCUSED"
+  else
+    return "NOT_FOUND"
+  end if
+end tell
+    `.trim();
+
+    try {
+      const { stdout } = await execAsync(`osascript -e '${this.escapeForCli(focusAppleScript)}'`);
+      if (stdout.trim().includes("FOCUSED")) {
+        console.log(`🎯 [Terminal] Brought existing session for ${sessionTitle} to front!`);
+        return;
+      }
+    } catch (e: any) {
+      console.warn(`[Terminal] Check existing session error:`, e.message);
+    }
+
+    // 2. Not found: Check if any candidate file exists on disk
+    let fileExists = false;
+    let foundPath = "";
+    for (const cand of fileCandidates) {
+      const fullPath = path.join(projectDir, cand);
+      if (fs.existsSync(fullPath)) {
+        fileExists = true;
+        foundPath = cand;
+        break;
+      }
+    }
+
+    // If file exists, open it in VS Code/editor in background
+    if (fileExists && foundPath) {
+      exec(`code "${path.join(projectDir, foundPath)}" 2>/dev/null || open "${path.join(projectDir, foundPath)}" 2>/dev/null || true`);
+    }
+
+    const chosenPrompt = fileExists ? updatePrompt : initialPrompt;
+    const command = `cd ${this.escapeForShell(projectDir)} && muse ${this.escapeForShell(chosenPrompt)}`;
+
+    const launchScript = `
+tell application "Terminal"
+  activate
+  set newTab to (do script "${this.escapeForAppleScript(command)}")
+  try
+    set custom title of selected tab of window 1 to "${sessionTitle}"
+    set title displays custom title of selected tab of window 1 to true
+  end try
+end tell
+    `.trim();
+
+    try {
+      await execAsync(`osascript -e '${this.escapeForCli(launchScript)}'`);
+      console.log(`🚀 [Terminal] Launched new session [${sessionTitle}] (fileExists=${fileExists})`);
+    } catch (err: any) {
+      console.error(`Failed to launch session for ${sessionTitle}:`, err.message);
+    }
+  }
+
+  /**
+   * Run an automated context command in the active Muse terminal or a fresh session.
+   */
+  static async runContextAction(prompt: string, rawCwd?: string): Promise<void> {
+    let projectDir = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
+    if (projectDir.includes(".sdPlugin")) {
+      projectDir = projectDir.split(/[\/\\]com\.memetcircus\.musedeck\.sdPlugin/)[0] || "/Users/akif/Projects/musedeck/musedeck";
+    }
+
+    const hasFocused = await this.focusMuseTerminalWindow();
+    if (hasFocused) {
+      await this.typeSnippetIntoTerminal(prompt, true);
+    } else {
+      await this.launchMuseCodeTerminal(projectDir, prompt);
+    }
+  }
+
   static async bringTerminalToFront(): Promise<boolean> {
     return await this.focusMuseTerminalWindow();
   }

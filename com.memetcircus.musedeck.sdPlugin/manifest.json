@@ -122,10 +122,10 @@
       "States": [{ "Image": "imgs/actions/prompt-task/key" }]
     },
     {
-      "Name": "Write Tests",
+      "Name": "Muse Memory",
       "UUID": "com.memetcircus.musedeck.write-tests",
       "Icon": "imgs/actions/write-tests/icon",
-      "Tooltip": "Triggers Muse Code to generate comprehensive test coverage in parallel worktrees.",
+      "Tooltip": "Living project documentation and persistent AI context manager (SPEC, PLAN, ARCH, TODO, MUSE RULES).",
       "Controllers": ["Keypad"],
       "States": [{ "Image": "imgs/actions/write-tests/key" }]
     },
