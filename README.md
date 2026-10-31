@@ -255,13 +255,33 @@ sequenceDiagram
 
 ---
 
-## 🖥️ Web Mission Control (`http://localhost:3456`)
+## ⚙️ Muse Settings & Web Mission Control (`http://localhost:3456/settings`)
 
-In addition to physical hardware control, MuseDeck provides a local glassmorphism web console:
-* **Interactive 5x3 Virtual Deck**: Mirrors the exact physical Stream Deck state with real-time key SVG rendering.
-* **Live Diffs & Telemetry**: Visualizes git changes (`+X / -Y`), memory usage, and token consumption.
-* **Environment System Health**: Real-time status for Meta Muse Code CLI, AppleScript Terminal Automation, Stream Deck Core Bridge, and Meta Model API latency.
-* **Settings Cockpit**: Manage API keys, model parameters (`muse-spark-1.3`, `sam-3.1`), and persistent configs (`~/.musedeck/config.json`).
+Tapping Key **[3, 1]** (`MUSE SETTINGS`) on your physical Stream Deck instantly opens the local **MuseDeck Mission Control Cockpit** in your default browser.
+
+![MuseDeck Web Settings Cockpit](assets/web_settings_dashboard.png)
+
+### Core Capabilities of the Settings Dashboard
+
+1. **Meta Model API Credentials & Live Connectivity**:
+   - Safely input and manage your **Meta Model API Key** with toggleable password visibility.
+   - **Test Ping Button**: Executes an instant test ping to Meta's inference servers, measuring real-time latency (e.g. `38ms`) and confirming connectivity with Meta's **Muse Spark 1.3** and **SAM 3.1** models.
+
+2. **Target Project Workspace Directory**:
+   - Defines the active project folder where the Meta Muse terminal automatically launches when you trigger actions from physical keys (`Voice`, `Fix Bug`, `Image-to-Code`, `Test Runner`).
+   - Includes a one-click **Current Path** reset button and native macOS directory browsing.
+
+3. **Environment & System Health Diagnostic**:
+   - **Meta Muse Code CLI (`muse`)**: Verifies path resolution (`~/.local/bin/muse`) and execution readiness.
+   - **Terminal Automation (AppleScript / zsh)**: Validates Accessibility and System Events permissions for zero-latency keystroke injection into Terminal.app.
+   - **Stream Deck Core Bridge**: Monitors bidirectional WebSocket (Port 3457) and HTTP REST API (Port 3456) link health.
+   - **Meta Model API Connection**: Displays live uptime, latency, and active model status.
+
+4. **Persistent Multi-Session Configuration**:
+   - All settings are persistently saved to `~/.musedeck/config.json`, maintaining configuration across system reboots, different terminal projects, and Stream Deck restarts without repetitive setup.
+
+5. **Interactive 5x3 Virtual Stream Deck**:
+   - Mirrors the physical Stream Deck state in real time at `http://localhost:3456`, displaying live diffs, token consumption, and terminal execution logs for dual-screen setups.
 
 ---
 
