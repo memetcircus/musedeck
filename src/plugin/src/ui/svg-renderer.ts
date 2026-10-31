@@ -1223,15 +1223,21 @@ export class SvgKeyRenderer {
       default:
         return this.svgToDataUri(`
           <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#ef4444" stroke-width="3"/>
-            <!-- Cinema Camera Silhouette -->
-            <g fill="#f87171">
+            <defs>
+              <linearGradient id="cyberVioletBg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#120a26"/>
+                <stop offset="100%" stop-color="#090514"/>
+              </linearGradient>
+            </defs>
+            <rect width="144" height="144" rx="26" fill="url(#cyberVioletBg)" stroke="#a855f7" stroke-width="3"/>
+            <!-- Cinema Camera Silhouette in Cyber Violet -->
+            <g fill="#c084fc">
               <!-- Left Reel -->
               <circle cx="53" cy="37" r="13"/>
-              <circle cx="53" cy="37" r="4.5" fill="#070b14"/>
+              <circle cx="53" cy="37" r="4.5" fill="#120a26"/>
               <!-- Right Reel (Larger) -->
               <circle cx="75" cy="32" r="16.5"/>
-              <circle cx="75" cy="32" r="5.5" fill="#070b14"/>
+              <circle cx="75" cy="32" r="5.5" fill="#120a26"/>
               <!-- Camera Body -->
               <rect x="49" y="49" width="40" height="28" rx="4"/>
               <!-- Lens Funnel -->
@@ -1242,7 +1248,7 @@ export class SvgKeyRenderer {
               <polygon points="65,77 73,77 75,82 63,82"/>
             </g>
             <text x="72" y="104" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">VIDEO</text>
-            <text x="72" y="124" fill="#fca5a5" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">RECORD</text>
+            <text x="72" y="124" fill="#e9d5ff" font-size="13" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">RECORD</text>
           </svg>
         `);
     }
