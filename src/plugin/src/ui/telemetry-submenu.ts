@@ -1,7 +1,6 @@
 import { exec } from "node:child_process";
 import { keyRegistry } from "./key-registry.js";
 import { SvgKeyRenderer } from "./svg-renderer.js";
-import { CyberIcons } from "./cyber-icons.js";
 import type { TelemetryData } from "../../../agent/types.js";
 
 class TelemetrySubmenuManager {
@@ -58,42 +57,32 @@ class TelemetrySubmenuManager {
 
       if (row === 0) {
         if (col === 0) {
-          // Top-left: Circular UP Arrow (No text, pure icon)
-          image = CyberIcons["submenu_up"];
+          // Top-left: Plain Minimal Back Arrow
+          image = SvgKeyRenderer.renderPlainBackKey();
         } else if (col === 1) {
-          image = SvgKeyRenderer.renderTelemetryCard("CREDITS", credits, "REMAINING", "#10b981", "#34d399");
+          image = SvgKeyRenderer.renderTelemetryCard("CREDITS", credits, "REMAINING", "#1b352b", "#34d399", "#10b981");
         } else if (col === 2) {
-          image = SvgKeyRenderer.renderTelemetryCard("SPEND", spent, "TOTAL", "#38bdf8", "#7dd3fc");
+          image = SvgKeyRenderer.renderTelemetryCard("SPEND", spent, "TOTAL", "#1e2433", "#ffffff", "#94a3b8");
         } else if (col === 3) {
-          image = SvgKeyRenderer.renderTelemetryCard("MODEL", model, "ACTIVE", "#a855f7", "#c084fc");
+          image = SvgKeyRenderer.renderTelemetryCard("REQUESTS", reqs, "CALLS", "#1e2433", "#ffffff", "#94a3b8");
         } else if (col === 4) {
-          image = SvgKeyRenderer.renderTelemetryCard("CONSOLE", "BILLING ↗", "OPEN WEB", "#06b6d4", "#22d3ee");
+          image = SvgKeyRenderer.renderTelemetryCard("BILLING ↗", "CONSOLE", "OPEN WEB", "#2a2d45", "#a5b4fc", "#818cf8");
         }
       } else if (row === 1) {
         if (col === 0) {
-          image = SvgKeyRenderer.renderTelemetryCard("INPUT", inTokens, "TOKENS", "#38bdf8", "#ffffff");
+          image = SvgKeyRenderer.renderTelemetryCard("INPUT", inTokens, "TOKENS", "#1e2433", "#ffffff", "#94a3b8");
         } else if (col === 1) {
-          image = SvgKeyRenderer.renderTelemetryCard("OUTPUT", outTokens, "TOKENS", "#818cf8", "#ffffff");
+          image = SvgKeyRenderer.renderTelemetryCard("OUTPUT", outTokens, "TOKENS", "#1e2433", "#ffffff", "#94a3b8");
         } else if (col === 2) {
-          image = SvgKeyRenderer.renderTelemetryCard("CACHE", cacheHit, "HIT RATE", "#34d399", "#6ee7b7");
+          image = SvgKeyRenderer.renderTelemetryCard("CACHE", cacheHit, "HIT RATE", "#1e2433", "#ffffff", "#94a3b8");
         } else if (col === 3) {
-          image = SvgKeyRenderer.renderTelemetryCard("REQUESTS", reqs, "CALLS", "#38bdf8", "#7dd3fc");
+          image = SvgKeyRenderer.renderTelemetryCard("LATENCY", "38ms", "AVERAGE", "#362a1b", "#fde68a", "#f59e0b");
         } else if (col === 4) {
-          image = SvgKeyRenderer.renderTelemetryCard("VISION", "SAM 3.1", "SEGMENT", "#60a5fa", "#93c5fd");
+          image = SvgKeyRenderer.renderTelemetryCard("MODEL", model, "ACTIVE", "#1e2433", "#ffffff", "#94a3b8");
         }
       } else if (row === 2) {
-        if (col === 0) {
-          image = SvgKeyRenderer.renderTelemetryCard("MEDIA", "0 IMGS", "ATTACHED", "#f43f5e", "#fda4af");
-        } else if (col === 1) {
-          image = SvgKeyRenderer.renderTelemetryCard("HEALTH", "100%", "ONLINE", "#10b981", "#34d399");
-        } else if (col === 2) {
-          image = SvgKeyRenderer.renderTelemetryCard("LATENCY", "1.3s", "AVERAGE", "#fbbf24", "#fef08a");
-        } else if (col === 3) {
-          image = SvgKeyRenderer.renderTelemetryCard("BRIDGE", "ONLINE", "SOCKET", "#38bdf8", "#7dd3fc");
-        } else if (col === 4) {
-          // Bottom-right: Live Session Uptime (pure telemetry display card)
-          image = SvgKeyRenderer.renderTelemetryCard("UPTIME", uptimeStr, "SESSION", "#a855f7", "#c084fc");
-        }
+        // Row 2: Clean empty tiles
+        image = SvgKeyRenderer.renderEmptyTile();
       }
 
       if (image) {

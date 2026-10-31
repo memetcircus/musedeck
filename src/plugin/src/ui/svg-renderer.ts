@@ -1945,51 +1945,43 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Render individual large telemetry card for the 15-key Sub-Menu
+   * Render Plain Back Key for Submenus (clean minimalist vector arrow)
+   */
+  static renderPlainBackKey(): string {
+    return this.svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+        <rect x="4" y="4" width="136" height="136" rx="20" fill="#0c1017" stroke="#1e2433" stroke-width="1.6"/>
+        <circle cx="72" cy="72" r="30" fill="#151b26" stroke="#2a3447" stroke-width="1.5"/>
+        <path d="M72 52 L56 68 M72 52 L88 68 M72 52 L72 92" fill="none" stroke="#f1f5f9" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `);
+  }
+
+  /**
+   * Render individual clean plain telemetry card for the 15-key Sub-Menu
    */
   static renderTelemetryCard(
     label: string,
     value: string,
     subtitle: string,
-    borderColor = "#38bdf8",
-    valColor = "#ffffff"
+    borderColor = "#1e2433",
+    valColor = "#ffffff",
+    labelColor = "#94a3b8"
   ): string {
-    const valSize = value.length > 7 ? 24 : 29;
-    const cleanId = label.replace(/[^a-zA-Z0-9]/g, '');
+    const valSize = value.length > 8 ? 20 : value.length > 6 ? 23 : 26;
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <defs>
-          <linearGradient id="cyberBgCard_${cleanId}" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#071326"/>
-            <stop offset="100%" stop-color="#020813"/>
-          </linearGradient>
-          <filter id="neonGlowCard_${cleanId}" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2.5" result="blur"/>
-            <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
+        <!-- Clean Plain Tile Background & Subtle Border -->
+        <rect x="4" y="4" width="136" height="136" rx="20" fill="#0c1017" stroke="${borderColor}" stroke-width="1.6"/>
 
-        <!-- Cyber Outer Frame -->
-        <rect x="5" y="5" width="134" height="134" rx="22" fill="url(#cyberBgCard_${cleanId})" stroke="${borderColor}" stroke-width="2.8"/>
-        <rect x="9" y="9" width="126" height="126" rx="18" fill="none" stroke="${borderColor}" stroke-width="1.2" stroke-opacity="0.5"/>
+        <!-- Top Label: Clean & Legible -->
+        <text x="72" y="38" fill="${labelColor}" font-size="13" font-weight="700" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${label}</text>
 
-        <!-- Tech Corner Brackets -->
-        <path d="M14 26 L14 14 L26 14" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
-        <path d="M130 26 L130 14 L118 14" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
-        <path d="M14 118 L14 130 L26 130" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
-        <path d="M130 118 L130 130 L118 130" fill="none" stroke="${borderColor}" stroke-width="2.5"/>
+        <!-- Center Value: Crisp, High-Contrast Typography -->
+        <text x="72" y="80" fill="${valColor}" font-size="${valSize}" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${value}</text>
 
-        <!-- Top Label: Bigger, Bolder, High-Contrast -->
-        <text x="72" y="34" fill="${borderColor}" font-size="15.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${label}</text>
-
-        <!-- Center Big High-Contrast Value -->
-        <text x="72" y="79" fill="${valColor}" font-size="${valSize}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" filter="url(#neonGlowCard_${cleanId})">${value}</text>
-
-        <!-- Bottom Subtitle: Crisp Bright Silver-White & Large -->
-        <text x="72" y="123" fill="#f8fafc" font-size="14.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${subtitle}</text>
+        <!-- Bottom Subtitle: Crisp Muted Description -->
+        <text x="72" y="118" fill="#64748b" font-size="12" font-weight="600" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${subtitle}</text>
       </svg>
     `);
   }
