@@ -218,32 +218,31 @@ export class SvgKeyRenderer {
 
   /**
    * Render individual prompt snippet card for Snippets Submenu
-   * Edge-to-edge frame without corner brackets, high contrast typography.
+   * Edge-to-edge frame, bold high-contrast centered typography without subtitle clutter.
    */
   static renderSnippetCard(
     line1: string,
     line2: string,
-    subtitle: string,
+    subtitle = "",
     borderColor = "#a855f7",
     textColor = "#ffffff"
   ): string {
-    const subFontSize = subtitle.length > 10 ? 15 : subtitle.length > 8 ? 16 : 18;
+    const isSingle = !line2 || line2.trim().length === 0;
+    const l1Size = line1.length > 7 ? 21 : 25;
+    const l2Size = line2 && line2.length > 7 ? 21 : 25;
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <!-- Edge-to-edge Frame without corner brackets -->
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${borderColor}" stroke-width="2.5"/>
-        <circle cx="72" cy="72" r="50" fill="${borderColor}" fill-opacity="0.04"/>
-
-        <!-- Title Lines -->
-        <text x="72" y="${line2 ? '46' : '58'}" fill="#ffffff" font-size="${line2 ? '22' : '34'}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="${line2 ? '0.8' : '1.5'}">${line1}</text>
-        ${line2 ? `<text x="72" y="73" fill="#ffffff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>` : ''}
-
-        <!-- Divider Line -->
-        <line x1="16" y1="86" x2="128" y2="86" stroke="${borderColor}" stroke-width="1.8" stroke-opacity="0.5"/>
-
-        <!-- Subtitle (Large, ultra-readable) -->
-        <text x="72" y="118" fill="${textColor}" font-size="${subFontSize}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${subtitle}</text>
+        <rect width="144" height="144" rx="26" fill="#060913" stroke="${borderColor}" stroke-width="3"/>
+        <circle cx="72" cy="72" r="54" fill="${borderColor}" fill-opacity="0.08"/>
+        ${
+          isSingle
+            ? `<text x="72" y="86" fill="${textColor}" font-size="44" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.5">${line1}</text>`
+            : `
+          <text x="72" y="58" fill="#ffffff" font-size="${l1Size}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
+          <text x="72" y="94" fill="${textColor}" font-size="${l2Size}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line2}</text>
+        `
+        }
       </svg>
     `);
   }
