@@ -61,23 +61,7 @@ export class SvgKeyRenderer {
         `);
 
       case AgentState.WAITING_APPROVAL:
-        return this.svgToDataUri(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-            <rect width="144" height="144" rx="26" fill="#070b14" stroke="#f59e0b" stroke-width="3">
-              <animate attributeName="stroke" values="#f59e0b;#ef4444;#f59e0b" dur="1s" repeatCount="indefinite"/>
-            </rect>
-            <circle cx="72" cy="46" r="30" fill="#78350f" fill-opacity="0.35" stroke="#fbbf24" stroke-width="3" stroke-dasharray="8, 6">
-              <animate attributeName="fill-opacity" values="0.25;0.75;0.25" dur="1s" repeatCount="indefinite"/>
-            </circle>
-            <polygon points="72,23 96,67 48,67" fill="#92400e" fill-opacity="0.85" stroke="#fde047" stroke-width="3" stroke-linejoin="round">
-              <animate attributeName="stroke" values="#fde047;#ffffff;#fde047" dur="1s" repeatCount="indefinite"/>
-            </polygon>
-            <line x1="72" y1="36" x2="72" y2="51" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
-            <circle cx="72" cy="60" r="2.8" fill="#ffffff"/>
-            <text x="72" y="105" fill="#fde047" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">REVIEW</text>
-            <text x="72" y="123" fill="#fca5a5" font-size="11" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">APPROVAL</text>
-          </svg>
-        `);
+        return this.renderFlashingApprovalKey(false);
 
       case AgentState.ERROR:
       default:
@@ -95,28 +79,29 @@ export class SvgKeyRenderer {
   }
 
   /**
-   * Hardware-Driven Flashing Approval Key (alternates every 400ms for high-visibility physical LED flash)
+   * Hardware-Driven Flashing Approval Key for Top-Left Key (0, 0)
+   * Alternates every 350ms between Green Phase and Amber Phase
    */
   static renderFlashingApprovalKey(phase: boolean): string {
-    const strokeColor = phase ? "#f59e0b" : "#ef4444";
-    const bgFill = phase ? "#451a03" : "#450a0a";
-    const glowFill = phase ? "#78350f" : "#7f1d1d";
-    const glowStroke = phase ? "#fbbf24" : "#f87171";
-    const polyStroke = phase ? "#fde047" : "#fca5a5";
-    const text1 = phase ? "REVIEW" : "ACTION";
-    const text2 = phase ? "APPROVAL" : "REQUIRED";
-    const text1Color = phase ? "#fde047" : "#ffffff";
-    const text2Color = phase ? "#fca5a5" : "#f87171";
+    const borderColor = phase ? "#22c55e" : "#f59e0b";
+    const bgFill = phase ? "#052e16" : "#451a03";
+    const circleFill = phase ? "#22c55e" : "#f59e0b";
+    const badgeFill = phase ? "#14532d" : "#78350f";
+    const badgeBorder = phase ? "#4ade80" : "#fbbf24";
+    const badgeText = phase ? "#86efac" : "#fde047";
+    const badgeLabel = phase ? "ACTION" : "CONFIRM";
+    const line1 = phase ? "TAP FOR" : "APPROVAL";
+    const line2 = phase ? "REVIEW ↗" : "REQUIRED";
+    const l2Color = phase ? "#4ade80" : "#fde047";
 
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="26" fill="${bgFill}" stroke="${strokeColor}" stroke-width="4"/>
-        <circle cx="72" cy="46" r="30" fill="${glowFill}" fill-opacity="0.5" stroke="${glowStroke}" stroke-width="3" stroke-dasharray="8, 6"/>
-        <polygon points="72,23 96,67 48,67" fill="#92400e" fill-opacity="0.9" stroke="${polyStroke}" stroke-width="3" stroke-linejoin="round"/>
-        <line x1="72" y1="36" x2="72" y2="51" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
-        <circle cx="72" cy="60" r="2.8" fill="#ffffff"/>
-        <text x="72" y="103" fill="${text1Color}" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1.2">${text1}</text>
-        <text x="72" y="124" fill="${text2Color}" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${text2}</text>
+        <rect width="144" height="144" rx="26" fill="${bgFill}" stroke="${borderColor}" stroke-width="4"/>
+        <circle cx="72" cy="72" r="52" fill="${circleFill}" fill-opacity="0.22"/>
+        <rect x="18" y="14" width="108" height="24" rx="8" fill="${badgeFill}" stroke="${badgeBorder}" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="${badgeText}" font-size="12.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${badgeLabel}</text>
+        <text x="72" y="68" fill="#ffffff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${line1}</text>
+        <text x="72" y="104" fill="${l2Color}" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">${line2}</text>
       </svg>
     `);
   }
@@ -354,23 +339,12 @@ export class SvgKeyRenderer {
   static renderHitlOption1Key(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#22c55e" stroke-width="3"/>
-        <circle cx="72" cy="72" r="50" fill="#22c55e" fill-opacity="0.04"/>
-
-        <!-- Top pill: #1 -->
-        <rect x="12" y="14" width="42" height="24" rx="6" fill="#14532d" stroke="#4ade80" stroke-width="1.5"/>
-        <text x="33" y="31" fill="#86efac" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">#1</text>
-
-        <!-- Right badge: ONCE -->
-        <rect x="64" y="14" width="68" height="24" rx="6" fill="#14532d" fill-opacity="0.6" stroke="#4ade80" stroke-width="1.5"/>
-        <text x="98" y="31" fill="#86efac" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">ONCE</text>
-
-        <!-- Center: YES -->
-        <text x="72" y="76" fill="#ffffff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">YES</text>
-        <line x1="16" y1="87" x2="128" y2="87" stroke="#22c55e" stroke-width="1.5" stroke-opacity="0.5"/>
-
-        <!-- Bottom: APPROVE (1) -->
-        <text x="72" y="121" fill="#4ade80" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">APPROVE (1)</text>
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#22c55e" stroke-width="3"/>
+        <circle cx="72" cy="72" r="52" fill="#22c55e" fill-opacity="0.12"/>
+        <rect x="18" y="14" width="108" height="24" rx="8" fill="#14532d" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="#86efac" font-size="12.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">OPTION 1</text>
+        <text x="72" y="70" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">APPROVE</text>
+        <text x="72" y="104" fill="#4ade80" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">ONCE (1)</text>
       </svg>
     `);
   }
@@ -381,23 +355,12 @@ export class SvgKeyRenderer {
   static renderHitlOption2Key(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#06b6d4" stroke-width="3"/>
-        <circle cx="72" cy="72" r="50" fill="#06b6d4" fill-opacity="0.04"/>
-
-        <!-- Top pill: #2 -->
-        <rect x="12" y="14" width="42" height="24" rx="6" fill="#164e63" stroke="#22d3ee" stroke-width="1.5"/>
-        <text x="33" y="31" fill="#67e8f9" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">#2</text>
-
-        <!-- Right badge: SESSION -->
-        <rect x="62" y="14" width="70" height="24" rx="6" fill="#164e63" fill-opacity="0.6" stroke="#22d3ee" stroke-width="1.5"/>
-        <text x="97" y="31" fill="#67e8f9" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">SESSION</text>
-
-        <!-- Center: ALWAYS -->
-        <text x="72" y="76" fill="#ffffff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">ALWAYS</text>
-        <line x1="16" y1="87" x2="128" y2="87" stroke="#06b6d4" stroke-width="1.5" stroke-opacity="0.5"/>
-
-        <!-- Bottom: ALLOW ALL (2) -->
-        <text x="72" y="121" fill="#22d3ee" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">ALLOW ALL (2)</text>
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#06b6d4" stroke-width="3"/>
+        <circle cx="72" cy="72" r="52" fill="#06b6d4" fill-opacity="0.12"/>
+        <rect x="18" y="14" width="108" height="24" rx="8" fill="#164e63" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="#67e8f9" font-size="12.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">OPTION 2</text>
+        <text x="72" y="70" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">ALWAYS</text>
+        <text x="72" y="104" fill="#22d3ee" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">SESSION (2)</text>
       </svg>
     `);
   }
@@ -408,23 +371,12 @@ export class SvgKeyRenderer {
   static renderHitlOption3Key(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#ef4444" stroke-width="3"/>
-        <circle cx="72" cy="72" r="50" fill="#ef4444" fill-opacity="0.04"/>
-
-        <!-- Top pill: #3 -->
-        <rect x="12" y="14" width="42" height="24" rx="6" fill="#7f1d1d" stroke="#f87171" stroke-width="1.5"/>
-        <text x="33" y="31" fill="#fca5a5" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">#3</text>
-
-        <!-- Right badge: DENY -->
-        <rect x="64" y="14" width="68" height="24" rx="6" fill="#7f1d1d" fill-opacity="0.6" stroke="#f87171" stroke-width="1.5"/>
-        <text x="98" y="31" fill="#fca5a5" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">DENY</text>
-
-        <!-- Center: NO -->
-        <text x="72" y="76" fill="#ffffff" font-size="24" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">NO</text>
-        <line x1="16" y1="87" x2="128" y2="87" stroke="#ef4444" stroke-width="1.5" stroke-opacity="0.5"/>
-
-        <!-- Bottom: REJECT (3) -->
-        <text x="72" y="121" fill="#f87171" font-size="15" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">REJECT (3)</text>
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#ef4444" stroke-width="3"/>
+        <circle cx="72" cy="72" r="52" fill="#ef4444" fill-opacity="0.12"/>
+        <rect x="18" y="14" width="108" height="24" rx="8" fill="#7f1d1d" stroke="#f87171" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="#fca5a5" font-size="12.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">OPTION 3</text>
+        <text x="72" y="70" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">REJECT</text>
+        <text x="72" y="104" fill="#f87171" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">DENY (3)</text>
       </svg>
     `);
   }
@@ -435,23 +387,12 @@ export class SvgKeyRenderer {
   static renderHitlOption4Key(): string {
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#f59e0b" stroke-width="3"/>
-        <circle cx="72" cy="72" r="50" fill="#f59e0b" fill-opacity="0.04"/>
-
-        <!-- Top pill: #4 -->
-        <rect x="12" y="14" width="42" height="24" rx="6" fill="#78350f" stroke="#fbbf24" stroke-width="1.5"/>
-        <text x="33" y="31" fill="#fde047" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">#4</text>
-
-        <!-- Right badge: STOP -->
-        <rect x="64" y="14" width="68" height="24" rx="6" fill="#78350f" fill-opacity="0.6" stroke="#fbbf24" stroke-width="1.5"/>
-        <text x="98" y="31" fill="#fde047" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">STOP</text>
-
-        <!-- Center: TELL WHY -->
-        <text x="72" y="76" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TELL WHY</text>
-        <line x1="16" y1="87" x2="128" y2="87" stroke="#f59e0b" stroke-width="1.5" stroke-opacity="0.5"/>
-
-        <!-- Bottom: FEEDBACK (4) -->
-        <text x="72" y="121" fill="#fbbf24" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">FEEDBACK (4)</text>
+        <rect width="144" height="144" rx="26" fill="#070b14" stroke="#f59e0b" stroke-width="3"/>
+        <circle cx="72" cy="72" r="52" fill="#f59e0b" fill-opacity="0.12"/>
+        <rect x="18" y="14" width="108" height="24" rx="8" fill="#78350f" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="72" y="30.5" fill="#fde047" font-size="12.5" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">OPTION 4</text>
+        <text x="72" y="70" fill="#ffffff" font-size="20" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">FEEDBACK</text>
+        <text x="72" y="104" fill="#fbbf24" font-size="18" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">TELL WHY (4)</text>
       </svg>
     `);
   }
