@@ -1138,7 +1138,6 @@ export class SvgKeyRenderer {
    * Key 8: Emergency Halt Key (Always visible & excluded from animation)
    */
   static renderHaltKey(isPulsing = false): string {
-    if (!isPulsing) return CyberIcons["p1_halt"];
     const strokeColor = isPulsing ? "#ef4444" : "#dc2626";
     const fillColor = isPulsing ? "#5f0a0a" : "#450a0a";
     const strokeWidth = isPulsing ? "5.5" : "4";
@@ -1148,8 +1147,7 @@ export class SvgKeyRenderer {
         <rect width="144" height="144" rx="26" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>
         <polygon points="56,18 88,18 108,38 108,62 88,82 56,82 36,62 36,38" fill="#dc2626" stroke="#fecaca" stroke-width="3"/>
         <rect x="58" y="36" width="28" height="28" rx="4" fill="#ffffff"/>
-        <text x="72" y="110" fill="#ffffff" font-size="22" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">HALT</text>
-        <text x="72" y="128" fill="#fca5a5" font-size="14" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">(ESC)</text>
+        <text x="72" y="115" fill="#ffffff" font-size="23" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.5">HALT</text>
       </svg>
     `);
   }
