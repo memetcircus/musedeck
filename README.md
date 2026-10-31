@@ -324,7 +324,7 @@ MuseDeck ships as a **self-contained `.streamDeckPlugin` installer** with the Mi
 2. **Double-Click to Install**:
    Double-click the downloaded `.streamDeckPlugin` file on macOS. The **Elgato Stream Deck** app will automatically install the plugin, prompt you to load the **MuseDeck** 15-key hardware profile, and launch the embedded bridge server in the background.
 3. **Configure API Key & Workspace**:
-   Press **`CONFIG`** on your Stream Deck (or open **[http://localhost:3456/settings](http://localhost:3456/settings)** in your browser) to enter your **Meta Model API Key**, verify your **Model API Credits**, and select your active project workspace directory.
+   Press **`MUSE SETTINGS`** (`[3, 1]`) on your Stream Deck (or open **[http://localhost:3456/settings](http://localhost:3456/settings)** in your browser) to enter your **Meta Model API Key**, verify your **Model API Credits**, and select your active project workspace directory.
 4. **Install Live Preview Toolchains (For `IMG TO CODE` & `VID TO CODE`)**:
    - **SwiftUI (`SWIFTUI` key)**: Install **Xcode** and run `xcode-select --install` so `swiftc` can compile and launch native SwiftUI desktop previews.
    - **Jetpack Compose (`COMPOSE` key)**: Install **Android Studio** (`/Applications/Android Studio.app`) to open and render `@Preview` Compose screens.
