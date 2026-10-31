@@ -96,19 +96,19 @@ class TelemetrySubmenuManager {
   handleKeyDown(col: number, row: number): boolean {
     if (!this.active) return false;
 
-    // 1. En sol üstteki UP Arrow (col 0, row 0): Page 2'ye geri döndürür
+    // 1. Top-left UP Arrow (col 0, row 0): Return to main console
     if (col === 0 && row === 0) {
       this.close();
       return true;
     }
 
-    // 2. En sağ üstteki CONSOLE BILLING (col 4, row 0): Billing sayfasını açar
+    // 2. Top-right OPEN BILLING (col 4, row 0): Opens Meta AI Billing dashboard
     if (col === 4 && row === 0) {
       exec('open "https://dev.meta.ai/billing?team_id=1552171003333942&project_id=2180934752484515"');
       return true;
     }
 
-    // Geriye kalan 13 butonun HİÇBİRİ basınca tepki vermez (salt bilgi/telemetri kartları)
+    // Remaining 13 keys are read-only telemetry cards
     return true;
   }
 }

@@ -114,7 +114,7 @@ class SnippetsSubmenuManager {
       let image = "";
 
       if (row === 0 && col === 0) {
-        // Sol üst köşe: Yukarı yönlü BACK tuşu
+        // Top-left corner: Upward BACK key
         console.log(`[SnippetsSubmenu] (0,0) rendering UpBackKey for action=${key.action.manifestId}`);
         image = SvgKeyRenderer.renderUpBackKey();
       } else {
@@ -145,13 +145,13 @@ class SnippetsSubmenuManager {
   async handleKeyDown(col: number, row: number): Promise<boolean> {
     if (!this.active) return false;
 
-    // 1. Sol üst köşe (col 0, row 0): BACK tuşu -> Menüyü kapat ve Page 1'e dön
+    // 1. Top-left corner (col 0, row 0): BACK key -> Close submenu and return to main console
     if (col === 0 && row === 0) {
       this.close();
       return true;
     }
 
-    // 2. Snippet tuşları:
+    // 2. Snippet keys:
     const keyCoord = `${col},${row}`;
     const snippet = SNIPPETS[keyCoord];
     if (snippet) {

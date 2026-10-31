@@ -165,7 +165,7 @@ class OpsSubmenuManager {
       let image = "";
 
       if (row === 0 && col === 0) {
-        // Sol üst köşe: Yukarı yönlü BACK tuşu
+        // Top-left corner: Upward BACK key
         image = SvgKeyRenderer.renderUpBackKey();
       } else {
         const keyCoord = `${col},${row}`;
@@ -192,13 +192,13 @@ class OpsSubmenuManager {
   async handleKeyDown(col: number, row: number): Promise<boolean> {
     if (!this.active) return false;
 
-    // 1. Sol üst köşe (col 0, row 0): BACK tuşu -> Menüyü kapat ve Page 1'e dön
+    // 1. Top-left corner (col 0, row 0): BACK key -> Close submenu and return to main console
     if (col === 0 && row === 0) {
       this.close();
       return true;
     }
 
-    // 2. Ops tuşları:
+    // 2. Ops action keys:
     const keyCoord = `${col},${row}`;
     const opsAction = OPS_ACTIONS[keyCoord];
     if (opsAction) {
