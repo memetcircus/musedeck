@@ -3,6 +3,14 @@
 > **Tactile Mission Control, Multimodal Visual Synthesis & Real-Time Telemetry Console for Meta Muse Code CLI & Meta AI Models**  
 > Direct physical integration between the **Elgato Stream Deck MK.2** and Meta's developer intelligence stack: **Muse Code CLI**, **Meta Model API (SAM 3.1 & Muse Spark 1.3)**, and **Meta Voice Transcribe**.
 
+<p align="center">
+  <img src="assets/hardware_deck_photo.jpg" width="48.5%" alt="Physical Stream Deck MK.2 Console running MuseDeck" />
+  <img src="assets/hardware_thinking_wave.gif" width="48.5%" alt="Live 5x3 Multi-Key Quantum Beam Wave Animation" />
+</p>
+<p align="center">
+  <em>Left: Physical Elgato Stream Deck MK.2 running MuseDeck. Right: Real-time 5×3 multi-key kinetic Quantum Beam wave during autonomous Muse Code synthesis.</em>
+</p>
+
 ---
 
 ## 🌟 Overview
