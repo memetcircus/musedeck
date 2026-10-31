@@ -35,7 +35,7 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 
 ### Page 1 Key Layout
 
-| Key [Col, Row] | Button | Function & Developer Capability |
+| Key Position | Button | Function & Developer Capability |
 |:---:|:---:|---|
 | **[0,&nbsp;0]** | **READY&nbsp;/&nbsp;REVIEW** | Dynamic agent status telemetry (`READY`, `PLAN`, `RUNNING`). When awaiting human approval (`WAITING_APPROVAL`), pulses with a calm 650ms breathing alert; tap opens the **Review Submenu**. |
 | **[1,&nbsp;0]** | **VOICE** | Hardware `⌥+V` trigger for Meta Muse Voice Transcribe. Streams microphone audio directly into the active terminal cursor for zero-typing steering. |
