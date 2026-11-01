@@ -214,7 +214,7 @@ async function generateMarketplaceBanners() {
 
       <!-- Bottom Callout Bar -->
       <rect x="64" y="814" width="1792" height="104" rx="20" fill="#0f172a" stroke="#334155" stroke-width="2"/>
-      <text x="960" y="858" fill="#ffffff" font-size="23" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">Row 1: Status &amp; HITL Gate • Voice (⌥+V) • Snippets • Spec Prompt • Sessions   |   Row 2: SAM 3.1 Snip • Img-to-Code • Vid-to-Code • Settings • Credits</text>
+      <text x="960" y="858" fill="#ffffff" font-size="23" font-weight="800" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">Row 1: Status &amp; HITL Gate • Voice (⌥+V) • Snippets • Struct Prompt • Sessions   |   Row 2: SAM 3.1 Snip • Img-to-Code • Vid-to-Code • Settings • Credits</text>
       <text x="960" y="894" fill="#38bdf8" font-size="20" font-weight="700" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">Row 3: 5s Video Record • Muse Memory (SPEC/ARCH/TODO) • Muse Ops (Fix/Refactor/Test) • 13-Key Git Deck • Emergency HALT</text>
     </svg>`);
 

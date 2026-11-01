@@ -3,7 +3,7 @@
   "UUID": "com.memetcircus.musedeck",
   "Name": "MuseDeck",
   "Version": "1.0.0.0",
-  "Author": "memetcircus",
+  "Author": "Mehmet Akif Acar",
   "Description": "Physical Human-in-the-Loop Mission Control, Multimodal UI Synthesizer & Telemetry Console for Meta Muse Code CLI, SAM 3.1, and Muse Spark.",
   "Category": "MuseDeck",
   "CategoryIcon": "imgs/category-icon",

@@ -27,7 +27,7 @@
     "ai-agent",
     "telemetry"
   ],
-  "author": "memetcircus",
+  "author": "Mehmet Akif Acar",
   "license": "Apache-2.0",
   "dependencies": {
     "@elgato/streamdeck": "^2.1.2",

@@ -25,11 +25,11 @@ Autonomous coding agents excel at multi-file refactoring and repository automati
 ### Key Features
 
 * **Physical Human-in-the-Loop (HITL) Verification Gate:** When the agent pauses for file diff or tool confirmation, Key `[0, 0]` pulses with a 650ms green/amber breathing alert. Tapping it brings your active Terminal window to the foreground and opens a dedicated hardware Review Submenu (`APPROVE ONCE`, `ALWAYS ALLOW`, `REJECT / DENY`, `TELL WHY / FEEDBACK`).
+* **In-Place AI Prompt Refiner (`STRUCT PROMPT`) & Steering Snippets:** Press `STRUCT PROMPT` (`[3, 0]`) to rewrite your current terminal input in-place into a clear, well-structured English prompt for an AI coding assistant without auto-submitting, or open the `SNIPPETS` drawer (`BE HONEST`, `DON'T CODE`, `SHOW OPTIONS`, `EXPLAIN WHY`, `KEEP SHORT`, `NO TESTS`, `GO!`) to inject critical engineering constraints with a single key press.
 * **Image-to-Code (`SAM 3.1` + `Muse Spark 1.3`):** Capture any screen region on macOS with one tap. MuseDeck segments foreground UI elements via **Meta SAM 3.1** and synthesizes production-ready components in **React + Tailwind CSS**, **HTML5**, **SwiftUI**, **Jetpack Compose**, or **Flutter**, complete with a hardware `RUN PREVIEW` key.
 * **Video-to-Code (`5s Temporal Storyboard`):** Record 5-second desktop UI interactions, automatically verify perceptual motion deltas, assemble an 8-frame timecoded contact sheet (`flow_montage.png`), and synthesize animated UI fixes via **Muse Spark 1.3**.
 * **Zero-Typing Voice Transcribe (`Option + V`):** Toggle native microphone voice transcription directly into your active terminal prompt without touching your keyboard.
 * **13-Key Multi-Session Switcher & History Drawer:** Monitor active terminal sessions and restore historical workspace sessions with high-contrast recency badges (`TODAY`, `YESTRDY`, date stamps) and instant window focus.
-* **Rapid Prompt Steering Snippets:** Inject critical engineering constraints (`BE HONEST`, `DON'T CODE`, `SHOW OPTIONS`, `EXPLAIN WHY`, `KEEP SHORT`, `NO TESTS`, `GO!`) into your active prompt with a single key press.
 * **Living Project Memory & Developer Ops Drawers:** Keep agents aligned with repository documentation (`MUSE RULES`, `SPEC.md`, `PLAN.md`, `ARCH.md`, `DECISIONS.md`, `TODO.md`, `SYNC CONTEXT`) and trigger one-tap operations (`FIX ERROR`, `REFACTOR CODE`, `OPTIMIZE PERF`, `CODE REVIEW`, `RUN TESTS`, `RUN BUILD`, `TYPE CHECK`).
 * **13-Key Tactile Git Cockpit & Emergency Halt:** Execute `STATUS`, `DIFF`, semantic `COMMIT`, `PULL`, `PUSH`, `STASH`, and `CREATE PR` from physical keys (with a 2-tap safety guard on `DISCARD`), plus an emergency `HALT` switch (`SIGINT` / `SIGKILL`) to stop runaway agent processes immediately.
 * **Live AI Credits HUD & Local Web Mission Control:** Monitor real-time Meta Model API credit balance, token consumption, cache hit rate, and inference latency on your Stream Deck, or press `MUSE SETTINGS` to open the local Web Mission Control dashboard at `http://localhost:3456/settings`.
@@ -48,6 +48,7 @@ Initial v1.0.0 release of MuseDeck for Elgato Stream Deck (macOS):
 
 - **15-Key Primary Console & Auto-Installed Profile:** Ships with a complete 5x3 hardware profile and high-legibility Retina SVG key rendering (144x144 / 288x288).
 - **Physical Human-in-the-Loop (HITL) Review Gate:** Added 650ms hardware breathing alert on Key [0, 0] and a dedicated 5-key approval modal (Approve Once, Always Allow, Reject, Tell Why).
+- **In-Place AI Prompt Refiner (`STRUCT PROMPT`):** Rewrites the current terminal prompt in-place into a clear, well-structured English prompt for an AI coding assistant without auto-submitting.
 - **Multimodal Visual Engineering:** Integrated interactive macOS screen region snipping with Meta SAM 3.1 segmentation and multi-framework UI code synthesis (React, HTML5, SwiftUI, Jetpack Compose, Flutter) via Meta Muse Spark 1.3.
 - **Temporal Video-to-Code Pipeline:** Added 5-second desktop interaction capture, perceptual motion verification, 8-frame timecoded filmstrip generation, and animated component synthesis.
 - **Hardware Submenu Drawers:** Added 7 full-screen hardware submenus that dynamically take over the 15-key grid (HITL Review, Multi-Session Switcher, Prompt Snippets, Muse Memory, Muse Ops, Git Commands, and AI Credits Telemetry).
@@ -73,9 +74,10 @@ MuseDeck is a self-contained macOS plugin with an embedded local web server (`ht
 2. Your default browser will open `http://localhost:3456/settings`, displaying the MuseDeck Mission Control dashboard and live environment health checks.
 3. Also visit `http://localhost:3456` to view the real-time 5x3 virtual Stream Deck mirror in your browser.
 
-#### 3. Testing Hardware Submenus on the Stream Deck
-Tap any of the drawer keys on Page 1 to test full-grid dynamic hardware navigation (use the top-left `↑` key at `[0, 0]` to return to Page 1 at any time):
+#### 3. Testing Hardware Submenus & Actions on the Stream Deck
+Tap any of the drawer or action keys on Page 1 to test full-grid dynamic hardware navigation (use the top-left `↑` key at `[0, 0]` to return to Page 1 at any time):
 - **SNIPPETS (`[2, 0]`):** Opens the 8-key Prompt Steering Snippets drawer (`BE HONEST`, `DON'T CODE`, `SHOW OPTIONS`, `EXPLAIN WHY`, `KEEP SHORT`, `NO TESTS`, `GO!`).
+- **STRUCT PROMPT (`[3, 0]`):** In-place AI prompt refiner that rewrites the current terminal input into a clear, well-structured English prompt without auto-submitting.
 - **SESSIONS (`[4, 0]`):** Opens the 13-key Multi-Session Switcher & History drawer.
 - **IMG TO CODE (`[1, 1]`) / VID TO CODE (`[2, 1]`):** Opens the framework target selector (`REACT`, `HTML5`, `SWIFTUI`, `COMPOSE`, `FLUTTER`, `RUN PREVIEW`).
 - **CREDITS (`[4, 1]`):** Opens the 10-key AI Credits & Telemetry HUD showing token counters, cache hit rate, and latency metrics.
