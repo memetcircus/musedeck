@@ -3,6 +3,8 @@
  * Drop-in compatible with Meta's developer API endpoint
  */
 
+import { configManager } from "../config/config-manager.js";
+
 export interface MetaClientConfig {
   apiKey?: string;
   baseUrl?: string;
@@ -23,17 +25,40 @@ export class MetaModelApiClient {
     this.retryDelayMs = config.retryDelayMs ?? 1000;
   }
 
+  private getResolvedApiKey(): string {
+    if (this.apiKey && this.apiKey !== "your_meta_model_api_key_here") {
+      return this.apiKey;
+    }
+    try {
+      const cfg = configManager.load();
+      if (cfg.apiKey && cfg.apiKey !== "your_meta_model_api_key_here") {
+        return cfg.apiKey;
+      }
+    } catch {}
+    return "";
+  }
+
+  private getResolvedBaseUrl(): string {
+    try {
+      const cfg = configManager.load();
+      if (cfg.baseUrl) return cfg.baseUrl;
+    } catch {}
+    return this.baseUrl || "https://api.meta.ai/v1";
+  }
+
   isConfigured(): boolean {
-    return Boolean(this.apiKey && this.apiKey !== "your_meta_model_api_key_here");
+    return Boolean(this.getResolvedApiKey());
   }
 
   /**
    * Dispatches a request to the Meta Model API with automatic retries and rate limit handling
    */
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.baseUrl}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+    const base = this.getResolvedBaseUrl();
+    const key = this.getResolvedApiKey();
+    const url = `${base}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
     const headers: Record<string, string> = {
-      "Authorization": `Bearer ${this.apiKey}`,
+      "Authorization": `Bearer ${key}`,
       "Content-Type": "application/json",
       ...(options.headers as Record<string, string> || {}),
     };

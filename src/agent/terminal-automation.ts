@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { fileURLToPath } from "node:url";
+import { MetaModelApiClient } from "../api/meta-client.js";
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
@@ -855,7 +856,7 @@ end if
     const macTypeBin = this.getMacTypeBin();
     if (macTypeBin) {
       try {
-        await execAsync(`"${macTypeBin}" text "${this.escapeForShell(textToInsert)}"`);
+        await execAsync(`"${macTypeBin}" text ${this.escapeForShell(textToInsert)}`);
         if (pressEnter) {
           await new Promise((r) => setTimeout(r, 60));
           await execAsync(`"${macTypeBin}" enter`);
@@ -888,62 +889,163 @@ end tell
   }
 
   /**
-   * Type a structured prompt directly into active Muse Terminal and press Enter.
-   * If the user typed text at a raw zsh prompt (% ) where muse is not yet running,
-   * rescues the typed text and launches muse with the combined prompt!
+   * Reads the user's current draft prompt from the active Terminal line (in Muse TUI `❯ ` or zsh `% `),
+   * rewrites it into a clear, well-structured English prompt via Meta Muse Spark 1.3,
+   * and replaces the draft text in-place at the terminal cursor without submitting it.
    */
-  static async typePromptIntoTerminal(promptText: string, pressEnter = true): Promise<boolean> {
-    const cleanText = promptText.trim();
-    const hasMuseSession = await this.focusMuseTerminalWindow();
-    if (hasMuseSession) {
-      return this.typeSnippetIntoTerminal(` ${cleanText}`, pressEnter);
-    }
+  static async rewritePromptInTerminal(): Promise<string | null> {
+    // 1. Focus active Muse terminal window if one exists, otherwise inspect front Terminal window
+    await this.focusMuseTerminalWindow();
 
-    // Check if there is an open Terminal window sitting at a plain zsh prompt (% ) with user-typed text
+    let draftText = "";
     try {
       const inspectScript = `
 tell application "Terminal"
   if (count of windows) is 0 then return "NO_WIN"
+  activate
   set tabText to contents of selected tab of window 1
   return tabText
 end tell
       `.trim();
       const { stdout } = await execAsync(`osascript -e '${this.escapeForCli(inspectScript)}'`);
       if (stdout && stdout.trim() !== "NO_WIN") {
-        const lines = stdout
-          .split(/\r?\n/)
-          .map((l) => l.trim())
-          .filter((l) => l.length > 0);
-        const lastLine = lines[lines.length - 1] || "";
-        const pctIdx = lastLine.indexOf("% ");
-        const draftText = pctIdx >= 0 ? lastLine.slice(pctIdx + 2).trim() : "";
-        const combinedPrompt = draftText ? `${draftText} ${cleanText}` : cleanText;
+        const rawLines = stdout.split(/\r?\n/);
 
-        // Clear the raw zsh line with Ctrl+C and run muse in that exact tab
-        const macTypeBin = this.getMacTypeBin();
-        if (macTypeBin) {
-          await execAsync(`osascript -e 'tell application "Terminal" to activate'`);
-          await new Promise((r) => setTimeout(r, 80));
-          await execAsync(`"${macTypeBin}" ctrl-c`);
-          await new Promise((r) => setTimeout(r, 80));
+        // A. Check for Muse Code TUI prompt (`❯ `)
+        let lastPromptIdx = -1;
+        for (let i = rawLines.length - 1; i >= 0; i--) {
+          if (rawLines[i].trimStart().startsWith("❯")) {
+            lastPromptIdx = i;
+            break;
+          }
         }
-        const runInTabScript = `
-tell application "Terminal"
-  activate
-  do script "muse ${this.escapeForAppleScript(this.escapeForShell(combinedPrompt))}" in selected tab of window 1
-end tell
-        `.trim();
-        await execAsync(`osascript -e '${this.escapeForCli(runInTabScript)}'`);
-        console.log(`🚀 [StructPrompt] Rescued zsh draft and launched muse with structured prompt!`);
-        return true;
+
+        if (lastPromptIdx >= 0) {
+          const collected: string[] = [];
+          const firstLine = rawLines[lastPromptIdx].trimStart().replace(/^❯\s*/, "").trim();
+          if (firstLine) collected.push(firstLine);
+          for (let j = lastPromptIdx + 1; j < rawLines.length; j++) {
+            const l = rawLines[j].trim();
+            if (l.startsWith("────") || l.includes("muse-spark") || l.includes("Auto-review")) {
+              break;
+            }
+            if (l) collected.push(l);
+          }
+          draftText = collected.join(" ").trim();
+        } else {
+          // B. Fallback only when Muse TUI (`❯`) is not running: Check for zsh / bash prompt (`% `)
+          const nonEmpty = rawLines.map((l) => l.trim()).filter((l) => l.length > 0 && !l.startsWith("────"));
+          for (let i = nonEmpty.length - 1; i >= Math.max(0, nonEmpty.length - 5); i--) {
+            const line = nonEmpty[i];
+            const pctIdx = line.indexOf("% ");
+            if (pctIdx >= 0) {
+              const parts = [line.slice(pctIdx + 2).trim()];
+              for (let k = i + 1; k < nonEmpty.length; k++) {
+                parts.push(nonEmpty[k]);
+              }
+              draftText = parts.join(" ").trim();
+              break;
+            }
+          }
+        }
       }
-    } catch (e: any) {
-      console.warn("Could not inspect zsh draft:", e.message);
+    } catch (err: any) {
+      console.warn("Failed to read terminal draft for STRUCT PROMPT:", err.message);
     }
 
-    // No window at all -> launch a fresh Muse session with the prompt
-    await this.launchMuseCodeTerminal(undefined, cleanText);
-    return true;
+    const fromTerminalLine = Boolean(draftText);
+
+    if (!draftText) {
+      console.warn("⚠️ [StructPrompt] No draft text found in terminal line or clipboard.");
+      await this.sendSystemNotification(
+        "Type or dictate a rough prompt in the terminal first, then tap STRUCT PROMPT.",
+        "MuseDeck"
+      );
+      return null;
+    }
+
+    console.log(`📐 [StructPrompt] Rewriting draft (${draftText.length} chars): "${draftText}"`);
+
+    // 2. Rewrite via Meta Muse Spark 1.3
+    let rewritten = "";
+    const metaClient = new MetaModelApiClient();
+    if (metaClient.isConfigured()) {
+      try {
+        const response = await metaClient.request<{
+          choices: Array<{ message: { content: string } }>;
+        }>("/chat/completions", {
+          method: "POST",
+          body: JSON.stringify({
+            model: "muse-spark-1.3",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Rewrite the following as a clear, well-structured English prompt for an AI coding assistant. Only return the rewritten text, nothing else. No code blocks, no explanation.",
+              },
+              {
+                role: "user",
+                content: draftText,
+              },
+            ],
+            temperature: 0.2,
+          }),
+        });
+        rewritten = (response.choices?.[0]?.message?.content || "")
+          .replace(/^["'`]+|["'`]+$/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+      } catch (err: any) {
+        console.warn("⚠️ [StructPrompt] Meta API rewrite failed:", err.message);
+      }
+    }
+
+    if (!rewritten) {
+      // Fallback cleanup if API is unreachable
+      rewritten = `Provide a clear, step-by-step implementation plan and well-structured code for the following task: ${draftText.replace(/\s+/g, " ").trim()}`;
+    }
+
+    console.log(`✨ [StructPrompt] Rewritten prompt: "${rewritten}"`);
+
+    // 3. Replace the rough draft in-place in the active Terminal window (WITHOUT pressing Enter!)
+    const macTypeBin = this.getMacTypeBin();
+    const deleteCount = fromTerminalLine ? draftText.length + 12 : 0;
+
+    if (macTypeBin) {
+      try {
+        await execAsync(`osascript -e 'tell application "Terminal" to activate'`);
+        await new Promise((r) => setTimeout(r, 80));
+        if (deleteCount > 0) {
+          await execAsync(
+            `"${macTypeBin}" replace-line ${deleteCount} ${this.escapeForShell(rewritten)}`
+          );
+        } else {
+          await execAsync(`"${macTypeBin}" text ${this.escapeForShell(rewritten)}`);
+        }
+        return rewritten;
+      } catch (err: any) {
+        console.warn("Native mac-type replace-line failed, falling back to AppleScript:", err.message);
+      }
+    }
+
+    // Fallback via AppleScript if mac-type fails
+    try {
+      const appleScript = `
+tell application "Terminal" to activate
+delay 0.08
+tell application "System Events"
+  repeat ${deleteCount} times
+    key code 51
+  end repeat
+  keystroke "${this.escapeForAppleScript(rewritten)}"
+end tell
+      `.trim();
+      await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      return rewritten;
+    } catch (err: any) {
+      console.error("Failed to replace prompt in terminal:", err.message);
+      return null;
+    }
   }
 
   /**
@@ -1698,7 +1800,7 @@ zipStorePath=wrapper/dists
   }
 
   private static escapeForShell(str: string): string {
-    return `"${str.replace(/(["\s'$`\\])/g, "\\$1")}"`;
+    return `"${str.replace(/(["$`\\])/g, "\\$1")}"`;
   }
 
   private static escapeForAppleScript(str: string): string {

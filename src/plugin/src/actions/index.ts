@@ -457,9 +457,25 @@ export class StructPromptAction extends SingletonAction {
 
   override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
     if (checkSubmenuKeyDown(_ev)) return;
-    console.log("📐 [StructPrompt] Typing structured spec prompt into active Muse terminal...");
-    const prompt = "Turn this into a structured spec. Create requirements first, then a technical design, then break it into tasks. Do not execute anything until I review and approve the plan.";
-    await TerminalAutomation.typePromptIntoTerminal(prompt, true);
+    console.log("📐 [StructPrompt] Rewriting rough terminal draft into structured English prompt via Muse Spark 1.3...");
+    for (const key of this.activeKeys) {
+      void key.setImage(SvgKeyRenderer.renderStructPromptKey("rewriting"));
+    }
+
+    const rewritten = await TerminalAutomation.rewritePromptInTerminal();
+
+    for (const key of this.activeKeys) {
+      void key.setImage(SvgKeyRenderer.renderStructPromptKey(rewritten ? "done" : "idle"));
+    }
+    if (rewritten) {
+      setTimeout(() => {
+        if (!isAnySubmenuActive() && !museBeamAnimator.isRunning) {
+          for (const key of this.activeKeys) {
+            void key.setImage(SvgKeyRenderer.renderStructPromptKey("idle"));
+          }
+        }
+      }, 2000);
+    }
   }
 }
 

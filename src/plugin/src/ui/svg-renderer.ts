@@ -311,24 +311,30 @@ export class SvgKeyRenderer {
    * Key 3: Struct Prompt Key (Transforms user task into structured spec & execution plan)
    * Clean edge-to-edge frame without corner brackets, high legibility typography.
    */
-  static renderStructPromptKey(): string {
+  static renderStructPromptKey(mode: "idle" | "rewriting" | "done" = "idle"): string {
+    const stroke = mode === "rewriting" ? "#f59e0b" : mode === "done" ? "#22c55e" : "#a855f7";
+    const accent = mode === "rewriting" ? "#fbbf24" : mode === "done" ? "#86efac" : "#c084fc";
+    const line1 = mode === "rewriting" ? "REWRITING" : mode === "done" ? "REWRITTEN" : "STRUCT";
+    const line2 = mode === "rewriting" ? "SPARK 1.3" : mode === "done" ? "READY" : "PROMPT";
+    const l1Size = mode === "idle" ? 19 : 16;
+
     return this.svgToDataUri(`
       <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
-        <rect width="144" height="144" rx="24" fill="#070b14" stroke="#a855f7" stroke-width="2.5"/>
-        <circle cx="72" cy="72" r="50" fill="#a855f7" fill-opacity="0.04"/>
+        <rect width="144" height="144" rx="24" fill="#070b14" stroke="${stroke}" stroke-width="${mode === "idle" ? 2.5 : 3.5}"/>
+        <circle cx="72" cy="72" r="50" fill="${stroke}" fill-opacity="${mode === "idle" ? 0.04 : 0.12}"/>
 
         <!-- Structured Document / Spec Icon -->
         <g transform="translate(46, 16)">
-          <rect x="0" y="0" width="52" height="56" rx="8" fill="#581c87" fill-opacity="0.35" stroke="#c084fc" stroke-width="2.5"/>
+          <rect x="0" y="0" width="52" height="56" rx="8" fill="#581c87" fill-opacity="0.35" stroke="${accent}" stroke-width="2.5"/>
           <line x1="12" y1="16" x2="40" y2="16" stroke="#f5f3ff" stroke-width="3" stroke-linecap="round"/>
-          <line x1="12" y1="26" x2="34" y2="26" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="12" y1="36" x2="40" y2="36" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="12" y1="46" x2="26" y2="46" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+          <line x1="12" y1="26" x2="34" y2="26" stroke="${accent}" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="12" y1="36" x2="40" y2="36" stroke="${accent}" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="12" y1="46" x2="26" y2="46" stroke="${stroke}" stroke-width="2" stroke-linecap="round"/>
         </g>
 
         <!-- High-Legibility Titles -->
-        <text x="72" y="97" fill="#f5f3ff" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">STRUCT</text>
-        <text x="72" y="121" fill="#c084fc" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">PROMPT</text>
+        <text x="72" y="97" fill="#f5f3ff" font-size="${l1Size}" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="0.8">${line1}</text>
+        <text x="72" y="121" fill="${accent}" font-size="16" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" letter-spacing="1">${line2}</text>
       </svg>
     `);
   }

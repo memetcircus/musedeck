@@ -65,10 +65,46 @@ func pressCtrlC() {
     usleep(80000)
 }
 
+func pressCtrlE() {
+    let eKeyCode: CGKeyCode = 0x0E // 'e'
+    if let keyDown = CGEvent(keyboardEventSource: source, virtualKey: eKeyCode, keyDown: true) {
+        keyDown.flags = .maskControl
+        keyDown.post(tap: .cghidEventTap)
+    }
+    usleep(15000)
+    if let keyUp = CGEvent(keyboardEventSource: source, virtualKey: eKeyCode, keyDown: false) {
+        keyUp.flags = []
+        keyUp.post(tap: .cghidEventTap)
+    }
+    usleep(20000)
+}
+
+func pressBackspaces(_ count: Int) {
+    let deleteKeyCode: CGKeyCode = 0x33 // Backspace / Delete
+    for _ in 0..<max(0, count) {
+        if let keyDown = CGEvent(keyboardEventSource: source, virtualKey: deleteKeyCode, keyDown: true) {
+            keyDown.post(tap: .cghidEventTap)
+        }
+        if let keyUp = CGEvent(keyboardEventSource: source, virtualKey: deleteKeyCode, keyDown: false) {
+            keyUp.post(tap: .cghidEventTap)
+        }
+        usleep(900)
+    }
+    usleep(30000)
+}
+
 switch mode {
 case "text":
     if CommandLine.arguments.count > 2 {
         typeString(CommandLine.arguments[2])
+    }
+case "replace-line":
+    if CommandLine.arguments.count > 3 {
+        let count = Int(CommandLine.arguments[2]) ?? 100
+        let replacement = CommandLine.arguments[3]
+        pressCtrlE()
+        pressBackspaces(count)
+        typeString(replacement)
     }
 case "clear-and-type":
     pressCtrlC()
