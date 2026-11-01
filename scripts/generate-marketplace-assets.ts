@@ -12,54 +12,7 @@ const outDir = path.join(rootDir, "marketplace-assets");
 const parseDataUri = (uri: string): Buffer => Buffer.from(uri.split(",")[1], "base64");
 
 function buildPluginIconSvg(): Buffer {
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-    <defs>
-      <radialGradient id="bg2" cx="50%" cy="45%" r="65%">
-        <stop offset="0%" stop-color="#261030"/>
-        <stop offset="65%" stop-color="#11071a"/>
-        <stop offset="100%" stop-color="#07030c"/>
-      </radialGradient>
-      <filter id="glowMag" filterUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
-        <feGaussianBlur stdDeviation="12" result="blur1"/>
-        <feGaussianBlur stdDeviation="4" result="blur2"/>
-        <feMerge>
-          <feMergeNode in="blur1"/>
-          <feMergeNode in="blur1"/>
-          <feMergeNode in="blur2"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-      </filter>
-      <filter id="glowBlue2" filterUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
-        <feGaussianBlur stdDeviation="10" result="blur1"/>
-        <feMerge>
-          <feMergeNode in="blur1"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-      </filter>
-    </defs>
-    <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#bg2)" stroke="#4a1d66" stroke-width="4"/>
-    <path d="M 96 440 C 102 305, 114 185, 146 128 C 176 74, 212 62, 256 62 C 300 62, 336 74, 366 128 C 398 185, 410 305, 416 440"
-          fill="none" stroke="#a855f7" stroke-width="8" stroke-linecap="round" opacity="0.55" filter="url(#glowMag)"/>
-    <path d="M 114 440 C 120 315, 130 200, 158 146 C 184 96, 216 84, 256 84 C 296 84, 328 96, 354 146 C 382 200, 392 315, 398 440"
-          fill="#180a29" stroke="#ff2a85" stroke-width="14" stroke-linecap="round" filter="url(#glowMag)"/>
-    <path d="M 114 440 C 120 315, 130 200, 158 146 C 184 96, 216 84, 256 84 C 296 84, 328 96, 354 146 C 382 200, 392 315, 398 440"
-          fill="none" stroke="#ffd6eb" stroke-width="4" stroke-linecap="round"/>
-    <path d="M 118 330 C 78 295, 58 240, 78 222 C 96 206, 120 238, 126 266"
-          fill="#180a29" stroke="#ff2a85" stroke-width="13" stroke-linecap="round" filter="url(#glowMag)"/>
-    <path d="M 118 330 C 78 295, 58 240, 78 222 C 96 206, 120 238, 126 266"
-          fill="none" stroke="#ffd6eb" stroke-width="4" stroke-linecap="round"/>
-    <rect x="156" y="148" width="200" height="156" rx="66" fill="#1d0d30" stroke="#38bdf8" stroke-width="11" filter="url(#glowBlue2)"/>
-    <rect x="156" y="148" width="200" height="156" rx="66" fill="none" stroke="#e0f2fe" stroke-width="3.5"/>
-    <circle cx="192" cy="252" r="15" fill="#ff2a85" opacity="0.7" filter="url(#glowMag)"/>
-    <circle cx="320" cy="252" r="15" fill="#ff2a85" opacity="0.7" filter="url(#glowMag)"/>
-    <circle cx="208" cy="220" r="15" fill="#38bdf8" filter="url(#glowBlue2)"/>
-    <circle cx="212" cy="215" r="5" fill="#ffffff"/>
-    <circle cx="304" cy="220" r="15" fill="#38bdf8" filter="url(#glowBlue2)"/>
-    <circle cx="308" cy="215" r="5" fill="#ffffff"/>
-    <path d="M 235 242 C 235 268, 277 268, 277 242 Z" fill="#ff2a85" stroke="#ffd6eb" stroke-width="4" stroke-linejoin="round" filter="url(#glowMag)"/>
-  </svg>`;
-  return Buffer.from(svg);
+  return fs.readFileSync(path.join(assetsDir, "musedeck_icon.png"));
 }
 
 function buildCategoryIconSvg(): Buffer {
