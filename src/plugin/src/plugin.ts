@@ -28,6 +28,7 @@ console.error = (...args: any[]) => {
 };
 
 import { StreamDeckCoreBridge } from "./core-bridge.js";
+import { ProfileManager } from "./profile-manager.js";
 import { startMuseDeckServer } from "../../server/index.js";
 import {
   AgentStatusAction,
@@ -73,6 +74,10 @@ try {
 } catch (err: any) {
   console.error("⚠️ [Plugin] Embedded server startup warning:", err?.message || err);
 }
+
+// Auto-switch to the MuseDeck profile when Terminal or a Muse Code session starts
+const profileManager = new ProfileManager();
+profileManager.start();
 
 // Start local bridge client and connect to Stream Deck host
 await bridge.start();

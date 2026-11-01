@@ -4,7 +4,7 @@
   "Name": "MuseDeck",
   "Version": "1.0.0.0",
   "Author": "memetcircus",
-  "Description": "Human-in-the-Loop Mission Control & Telemetry Console for Meta Muse Code CLI & Meta Model API (SAM 3.1 & Muse Spark). Built for Meta Global AI Developer Hackathon.",
+  "Description": "Physical Human-in-the-Loop Mission Control, Multimodal UI Synthesizer & Telemetry Console for Meta Muse Code CLI, SAM 3.1, and Muse Spark.",
   "Category": "MuseDeck",
   "CategoryIcon": "imgs/category-icon",
   "URL": "https://github.com/memetcircus/musedeck",
@@ -24,6 +24,12 @@
     "Debug": "enabled"
   },
   "CodePath": "bin/plugin.js",
+  "ApplicationsToMonitor": {
+    "mac": [
+      "com.apple.Terminal"
+    ],
+    "windows": []
+  },
   "Profiles": [
     {
       "Name": "MuseDeck",
@@ -76,10 +82,10 @@
       ]
     },
     {
-      "Name": "Approve (HITL)",
+      "Name": "Structured Prompt (SPEC)",
       "UUID": "com.memetcircus.musedeck.approve",
       "Icon": "imgs/actions/approve/icon",
-      "Tooltip": "Physical Human-in-the-Loop Approval key. Press to unpause agent when waiting for review.",
+      "Tooltip": "Transforms your active terminal prompt into a structured specification and step-by-step execution plan with a human review gate.",
       "Controllers": [
         "Keypad"
       ],
@@ -174,10 +180,10 @@
       ]
     },
     {
-      "Name": "Prompt Task",
+      "Name": "Video Record",
       "UUID": "com.memetcircus.musedeck.prompt-task",
       "Icon": "imgs/actions/prompt-task/icon",
-      "Tooltip": "Sends a preset coding task to Muse Code.",
+      "Tooltip": "One-touch desktop interaction video recorder (5s). Captures reproducible UI bug flows and injects the video path at the terminal cursor.",
       "Controllers": [
         "Keypad"
       ],
@@ -232,14 +238,14 @@
     {
       "Name": "Halt / Stop",
       "UUID": "com.memetcircus.musedeck.page-next",
-      "Icon": "imgs/actions/halt/icon",
+      "Icon": "imgs/actions/page-next/icon",
       "Tooltip": "Emergency stop. Immediately halts child processes and cancels running agent workflows.",
       "Controllers": [
         "Keypad"
       ],
       "States": [
         {
-          "Image": "imgs/actions/halt/key"
+          "Image": "imgs/actions/page-next/key"
         }
       ]
     }
