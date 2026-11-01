@@ -288,21 +288,31 @@ end tell
    */
   static async launchMuseCodeTerminal(rawCwd?: string, prompt?: string): Promise<void> {
     let projectDir = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
-    if (projectDir.includes(".sdPlugin")) {
-      projectDir = projectDir.split(/[\/\\]com\.memetcircus\.musedeck\.sdPlugin/)[0] || "/Users/akif/Projects/musedeck/musedeck";
+    if (projectDir.includes(".sdPlugin") || projectDir.includes("com.elgato.StreamDeck")) {
+      projectDir = "/Users/akif/Projects/musedeck/musedeck";
+      try {
+        const homeDir = process.env.HOME || "/Users/akif";
+        const cfgPath = path.join(homeDir, ".musedeck", "config.json");
+        if (fs.existsSync(cfgPath)) {
+          const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+          if (cfg.projectDir && !cfg.projectDir.includes(".sdPlugin")) {
+            projectDir = cfg.projectDir;
+          }
+        }
+      } catch {}
     }
 
     const command = prompt
-      ? `cd ${this.escapeForShell(projectDir)} && muse ${this.escapeForShell(prompt)}; exec $SHELL`
-      : `cd ${this.escapeForShell(projectDir)} && muse; exec $SHELL`;
+      ? `export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH" && cd ${this.escapeForShell(projectDir)} && muse ${this.escapeForShell(prompt)}; exec $SHELL`
+      : `export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH" && cd ${this.escapeForShell(projectDir)} && muse; exec $SHELL`;
 
     const appleScript = `
 tell application "Terminal"
-  activate
   set newTab to (do script "${this.escapeForAppleScript(command)}")
+  activate
   try
-    set custom title of selected tab of window 1 to "MUSE_ACTIVE_SESSION"
-    set title displays custom title of selected tab of window 1 to true
+    set custom title of newTab to "MUSE_ACTIVE_SESSION"
+    set title displays custom title of newTab to true
     set winId to id of window 1
     do shell script "mkdir -p /tmp/musedeck && echo " & winId & " > /tmp/musedeck/active_terminal_window_id.txt"
   end try
@@ -469,13 +479,13 @@ end tell
 tell application "Terminal"
   set targetWin to missing value
 
-  -- 1. Try reading saved active window ID
+  -- 1. Try reading saved active window ID (must actually be running muse-bin, not idle -zsh)
   try
     set savedId to (do shell script "cat /tmp/musedeck/active_terminal_window_id.txt 2>/dev/null || true")
     if savedId is not "" then
       set savedIdNum to (savedId as integer)
       repeat with w in windows
-        if id of w is savedIdNum then
+        if id of w is savedIdNum and (name of w contains "muse-bin") then
           set targetWin to w
           exit repeat
         end if
@@ -483,18 +493,18 @@ tell application "Terminal"
     end if
   end try
 
-  -- 2. Fallback: match window with "MUSE_ACTIVE_SESSION", "muse-bin", or "muse" in title or tab content (exclude "codex")
+  -- 2. Fallback: match window actively running "muse-bin"
   if targetWin is missing value then
     repeat with w in windows
       set winName to name of w
-      if winName contains "MUSE_ACTIVE_SESSION" or winName contains "muse-bin" or (winName contains "muse" and not (winName contains "codex")) then
+      if winName contains "muse-bin" then
         set targetWin to w
         exit repeat
       end if
     end repeat
   end if
 
-  -- 3. Bring target window to front if found, else do NOT activate random terminals
+  -- 3. Bring target window to front if found, else do NOT activate random shell terminals
   if targetWin is not missing value then
     set index of targetWin to 1
     activate
@@ -878,20 +888,62 @@ end tell
   }
 
   /**
-   * Type a structured prompt directly into active Muse Terminal and press Enter
+   * Type a structured prompt directly into active Muse Terminal and press Enter.
+   * If the user typed text at a raw zsh prompt (% ) where muse is not yet running,
+   * rescues the typed text and launches muse with the combined prompt!
    */
   static async typePromptIntoTerminal(promptText: string, pressEnter = true): Promise<boolean> {
     const cleanText = promptText.trim();
     const hasMuseSession = await this.focusMuseTerminalWindow();
-    if (!hasMuseSession) {
-      console.warn(`⚠️ [Terminal] No active Muse Code terminal found for structured prompt.`);
-      await this.sendSystemNotification(
-        "No active Muse Code terminal found. Tap READY [0,0] or SESSIONS [4,0] to open a session first.",
-        "MuseDeck"
-      );
-      return false;
+    if (hasMuseSession) {
+      return this.typeSnippetIntoTerminal(` ${cleanText}`, pressEnter);
     }
-    return this.typeSnippetIntoTerminal(` ${cleanText}`, pressEnter);
+
+    // Check if there is an open Terminal window sitting at a plain zsh prompt (% ) with user-typed text
+    try {
+      const inspectScript = `
+tell application "Terminal"
+  if (count of windows) is 0 then return "NO_WIN"
+  set tabText to contents of selected tab of window 1
+  return tabText
+end tell
+      `.trim();
+      const { stdout } = await execAsync(`osascript -e '${this.escapeForCli(inspectScript)}'`);
+      if (stdout && stdout.trim() !== "NO_WIN") {
+        const lines = stdout
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0);
+        const lastLine = lines[lines.length - 1] || "";
+        const pctIdx = lastLine.indexOf("% ");
+        const draftText = pctIdx >= 0 ? lastLine.slice(pctIdx + 2).trim() : "";
+        const combinedPrompt = draftText ? `${draftText} ${cleanText}` : cleanText;
+
+        // Clear the raw zsh line with Ctrl+C and run muse in that exact tab
+        const macTypeBin = this.getMacTypeBin();
+        if (macTypeBin) {
+          await execAsync(`osascript -e 'tell application "Terminal" to activate'`);
+          await new Promise((r) => setTimeout(r, 80));
+          await execAsync(`"${macTypeBin}" ctrl-c`);
+          await new Promise((r) => setTimeout(r, 80));
+        }
+        const runInTabScript = `
+tell application "Terminal"
+  activate
+  do script "muse ${this.escapeForAppleScript(this.escapeForShell(combinedPrompt))}" in selected tab of window 1
+end tell
+        `.trim();
+        await execAsync(`osascript -e '${this.escapeForCli(runInTabScript)}'`);
+        console.log(`🚀 [StructPrompt] Rescued zsh draft and launched muse with structured prompt!`);
+        return true;
+      }
+    } catch (e: any) {
+      console.warn("Could not inspect zsh draft:", e.message);
+    }
+
+    // No window at all -> launch a fresh Muse session with the prompt
+    await this.launchMuseCodeTerminal(undefined, cleanText);
+    return true;
   }
 
   /**
