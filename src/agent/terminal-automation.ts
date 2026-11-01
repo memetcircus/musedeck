@@ -271,6 +271,8 @@ end tell
 
   private static getMacTypeBin(): string | null {
     const candidates = [
+      path.resolve(__dirname, "mac-type"),
+      path.resolve(__dirname, "../bin/mac-type"),
       path.resolve(__dirname, "../../bin/mac-type"),
       path.resolve("/Users/akif/Projects/musedeck/musedeck/bin/mac-type"),
       path.resolve(process.cwd(), "bin/mac-type"),
@@ -830,7 +832,7 @@ end if
    */
   static async typeSnippetIntoTerminal(snippetText: string, pressEnter = false): Promise<boolean> {
     const cleanText = snippetText.trim();
-    const textToInsert = pressEnter ? cleanText : ` ${cleanText} `;
+    const textToInsert = pressEnter ? ` ${cleanText}` : ` ${cleanText} `;
 
     // 1. Bring active Muse Terminal to front (verifies Muse session exists!)
     const hasMuseSession = await this.focusMuseTerminalWindow();
@@ -879,7 +881,17 @@ end tell
    * Type a structured prompt directly into active Muse Terminal and press Enter
    */
   static async typePromptIntoTerminal(promptText: string, pressEnter = true): Promise<boolean> {
-    return this.typeSnippetIntoTerminal(promptText, pressEnter);
+    const cleanText = promptText.trim();
+    const hasMuseSession = await this.focusMuseTerminalWindow();
+    if (!hasMuseSession) {
+      console.warn(`⚠️ [Terminal] No active Muse Code terminal found for structured prompt.`);
+      await this.sendSystemNotification(
+        "No active Muse Code terminal found. Tap READY [0,0] or SESSIONS [4,0] to open a session first.",
+        "MuseDeck"
+      );
+      return false;
+    }
+    return this.typeSnippetIntoTerminal(` ${cleanText}`, pressEnter);
   }
 
   /**
