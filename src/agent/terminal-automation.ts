@@ -849,6 +849,10 @@ end if
     const hasMuseSession = await this.focusMuseTerminalWindow();
     if (!hasMuseSession) {
       console.warn(`⚠️ [Terminal] Ignored typing "${cleanText}": No active Muse Code terminal found.`);
+      await this.sendSystemNotification(
+        "No active Muse Code terminal found. Tap READY or SESSIONS to open a session first.",
+        "MuseDeck"
+      );
       return false;
     }
 
@@ -894,8 +898,16 @@ end tell
    * and replaces the draft text in-place at the terminal cursor without submitting it.
    */
   static async rewritePromptInTerminal(): Promise<string | null> {
-    // 1. Focus active Muse terminal window if one exists, otherwise inspect front Terminal window
-    await this.focusMuseTerminalWindow();
+    // 1. Focus active Muse terminal window if one exists
+    const hasMuseSession = await this.focusMuseTerminalWindow();
+    if (!hasMuseSession) {
+      console.warn("⚠️ [StructPrompt] No active Muse Code terminal found.");
+      await this.sendSystemNotification(
+        "No active Muse Code terminal found. Tap READY or SESSIONS to open a session first.",
+        "MuseDeck"
+      );
+      return null;
+    }
 
     let draftText = "";
     try {
