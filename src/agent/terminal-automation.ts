@@ -898,12 +898,13 @@ end tell
    * and replaces the draft text in-place at the terminal cursor without submitting it.
    */
   static async rewritePromptInTerminal(): Promise<string | null> {
-    // 1. Focus active Muse terminal window if one exists
+    // 1. Focus active Muse terminal window if one exists, or launch a fresh Muse Code terminal
     const hasMuseSession = await this.focusMuseTerminalWindow();
     if (!hasMuseSession) {
-      console.warn("⚠️ [StructPrompt] No active Muse Code terminal found.");
+      console.log("💻 [StructPrompt] No active Muse Code terminal found. Launching new session...");
+      await this.launchMuseCodeTerminal();
       await this.sendSystemNotification(
-        "No active Muse Code terminal found. Tap READY or SESSIONS to open a session first.",
+        "Type or dictate a rough prompt in the terminal first, then tap STRUCT PROMPT.",
         "MuseDeck"
       );
       return null;
