@@ -82,10 +82,10 @@
       ]
     },
     {
-      "Name": "Structured Prompt (SPEC)",
+      "Name": "Struct Prompt",
       "UUID": "com.memetcircus.musedeck.approve",
       "Icon": "imgs/actions/approve/icon",
-      "Tooltip": "Transforms your active terminal prompt into a structured specification and step-by-step execution plan with a human review gate.",
+      "Tooltip": "Rewrites the current terminal input in-place into a clear, well-structured English prompt for an AI coding assistant.",
       "Controllers": [
         "Keypad"
       ],
