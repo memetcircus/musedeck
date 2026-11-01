@@ -904,7 +904,7 @@ end tell
       console.log("💻 [StructPrompt] No active Muse Code terminal found. Launching new session...");
       await this.launchMuseCodeTerminal();
       await this.sendSystemNotification(
-        "Type or dictate a rough prompt in the terminal first, then tap STRUCT PROMPT.",
+        "Type your prompt in the terminal first, then tap STRUCT PROMPT to refine it.",
         "MuseDeck"
       );
       return null;
@@ -971,7 +971,7 @@ end tell
     if (!draftText) {
       console.warn("⚠️ [StructPrompt] No draft text found in terminal line or clipboard.");
       await this.sendSystemNotification(
-        "Type or dictate a rough prompt in the terminal first, then tap STRUCT PROMPT.",
+        "Type your prompt in the terminal first, then tap STRUCT PROMPT to refine it.",
         "MuseDeck"
       );
       return null;
