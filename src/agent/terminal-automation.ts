@@ -1189,7 +1189,26 @@ end tell
               return `.stroke(${content}, style: StrokeStyle(lineWidth: ${lw}, lineCap: ${lc}))`;
             }
           );
-          // Auto-heal iOS-only SwiftUI modifiers that break macOS swiftc compilation:
+          // Auto-heal iOS-only SwiftUI colors, closures, and modifiers that break macOS swiftc compilation:
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)systemGray6\s*\)/g, "Color(white: 0.95)");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)systemGray5\s*\)/g, "Color(white: 0.90)");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)systemGray4\s*\)/g, "Color(white: 0.84)");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)systemGray3\s*\)/g, "Color(white: 0.78)");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)systemGray2\s*\)/g, "Color(white: 0.68)");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)systemGray\s*\)/g, "Color.gray");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)systemBackground\s*\)/g, "Color.white");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)secondarySystemBackground\s*\)/g, "Color(white: 0.95)");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)tertiarySystemBackground\s*\)/g, "Color(white: 0.98)");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)systemGroupedBackground\s*\)/g, "Color(white: 0.95)");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)secondarySystemGroupedBackground\s*\)/g, "Color.white");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)label\s*\)/g, "Color.primary");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)secondaryLabel\s*\)/g, "Color.secondary");
+          swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)separator\s*\)/g, "Color.gray.opacity(0.25)");
+          swiftCode = swiftCode.replace(/(Button\s*\{[^\n]*\})\s*\{/g, "$1 label: {");
+          swiftCode = swiftCode.replace(/UIScreen\.main\.bounds\.width/g, "800.0");
+          swiftCode = swiftCode.replace(/UIScreen\.main\.bounds\.height/g, "700.0");
+          swiftCode = swiftCode.replace(/\.listStyle\(\.insetGrouped\)/g, ".listStyle(.inset)");
+          swiftCode = swiftCode.replace(/\.fullScreenCover\(/g, ".sheet(");
           swiftCode = swiftCode.replace(/\.navigationBarTitleDisplayMode\([^)]*\)/g, "");
           swiftCode = swiftCode.replace(/\.navigationBarHidden\([^)]*\)/g, "");
           swiftCode = swiftCode.replace(/\.navigationBarItems\([^)]*\)/g, "");
