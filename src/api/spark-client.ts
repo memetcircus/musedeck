@@ -178,9 +178,17 @@ export class MuseSparkClient {
       code = code.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)secondaryLabel\s*\)/g, "Color.secondary");
       code = code.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)separator\s*\)/g, "Color.gray.opacity(0.25)");
       code = code.replace(/(Button\s*\{[^\n]*\})\s*\{/g, "$1 label: {");
+      code = code.replace(/(?:@ViewBuilder\s*(?:_\s*)?@{1,2}ViewBuilder(?:\s+ViewBuilder)?|@ViewBuilder\s+@ViewBuilder)/g, "@ViewBuilder _");
       code = code.replace(
-        /((?:func\s+\w+|init)\s*(?:<[^>]+>)?\s*\([^)]*?)(?<!@ViewBuilder\s+)(\b(?:_\s+\w+|\w+(?:\s+\w+)?)\s*:\s*(?:@escaping\s*)?\(\)\s*->\s*(?:some\s+View|Content\b))/g,
-        "$1@ViewBuilder $2"
+        /(\b(?:func\s+\w+|init)\s*(?:<[^>]+>)?\s*\()([^)]*)(\)\s*(?:->\s*some\s+View|\{))/g,
+        (full, prefix, params, suffix) => {
+          if (params.includes("@ViewBuilder")) return full;
+          const updatedParams = params.replace(
+            /((?:^|,\s*))((?:_\s+\w+|\w+(?:\s+\w+)?)\s*:\s*(?:@escaping\s*)?\(\)\s*->\s*(?:some\s+View|Content\b))/,
+            "$1@ViewBuilder $2"
+          );
+          return `${prefix}${updatedParams}${suffix}`;
+        }
       );
       code = code.replace(/UIScreen\.main\.bounds\.width/g, "800.0");
       code = code.replace(/UIScreen\.main\.bounds\.height/g, "700.0");
