@@ -1,6 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
 import type { MetaModelApiClient } from "./meta-client.js";
+
+const execAsync = promisify(exec);
 
 export type TargetFramework =
   | "AUTO"
@@ -178,6 +182,7 @@ export class MuseSparkClient {
       code = code.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)secondaryLabel\s*\)/g, "Color.secondary");
       code = code.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)separator\s*\)/g, "Color.gray.opacity(0.25)");
       code = code.replace(/(Button\s*\{[^\n]*\})\s*\{/g, "$1 label: {");
+      code = code.replace(/\{\s*@ViewBuilder\s+/g, "{ ");
       code = code.replace(/(?:@ViewBuilder\s*(?:_\s*)?@{1,2}ViewBuilder(?:\s+ViewBuilder)?|@ViewBuilder\s+@ViewBuilder)/g, "@ViewBuilder _");
       code = code.replace(
         /(\b(?:func\s+\w+|init)\s*(?:<[^>]+>)?\s*\()([^)]*)(\)\s*(?:->\s*some\s+View|\{))/g,
@@ -299,6 +304,57 @@ export class MuseSparkClient {
     fs.writeFileSync(filePath, code, "utf8");
     console.log(`💾 [Muse Spark] Component saved to: ${filePath}`);
 
+    // Pre-verify & self-heal SwiftUI compilation via swiftc before finishing synthesis
+    if (resolvedFramework === "SWIFTUI" || resolvedFramework === "SWIFTUI_SPRING") {
+      try {
+        await execAsync(`swiftc -parse-as-library -o "/tmp/musedeck/PreviewApp" "${filePath}"`);
+        console.log(`✅ [Muse Spark] Pre-compiled SwiftUI PreviewApp cleanly!`);
+      } catch (compileErr: any) {
+        const compilerStderr = compileErr.stderr || compileErr.message || "";
+        console.warn(`⚠️ [Muse Spark] Initial swiftc check failed, running AI compiler auto-repair:\n${compilerStderr}`);
+        if (this.apiClient.isConfigured()) {
+          try {
+            const repairRes = await this.apiClient.request<{
+              choices: Array<{ message: { content: string } }>;
+            }>("/chat/completions", {
+              method: "POST",
+              body: JSON.stringify({
+                model: this.modelName,
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You are a macOS SwiftUI compiler repair agent. Fix the exact swiftc compiler error(s) in the provided Swift file and return ONLY the complete, self-contained corrected Swift code block including @main struct PreviewApp. Do NOT put @ViewBuilder inside closure bodies (e.g. never write `{ @ViewBuilder x in`).",
+                  },
+                  {
+                    role: "user",
+                    content: `Fix these swiftc compiler errors:\n\n${compilerStderr}\n\nSwift source file:\n\`\`\`swift\n${code}\n\`\`\``,
+                  },
+                ],
+                temperature: 0.1,
+                max_tokens: 12288,
+              }),
+            });
+            const repairedRaw = repairRes.choices?.[0]?.message?.content || "";
+            let repairedCode = this.extractBestCodeBlock(repairedRaw, resolvedFramework);
+            if (repairedCode && repairedCode.includes("struct")) {
+              repairedCode = repairedCode.replace(/\{\s*@ViewBuilder\s+/g, "{ ");
+              if (!repairedCode.includes("@main")) {
+                const mainMatch = code.match(/@main[\s\S]*$/);
+                if (mainMatch) repairedCode += "\n\n" + mainMatch[0];
+              }
+              code = repairedCode;
+              fs.writeFileSync(filePath, code, "utf8");
+              await execAsync(`swiftc -parse-as-library -o "/tmp/musedeck/PreviewApp" "${filePath}"`);
+              console.log(`✅ [Muse Spark] AI compiler auto-repair succeeded!`);
+            }
+          } catch (repairErr: any) {
+            console.warn(`⚠️ [Muse Spark] AI compiler auto-repair attempt finished: ${repairErr.message}`);
+          }
+        }
+      }
+    }
+
     return {
       code,
       framework: resolvedFramework,
@@ -360,7 +416,7 @@ export class MuseSparkClient {
         return {
           filename: "ExtractedComponent.swift",
           frameworkName: "Apple SwiftUI",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready, idiomatic Apple SwiftUI components targeting macOS (compiled via swiftc -parse-as-library) with modern styling, SF Symbols, and smooth animations. Do NOT use UIKit-only APIs such as UIColor, Color(.systemGray6), Color(.systemBackground), or UIScreen; use pure SwiftUI colors (e.g., Color(white: 0.95), Color.gray.opacity(0.12), Color.white), Button(action: { ... }) { ... }, and always annotate view-returning closure parameters with @ViewBuilder (e.g., @ViewBuilder _ content: () -> some View). The file must be 100% complete and self-contained so that swiftc compiles it cleanly.",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready, idiomatic Apple SwiftUI components targeting macOS (compiled via swiftc -parse-as-library) with modern styling, SF Symbols, and smooth animations. Do NOT use UIKit-only APIs such as UIColor, Color(.systemGray6), Color(.systemBackground), or UIScreen; use pure SwiftUI colors (e.g., Color(white: 0.95), Color.gray.opacity(0.12), Color.white) and Button(action: { ... }) { ... }. Never place @ViewBuilder inside a closure body (e.g., never write `{ @ViewBuilder x in`). The file must be 100% complete and self-contained so that swiftc compiles it cleanly.",
           prompt: "Convert this UI design into a complete, self-contained Apple SwiftUI View with @State and SF Symbols. Include all subviews and helpers inline in the same file so the code compiles with zero external dependencies.",
         };
 
@@ -368,8 +424,8 @@ export class MuseSparkClient {
         return {
           filename: "AnimatedComponent.swift",
           frameworkName: "SwiftUI Interactive Flow",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready Apple SwiftUI Views targeting macOS (compiled via swiftc -parse-as-library) for interactive UI flows (modals, drawers, multi-step steppers, tab transitions, accordions, gesture interactions, and smooth animations with .animation(.spring()), TimelineView(.animation), and interactive @State). Do NOT use UIKit-only APIs such as UIColor, Color(.systemGray6), Color(.systemBackground), or UIScreen; use pure SwiftUI colors (e.g., Color(white: 0.95), Color.gray.opacity(0.12), Color.white), Button(action: { ... }) { ... }, and always annotate view-returning closure parameters with @ViewBuilder (e.g., @ViewBuilder _ content: () -> some View). Name the root view ContentView and keep the entire file concise (under 240 lines) so it never truncates and swiftc compiles it cleanly.",
-          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns, t=0.6s to t=5.0s) captured at high frame rate from a screen recording. Analyze the micro-interactions, state transitions, spring dynamics, and animated elements across all 8 frames. Recreate this complete interactive UI flow in SwiftUI with a root ContentView, interactive state, spring/timeline animations, and realistic controls in under 240 lines.",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready Apple SwiftUI Views targeting macOS (compiled via swiftc -parse-as-library) for interactive UI flows (modals, drawers, multi-step steppers, tab transitions, accordions, gesture interactions, and smooth animations with .animation(.spring()), TimelineView(.animation), and interactive @State). Do NOT use UIKit-only APIs such as UIColor, Color(.systemGray6), Color(.systemBackground), or UIScreen; use pure SwiftUI colors (e.g., Color(white: 0.95), Color.gray.opacity(0.12), Color.white) and Button(action: { ... }) { ... }. Never place @ViewBuilder inside a closure body (e.g., never write `{ @ViewBuilder x in`). Name the root view ContentView and keep the entire file concise (under 220 lines) so it never truncates and swiftc compiles it cleanly.",
+          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns, t=0.6s to t=5.0s) captured at high frame rate from a screen recording. Analyze the micro-interactions, state transitions, spring dynamics, and animated elements across all 8 frames. Recreate this complete interactive UI flow in SwiftUI with a root ContentView, interactive state, spring/timeline animations, and realistic controls in under 220 lines.",
         };
 
       case "FRAMER":

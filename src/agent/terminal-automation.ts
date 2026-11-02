@@ -1219,6 +1219,7 @@ end tell
           swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)secondaryLabel\s*\)/g, "Color.secondary");
           swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)separator\s*\)/g, "Color.gray.opacity(0.25)");
           swiftCode = swiftCode.replace(/(Button\s*\{[^\n]*\})\s*\{/g, "$1 label: {");
+          swiftCode = swiftCode.replace(/\{\s*@ViewBuilder\s+/g, "{ ");
           swiftCode = swiftCode.replace(/(?:@ViewBuilder\s*(?:_\s*)?@{1,2}ViewBuilder(?:\s+ViewBuilder)?|@ViewBuilder\s+@ViewBuilder)/g, "@ViewBuilder _");
           swiftCode = swiftCode.replace(
             /(\b(?:func\s+\w+|init)\s*(?:<[^>]+>)?\s*\()([^)]*)(\)\s*(?:->\s*some\s+View|\{))/g,
@@ -1331,10 +1332,54 @@ end tell
 
           await execAsync(`swiftc -parse-as-library -o "${binPath}" "${filePath}"`);
         } catch (compileErr: any) {
-          console.warn(`⚠️ [LivePreview] swiftc compilation error: ${compileErr.message}`);
-          await TerminalAutomation.sendSystemNotification("Opening component in Xcode Canvas...", "MuseDeck Preview");
-          await execAsync(`open -a Xcode "${filePath}"`);
-          return false;
+          const errOut = compileErr.stderr || compileErr.message || "";
+          console.warn(`⚠️ [LivePreview] Initial swiftc error, attempting AI compiler auto-repair:\n${errOut}`);
+          let repairedSuccess = false;
+          try {
+            const metaClient = new MetaModelApiClient();
+            if (metaClient.isConfigured()) {
+              const currentSwift = await fs.promises.readFile(filePath, "utf8");
+              const repairRes = await metaClient.request<{
+                choices: Array<{ message: { content: string } }>;
+              }>("/chat/completions", {
+                method: "POST",
+                body: JSON.stringify({
+                  model: "muse-spark-1.3",
+                  messages: [
+                    {
+                      role: "system",
+                      content:
+                        "You are a macOS SwiftUI compiler repair agent. Fix the exact swiftc compiler error(s) in the provided Swift file and return ONLY the complete corrected Swift file inside a ```swift code block, keeping @main struct PreviewApp intact.",
+                    },
+                    {
+                      role: "user",
+                      content: `Fix these swiftc compiler errors:\n\n${errOut}\n\nSwift source file:\n\`\`\`swift\n${currentSwift}\n\`\`\``,
+                    },
+                  ],
+                  temperature: 0.1,
+                  max_tokens: 12288,
+                }),
+              });
+              const rawContent = repairRes.choices?.[0]?.message?.content || "";
+              const blockMatch = rawContent.match(/```(?:swift)?[ \t]*\n([\s\S]*?)(?:```|$)/i);
+              let repairedSwift = (blockMatch ? blockMatch[1] : rawContent).trim();
+              repairedSwift = repairedSwift.replace(/\{\s*@ViewBuilder\s+/g, "{ ");
+              if (repairedSwift.includes("struct")) {
+                await fs.promises.writeFile(filePath, repairedSwift, "utf8");
+                await execAsync(`swiftc -parse-as-library -o "${binPath}" "${filePath}"`);
+                repairedSuccess = true;
+                console.log(`✅ [LivePreview] AI compiler auto-repair succeeded!`);
+              }
+            }
+          } catch (repairErr: any) {
+            console.warn(`⚠️ [LivePreview] AI compiler auto-repair failed: ${repairErr.message}`);
+          }
+
+          if (!repairedSuccess) {
+            await TerminalAutomation.sendSystemNotification("Opening component in Xcode Canvas...", "MuseDeck Preview");
+            await execAsync(`open -a Xcode "${filePath}"`);
+            return false;
+          }
         }
 
         console.log(`🚀 [LivePreview] Launching native macOS SwiftUI window...`);
