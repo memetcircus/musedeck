@@ -1275,9 +1275,15 @@ end tell
           let isLandscape = false;
           if (capturePath) {
             try {
-              const sharpModule: any = await import("sharp");
-              const sharp = sharpModule.default || sharpModule;
-              const meta = await sharp(capturePath).metadata();
+              let sharp: any = null;
+              for (const cand of ["sharp", "/Users/akif/Projects/musedeck/musedeck/node_modules/sharp/lib/index.js"]) {
+                try {
+                  const sharpModule: any = await import(cand);
+                  sharp = sharpModule.default || sharpModule;
+                  if (sharp) break;
+                } catch {}
+              }
+              const meta = sharp ? await sharp(capturePath).metadata() : {};
               if (meta.width && meta.height) {
                 const ratio = meta.width / meta.height;
                 isLandscape = ratio >= 1.2;
@@ -1364,8 +1370,14 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       }
 
       if (ext === ".tsx" || ext === ".jsx") {
-        const tsModule: any = await import("typescript");
-        const ts = tsModule.default || tsModule;
+        let ts: any = null;
+        for (const cand of ["typescript", "/Users/akif/Projects/musedeck/musedeck/node_modules/typescript/lib/typescript.js"]) {
+          try {
+            const tsModule: any = await import(cand);
+            ts = tsModule.default || tsModule;
+            if (ts) break;
+          } catch {}
+        }
         const code = await fs.promises.readFile(filePath, "utf8");
         const defaultExportMatch = code.match(/export\s+default\s+(?:function\s+)?([A-Za-z0-9_]+)/);
         const functionMatches = [...code.matchAll(/function\s+([A-Z][A-Za-z0-9_]*)/g)].map(m => m[1]);
@@ -1376,13 +1388,15 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
           .replace(/export\s+default\s+/g, "")
           .replace(/export\s+/g, "");
 
-        const transpiled = ts.transpileModule(cleanCode, {
-          compilerOptions: {
-            jsx: ts.JsxEmit.React,
-            target: ts.ScriptTarget.ES2020,
-            module: ts.ModuleKind.None,
-          },
-        });
+        const transpiledCode = ts
+          ? ts.transpileModule(cleanCode, {
+              compilerOptions: {
+                jsx: ts.JsxEmit.React,
+                target: ts.ScriptTarget.ES2020,
+                module: ts.ModuleKind.None,
+              },
+            }).outputText
+          : `eval(window.Babel.transform(${JSON.stringify(cleanCode)}, { presets: ["react", "typescript"], filename: "component.tsx" }).code);`;
 
         const htmlWrapper = `<!DOCTYPE html>
 <html lang="en">
@@ -1394,6 +1408,7 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+  ${ts ? "" : '<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>'}
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-6">
   <div id="root" class="w-full max-w-5xl"></div>
@@ -1426,7 +1441,7 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
       }
     }
 
-    ${transpiled.outputText}
+    ${transpiledCode}
 
     try {
       const RootTarget = typeof ${rootComponentName} !== "undefined"
@@ -1447,12 +1462,18 @@ if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &window
 
       if (ext === ".vue") {
         const vueCode = await fs.promises.readFile(filePath, "utf8");
-        const tsModule: any = await import("typescript");
-        const ts = tsModule.default || tsModule;
+        let ts: any = null;
+        for (const cand of ["typescript", "/Users/akif/Projects/musedeck/musedeck/node_modules/typescript/lib/typescript.js"]) {
+          try {
+            const tsModule: any = await import(cand);
+            ts = tsModule.default || tsModule;
+            if (ts) break;
+          } catch {}
+        }
 
         let cleanVue = vueCode;
         const scriptMatch = vueCode.match(/<script\s+setup(?:\s+lang="ts")?>([\s\S]*?)<\/script>/);
-        if (scriptMatch) {
+        if (scriptMatch && ts) {
           const transpiled = ts.transpileModule(scriptMatch[1], {
             compilerOptions: {
               target: ts.ScriptTarget.ES2020,

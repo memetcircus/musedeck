@@ -3,12 +3,17 @@ import path from "path";
 import { exec } from "child_process";
 
 async function getSharp(): Promise<any | null> {
-  try {
-    const mod: any = await import("sharp");
-    return mod.default || mod;
-  } catch {
-    return null;
+  const candidates = [
+    "sharp",
+    "/Users/akif/Projects/musedeck/musedeck/node_modules/sharp/lib/index.js",
+  ];
+  for (const cand of candidates) {
+    try {
+      const mod: any = await import(cand);
+      return mod.default || mod;
+    } catch {}
   }
+  return null;
 }
 
 export interface StoryboardFrameMeta {

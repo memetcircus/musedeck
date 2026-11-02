@@ -248,9 +248,17 @@ export class MuseSparkClient {
           if (imgBuf.length >= 24 && imgBuf[0] === 0x89 && imgBuf[1] === 0x50) {
             meta = { width: imgBuf.readUInt32BE(16), height: imgBuf.readUInt32BE(20) };
           } else {
-            const sharpMod: any = await import("sharp");
-            const sharp = sharpMod.default || sharpMod;
-            meta = await sharp(imgBuf).metadata();
+            let sharp: any = null;
+            for (const cand of ["sharp", "/Users/akif/Projects/musedeck/musedeck/node_modules/sharp/lib/index.js"]) {
+              try {
+                const sharpMod: any = await import(cand);
+                sharp = sharpMod.default || sharpMod;
+                if (sharp) break;
+              } catch {}
+            }
+            if (sharp) {
+              meta = await sharp(imgBuf).metadata();
+            }
           }
           if (meta.width && meta.height) {
             const ratio = meta.width / meta.height;

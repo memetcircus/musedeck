@@ -1024,9 +1024,9 @@ export class SvgKeyRenderer {
       bgOpacity = isStepActive ? "0.28" : "0.05";
       subColor = isStepActive ? "#67e8f9" : "#0891b2";
       const bannerData = [
-        { main: "CREATING", sub: "SWIFTC..." },
+        { main: "BUILDING", sub: "RUNTIME..." },
         { main: "PREVIEW", sub: "COMPILING" },
-        { main: "LIVE", sub: "MACOS" },
+        { main: "LIVE", sub: "RENDERER" },
         { main: "APP", sub: "STARTING" },
       ];
       mainText = bannerData[index].main;
@@ -1036,7 +1036,7 @@ export class SvgKeyRenderer {
       bgOpacity = "0.22";
       subColor = "#86efac";
       const bannerData = [
-        { main: "PREVIEW", sub: "MACOS" },
+        { main: "PREVIEW", sub: "LIVE UI" },
         { main: "APP", sub: "WINDOW" },
         { main: "LIVE ON", sub: "RUNNING" },
         { main: "SCREEN", sub: "READY" },
@@ -1051,7 +1051,7 @@ export class SvgKeyRenderer {
         { main: "BUILD", sub: "ERROR" },
         { main: "FAILED", sub: "LOG" },
         { main: "CHECK", sub: "INSPECT" },
-        { main: "XCODE", sub: "EDITOR" },
+        { main: "CODE", sub: "EDITOR" },
       ];
       mainText = bannerData[index].main;
       subText = bannerData[index].sub;
