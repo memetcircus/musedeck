@@ -202,6 +202,30 @@ export class MuseSparkClient {
       code = code.replace(/\.presentationDragIndicator\([^)]*\)/g, "");
       code = code.replace(/\.keyboardType\([^)]*\)/g, "");
       code = code.replace(/\.textInputAutocapitalization\([^)]*\)/g, "");
+
+      // Auto-balance any unclosed curly braces in struct ContentView before appending @main
+      {
+        const mainMatch = code.match(/\n\s*@main\b/);
+        const splitIdx = mainMatch && mainMatch.index !== undefined ? mainMatch.index : -1;
+        const bodyPart = splitIdx >= 0 ? code.slice(0, splitIdx) : code;
+        const tailPart = splitIdx >= 0 ? code.slice(splitIdx) : "";
+        const withoutComments = bodyPart.replace(/\/\/[^\n]*/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+        let openCount = 0;
+        for (const ch of withoutComments) {
+          if (ch === "{") openCount++;
+          else if (ch === "}") openCount--;
+        }
+        let fixedBody = bodyPart.trimEnd();
+        while (openCount < 0 && fixedBody.endsWith("}")) {
+          fixedBody = fixedBody.slice(0, -1).trimEnd();
+          openCount++;
+        }
+        if (openCount > 0) {
+          fixedBody = fixedBody + "\n" + "}\n".repeat(openCount).trimEnd();
+        }
+        code = tailPart ? `${fixedBody}\n${tailPart}` : `${fixedBody}\n`;
+      }
+
       if (!code.includes("@main")) {
         const hasContentView = /struct\s+ContentView\s*:\s*View/.test(code);
         const allViewMatches = [...code.matchAll(/struct\s+(\w+)\s*:\s*View/g)];

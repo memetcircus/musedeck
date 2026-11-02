@@ -8,7 +8,7 @@
     "dev": "tsx watch src/server/index.ts",
     "start": "node dist/server/index.js",
     "build:server": "tsc -p tsconfig.server.json",
-    "build:plugin": "rollup -c rollup.config.mjs && mkdir -p com.memetcircus.musedeck.sdPlugin/public && cp -r public/* com.memetcircus.musedeck.sdPlugin/public/ && cp bin/mac-type com.memetcircus.musedeck.sdPlugin/bin/mac-type && chmod +x com.memetcircus.musedeck.sdPlugin/bin/mac-type",
+    "build:plugin": "rollup -c rollup.config.mjs && mkdir -p com.memetcircus.musedeck.sdPlugin/public && cp -r public/* com.memetcircus.musedeck.sdPlugin/public/ && cp bin/mac-type com.memetcircus.musedeck.sdPlugin/bin/mac-type && cp bin/wait-mouse-release com.memetcircus.musedeck.sdPlugin/bin/wait-mouse-release && chmod +x com.memetcircus.musedeck.sdPlugin/bin/mac-type com.memetcircus.musedeck.sdPlugin/bin/wait-mouse-release",
     "build": "npm run build:server && npm run build:plugin",
     "pack": "npm run build && npx @elgato/cli pack com.memetcircus.musedeck.sdPlugin -o dist/ --force",
     "test:agent": "tsx test/test-agent.ts",

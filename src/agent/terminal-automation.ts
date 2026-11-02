@@ -1244,6 +1244,29 @@ end tell
           swiftCode = swiftCode.replace(/\.keyboardType\([^)]*\)/g, "");
           swiftCode = swiftCode.replace(/\.textInputAutocapitalization\([^)]*\)/g, "");
 
+          // Auto-balance any unclosed curly braces in struct ContentView before @main
+          {
+            const mainMatch = swiftCode.match(/\n\s*@main\b/);
+            const splitIdx = mainMatch && mainMatch.index !== undefined ? mainMatch.index : -1;
+            const bodyPart = splitIdx >= 0 ? swiftCode.slice(0, splitIdx) : swiftCode;
+            const tailPart = splitIdx >= 0 ? swiftCode.slice(splitIdx) : "";
+            const withoutComments = bodyPart.replace(/\/\/[^\n]*/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+            let openCount = 0;
+            for (const ch of withoutComments) {
+              if (ch === "{") openCount++;
+              else if (ch === "}") openCount--;
+            }
+            let fixedBody = bodyPart.trimEnd();
+            while (openCount < 0 && fixedBody.endsWith("}")) {
+              fixedBody = fixedBody.slice(0, -1).trimEnd();
+              openCount++;
+            }
+            if (openCount > 0) {
+              fixedBody = fixedBody + "\n" + "}\n".repeat(openCount).trimEnd();
+            }
+            swiftCode = tailPart ? `${fixedBody}\n${tailPart}` : `${fixedBody}\n`;
+          }
+
           // Dynamic aspect-ratio-aware window sizing (iPad/Landscape vs iPhone/Portrait)
           const segmentedPath = "/tmp/musedeck/latest_segmented.png";
           const montagePath = "/tmp/musedeck/flow_montage.png";

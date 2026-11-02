@@ -531,7 +531,12 @@ export async function startMuseDeckServer(): Promise<boolean> {
           }, 1000);
         };
 
-        const mouseWaiterPath = path.resolve(process.cwd(), "bin/wait-mouse-release");
+        const mouseWaiterCandidates = [
+          path.resolve(process.cwd(), "bin/wait-mouse-release"),
+          path.resolve(process.cwd(), "../bin/wait-mouse-release"),
+          "/Users/akif/Projects/musedeck/musedeck/bin/wait-mouse-release",
+        ];
+        const mouseWaiterPath = mouseWaiterCandidates.find((p) => fs.existsSync(p)) || mouseWaiterCandidates[0];
         const mouseWaiterSrc = path.resolve(process.cwd(), "scripts/wait-mouse-release.swift");
         if (!fs.existsSync(mouseWaiterPath) && fs.existsSync(mouseWaiterSrc)) {
           try {
@@ -547,6 +552,9 @@ export async function startMuseDeckServer(): Promise<boolean> {
               startRecordingCountdown();
             }
           });
+        } else {
+          // Fallback if helper binary is unavailable: start countdown immediately
+          startRecordingCountdown();
         }
 
         activeRecordingProcess.on("exit", (code: number) => {
@@ -637,7 +645,12 @@ export async function startMuseDeckServer(): Promise<boolean> {
           }, 1000);
         };
 
-        const mouseWaiterPath = path.resolve(process.cwd(), "bin/wait-mouse-release");
+        const flowWaiterCandidates = [
+          path.resolve(process.cwd(), "bin/wait-mouse-release"),
+          path.resolve(process.cwd(), "../bin/wait-mouse-release"),
+          "/Users/akif/Projects/musedeck/musedeck/bin/wait-mouse-release",
+        ];
+        const mouseWaiterPath = flowWaiterCandidates.find((p) => fs.existsSync(p)) || flowWaiterCandidates[0];
         const mouseWaiterSrc = path.resolve(process.cwd(), "scripts/wait-mouse-release.swift");
         if (!fs.existsSync(mouseWaiterPath) && fs.existsSync(mouseWaiterSrc)) {
           try {
@@ -653,6 +666,8 @@ export async function startMuseDeckServer(): Promise<boolean> {
               startFlowRecordingCountdown();
             }
           });
+        } else {
+          startFlowRecordingCountdown();
         }
 
         activeFlowRecordingProcess.on("exit", async (code: number) => {
