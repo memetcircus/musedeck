@@ -178,6 +178,10 @@ export class MuseSparkClient {
       code = code.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)secondaryLabel\s*\)/g, "Color.secondary");
       code = code.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)separator\s*\)/g, "Color.gray.opacity(0.25)");
       code = code.replace(/(Button\s*\{[^\n]*\})\s*\{/g, "$1 label: {");
+      code = code.replace(
+        /((?:func\s+\w+|init)\s*(?:<[^>]+>)?\s*\([^)]*?)(?<!@ViewBuilder\s+)(\b(?:_\s+\w+|\w+(?:\s+\w+)?)\s*:\s*(?:@escaping\s*)?\(\)\s*->\s*(?:some\s+View|Content\b))/g,
+        "$1@ViewBuilder $2"
+      );
       code = code.replace(/UIScreen\.main\.bounds\.width/g, "800.0");
       code = code.replace(/UIScreen\.main\.bounds\.height/g, "700.0");
       code = code.replace(/\.listStyle\(\.insetGrouped\)/g, ".listStyle(.inset)");
@@ -191,8 +195,13 @@ export class MuseSparkClient {
       code = code.replace(/\.keyboardType\([^)]*\)/g, "");
       code = code.replace(/\.textInputAutocapitalization\([^)]*\)/g, "");
       if (!code.includes("@main")) {
-        const viewMatch = code.match(/struct\s+(\w+)\s*:\s*View/);
-        const mainViewName = viewMatch ? viewMatch[1] : "ExtractedComponent";
+        const hasContentView = /struct\s+ContentView\s*:\s*View/.test(code);
+        const allViewMatches = [...code.matchAll(/struct\s+(\w+)\s*:\s*View/g)];
+        const mainViewName = hasContentView
+          ? "ContentView"
+          : allViewMatches.length > 0
+            ? allViewMatches[allViewMatches.length - 1][1]
+            : "ExtractedComponent";
 
         let idealW = 390;
         let idealH = 780;
@@ -311,7 +320,7 @@ export class MuseSparkClient {
         return {
           filename: "ExtractedComponent.swift",
           frameworkName: "Apple SwiftUI",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready, idiomatic Apple SwiftUI components targeting macOS (compiled via swiftc -parse-as-library) with modern styling, SF Symbols, and smooth animations. Do NOT use UIKit-only APIs such as UIColor, Color(.systemGray6), Color(.systemBackground), or UIScreen; use pure SwiftUI colors (e.g., Color(white: 0.95), Color.gray.opacity(0.12), Color.white) and Button(action: { ... }) { ... }. The file must be 100% complete and self-contained so that swiftc compiles it cleanly.",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready, idiomatic Apple SwiftUI components targeting macOS (compiled via swiftc -parse-as-library) with modern styling, SF Symbols, and smooth animations. Do NOT use UIKit-only APIs such as UIColor, Color(.systemGray6), Color(.systemBackground), or UIScreen; use pure SwiftUI colors (e.g., Color(white: 0.95), Color.gray.opacity(0.12), Color.white), Button(action: { ... }) { ... }, and always annotate view-returning closure parameters with @ViewBuilder (e.g., @ViewBuilder _ content: () -> some View). The file must be 100% complete and self-contained so that swiftc compiles it cleanly.",
           prompt: "Convert this UI design into a complete, self-contained Apple SwiftUI View with @State and SF Symbols. Include all subviews and helpers inline in the same file so the code compiles with zero external dependencies.",
         };
 
@@ -319,8 +328,8 @@ export class MuseSparkClient {
         return {
           filename: "AnimatedComponent.swift",
           frameworkName: "SwiftUI Interactive Flow",
-          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready Apple SwiftUI Views targeting macOS (compiled via swiftc -parse-as-library) for interactive UI flows (modals, drawers, multi-step steppers, tab transitions, accordions, gesture interactions, and smooth animations with .animation(.spring()), TimelineView(.animation), and interactive @State). Do NOT use UIKit-only APIs such as UIColor, Color(.systemGray6), Color(.systemBackground), or UIScreen; use pure SwiftUI colors (e.g., Color(white: 0.95), Color.gray.opacity(0.12), Color.white) and Button(action: { ... }) { ... }. The file must be 100% complete and self-contained with a preview App so swiftc compiles it cleanly.",
-          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns, t=0.6s to t=5.0s) captured at high frame rate from a screen recording. Analyze the micro-interactions, state transitions, spring dynamics, and animated elements across all 8 frames. Recreate this complete interactive UI flow in SwiftUI with interactive state, spring/timeline animations, and realistic controls.",
+          systemPrompt: "You are Muse Spark, Meta's multimodal engineering agent. Generate production-ready Apple SwiftUI Views targeting macOS (compiled via swiftc -parse-as-library) for interactive UI flows (modals, drawers, multi-step steppers, tab transitions, accordions, gesture interactions, and smooth animations with .animation(.spring()), TimelineView(.animation), and interactive @State). Do NOT use UIKit-only APIs such as UIColor, Color(.systemGray6), Color(.systemBackground), or UIScreen; use pure SwiftUI colors (e.g., Color(white: 0.95), Color.gray.opacity(0.12), Color.white), Button(action: { ... }) { ... }, and always annotate view-returning closure parameters with @ViewBuilder (e.g., @ViewBuilder _ content: () -> some View). Name the root view ContentView and keep the entire file concise (under 240 lines) so it never truncates and swiftc compiles it cleanly.",
+          prompt: "The image shows an 8-step chronological storyboard grid (2 rows x 4 columns, t=0.6s to t=5.0s) captured at high frame rate from a screen recording. Analyze the micro-interactions, state transitions, spring dynamics, and animated elements across all 8 frames. Recreate this complete interactive UI flow in SwiftUI with a root ContentView, interactive state, spring/timeline animations, and realistic controls in under 240 lines.",
         };
 
       case "FRAMER":

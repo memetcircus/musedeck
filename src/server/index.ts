@@ -298,9 +298,9 @@ export async function startMuseDeckServer(): Promise<boolean> {
       // Open in developer's active editor
       await TerminalAutomation.openFileInEditor(res.filePath);
 
-      // Feed prompt into active Muse terminal with temporal metadata
+      // Feed prompt into active Muse terminal with temporal metadata (silently skip if no terminal is open)
       const prompt = `Synthesized interactive ${res.frameworkName} UI flow component (${res.filename}) from 8-frame temporal storyboard (5.0s sequence, ${motionPercent.toFixed(1)}% motion change): ${res.filePath}. Integrate this animated transition into our workspace.`;
-      await TerminalAutomation.typeSnippetIntoTerminal(prompt, false);
+      await TerminalAutomation.typeSnippetIntoTerminal(prompt, false, true);
 
       // Broadcast completion to Stream Deck
       wsServer.broadcast({
@@ -395,9 +395,9 @@ export async function startMuseDeckServer(): Promise<boolean> {
           // 1. Open generated component in developer's active editor (VS Code / default)
           await TerminalAutomation.openFileInEditor(res.filePath);
 
-          // 2. Feed prompt into active Muse terminal
+          // 2. Feed prompt into active Muse terminal (silently skip if no terminal is open)
           const prompt = `Synthesized ${res.frameworkName} component (${res.filename}): ${res.filePath}. Integrate this into our workspace.`;
-          await TerminalAutomation.typeSnippetIntoTerminal(prompt, false);
+          await TerminalAutomation.typeSnippetIntoTerminal(prompt, false, true);
 
           // 3. Notify physical Stream Deck
           wsServer.broadcast({

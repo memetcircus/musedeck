@@ -841,7 +841,11 @@ end if
    * If pressEnter is true (e.g. for "GO!"), immediately executes with Enter.
    * Strictly verifies that an active Muse Code terminal exists before typing.
    */
-  static async typeSnippetIntoTerminal(snippetText: string, pressEnter = false): Promise<boolean> {
+  static async typeSnippetIntoTerminal(
+    snippetText: string,
+    pressEnter = false,
+    silentIfMissing = false
+  ): Promise<boolean> {
     const cleanText = snippetText.trim();
     const textToInsert = pressEnter ? ` ${cleanText}` : ` ${cleanText} `;
 
@@ -849,10 +853,12 @@ end if
     const hasMuseSession = await this.focusMuseTerminalWindow();
     if (!hasMuseSession) {
       console.warn(`⚠️ [Terminal] Ignored typing "${cleanText}": No active Muse Code terminal found.`);
-      await this.sendSystemNotification(
-        "No active Muse Code terminal found. Tap READY or SESSIONS to open a session first.",
-        "MuseDeck"
-      );
+      if (!silentIfMissing) {
+        await this.sendSystemNotification(
+          "No active Muse Code terminal found. Tap READY or SESSIONS to open a session first.",
+          "MuseDeck"
+        );
+      }
       return false;
     }
 
@@ -1102,9 +1108,17 @@ end tell
   }
 
   /**
-   * Opens a file in the developer's active editor (VS Code, Cursor, Antigravity, or TextEdit fallback)
+   * Opens a file in the developer's active editor (Xcode for .swift, or VS Code, Cursor, Antigravity, TextEdit fallback)
    */
   static async openFileInEditor(filePath: string): Promise<boolean> {
+    const ext = path.extname(filePath).toLowerCase();
+    if (ext === ".swift" && fs.existsSync("/Applications/Xcode.app")) {
+      try {
+        await execAsync(`open -a "Xcode" "${filePath}"`);
+        return true;
+      } catch {}
+    }
+
     const candidateEditors = [
       "Visual Studio Code",
       "Cursor",
@@ -1205,6 +1219,10 @@ end tell
           swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)secondaryLabel\s*\)/g, "Color.secondary");
           swiftCode = swiftCode.replace(/Color\(\s*(?:UIColor\s*\.\s*|\.\s*)separator\s*\)/g, "Color.gray.opacity(0.25)");
           swiftCode = swiftCode.replace(/(Button\s*\{[^\n]*\})\s*\{/g, "$1 label: {");
+          swiftCode = swiftCode.replace(
+            /((?:func\s+\w+|init)\s*(?:<[^>]+>)?\s*\([^)]*?)(?<!@ViewBuilder\s+)(\b(?:_\s+\w+|\w+(?:\s+\w+)?)\s*:\s*(?:@escaping\s*)?\(\)\s*->\s*(?:some\s+View|Content\b))/g,
+            "$1@ViewBuilder $2"
+          );
           swiftCode = swiftCode.replace(/UIScreen\.main\.bounds\.width/g, "800.0");
           swiftCode = swiftCode.replace(/UIScreen\.main\.bounds\.height/g, "700.0");
           swiftCode = swiftCode.replace(/\.listStyle\(\.insetGrouped\)/g, ".listStyle(.inset)");
