@@ -7,9 +7,8 @@
   "Description": "Physical Human-in-the-Loop Mission Control, Multimodal UI Synthesizer & Telemetry Console for Meta Muse Code CLI, SAM 3.1, and Muse Spark.",
   "Category": "MuseDeck",
   "CategoryIcon": "imgs/category-icon",
-  "URL": "https://github.com/memetcircus/musedeck",
   "Icon": "imgs/plugin-icon",
-  "SDKVersion": 2,
+  "SDKVersion": 3,
   "Software": {
     "MinimumVersion": "7.1"
   },
