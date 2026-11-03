@@ -224,72 +224,82 @@ Real-time hardware HUD tracking Meta Model API resource utilization and cloud in
 
 ```mermaid
 flowchart TD
-    subgraph Hardware["Physical Hardware Layer"]
-        SD["Elgato Stream Deck MK.2"]
-        MIC["Mac Microphone (Opt+V)"]
+    subgraph Hardware["Physical Hardware & Input Layer"]
+        SD["Elgato Stream Deck MK.2 (15 LCD Keys)"]
+        CAPTURE["macOS Screen Snip & Release-Triggered Recorder"]
+        MIC["Mac Microphone (Option+V)"]
     end
 
-    subgraph BridgeLayer["MuseDeck Bridge Layer (Port 3456 / 3457)"]
-        Plugin["Stream Deck Plugin (Node.js SDK)"]
-        Server["Express REST API & WS Broadcaster"]
-        Automator["Terminal Automation (AppleScript / Native C Engine)"]
-        Storyboard["Temporal Storyboard Engine (FFmpeg & Sharp)"]
+    subgraph BridgeLayer["MuseDeck Embedded Runtime & Bridge (Port 3456 / 3457)"]
+        Plugin["Stream Deck Plugin & Submenu Engine (Node.js)"]
+        Server["Express REST API, Web Cockpit & WS Broadcaster"]
+        Automator["Terminal & OS Automation (AppleScript + Swift CGEvent)"]
+        Storyboard["Temporal Storyboard Engine (FFmpeg 8-Frame + Sharp Delta)"]
+        Previewer["Live Preview Compiler (swiftc / TS Sandbox / Compose / Flutter)"]
     end
 
-    subgraph MetaStack["Meta AI & CLI Stack"]
-        MuseCLI["Meta Muse Code CLI (`muse`)"]
-        SAM["Meta SAM 3.1 (Segment Anything)"]
-        Spark["Meta Muse Spark 1.3 (Vision & Code)"]
-        FilesAPI["Meta Files API (Multimodal Video)"]
+    subgraph MetaStack["Meta AI, CLI & Local IDEs"]
+        MuseCLI["Meta Muse Code CLI (muse)"]
+        SAM["Meta SAM 3.1 (UI Segmentation)"]
+        Spark["Meta Muse Spark 1.3 (Multimodal Code Synthesis)"]
         VoiceAPI["Meta Muse Voice Transcribe"]
+        IDEs["Native Preview & IDEs (PreviewApp.app / Browser / Xcode / Android Studio)"]
     end
 
-    SD <-->|"Bidirectional WebSocket"| Plugin
+    SD <-->|"Bidirectional SDK & SVG Key Rendering"| Plugin
     Plugin <-->|"WebSocket Telemetry & Action Dispatch"| Server
+    CAPTURE -->|"Cropped PNG / 5s MP4"| Server
     Server --> Automator
     Server --> Storyboard
-    Automator -->|"Zero-latency keystrokes & window focus"| MuseCLI
-    Server <-->|"REST & Polling"| MuseCLI
+    Server --> Previewer
 
-    MIC -->|"Native Stream"| VoiceAPI
-    VoiceAPI -->|"Audio-to-text"| MuseCLI
+    Automator -->|"Zero-latency CGEvent keystrokes & window focus"| MuseCLI
+    MuseCLI -->|"Live TUI State & Session JSONL History"| Automator
 
-    Server <-->|"Bounding segmentation"| SAM
-    Storyboard -->|"Timecoded 4×2 filmstrip & manifest"| Spark
-    Server <-->|"Multimodal code synthesis"| Spark
-    Server <-->|"Video frame diagnostic"| FilesAPI
+    MIC -->|"Hardware Opt+V Stream"| VoiceAPI
+    VoiceAPI -->|"Live Audio-to-Text"| MuseCLI
+
+    Server <-->|"Foreground UI & Bounding Box Isolation"| SAM
+    Storyboard -->|"4x2 Timecoded Contact Sheet & JSON Manifest"| Spark
+    Server <-->|"8-Framework Code Synthesis & Compiler Auto-Repair"| Spark
+    Previewer -->|"Launch Live App & Open Source Code"| IDEs
 ```
 
 ---
 
-## Multimodal Data Pipeline
+## Multimodal Data Pipeline (`IMG TO CODE` & `VID TO CODE`)
 
 ```mermaid
 flowchart LR
-    subgraph Ingestion["Input Capture"]
-        Snip["SAM 3.1 Screen Snip"]
-        Video["Desktop Video Recorder (5s)"]
-        Voice["Option+V Microphone"]
+    subgraph Ingestion["1. Multimodal Capture"]
+        Snip["Interactive Region Snip (screencapture -i)"]
+        Video["5s Interaction Recording (Wait-Mouse-Release + FFmpeg)"]
+        Voice["Option+V Voice Stream"]
     end
 
-    subgraph Processing["Local Pre-Processing"]
-        Motion["Motion Delta Check"]
-        Filmstrip["Temporal Contact Sheet (8 Frames)"]
+    subgraph Processing["2. Local Vision Pre-Processing"]
+        SizeCheck["Min Area Guard (150x150px)"]
+        Motion["Sharp Perceptual Motion Check (>1.5% Delta)"]
+        Filmstrip["4x2 Timecoded Contact Sheet (8 Keyframes + Manifest)"]
     end
 
-    subgraph MetaProcessing["Meta Multimodal Processing"]
-        SAM_Proc["SAM 3.1 Boundary Segmentation"]
-        Spark_Proc["Muse Spark 1.3 Code Engine"]
+    subgraph MetaProcessing["3. Meta AI Inference & Auto-Heal"]
+        SAM_Proc["Meta SAM 3.1 Component Segmentation"]
+        Spark_Proc["Meta Muse Spark 1.3 (8 Target Frameworks)"]
+        Heal["Swiftc Pre-Check & AI Compiler Auto-Repair"]
     end
 
-    subgraph Synthesis["Tactile Output"]
-        Deck["Stream Deck Dynamic LCD Key"]
-        Term["Active Muse Terminal Buffer"]
-        Patch["Git Patch & Code Commit"]
+    subgraph Synthesis["4. Live Execution & Developer Output"]
+        Preview["LIVE PREVIEW (Native SwiftUI App / Browser Sandbox / Compose / Flutter)"]
+        IDE["OPEN CODE (Xcode / Android Studio / VS Code)"]
+        Term["Active Muse CLI Cursor Injection"]
     end
 
-    Snip --> SAM_Proc --> Spark_Proc --> Deck
-    Video --> Motion --> Filmstrip --> Spark_Proc --> Patch
+    Snip --> SizeCheck --> SAM_Proc --> Spark_Proc
+    Video --> SizeCheck --> Motion --> Filmstrip --> Spark_Proc
+    SAM_Proc --> Term
+    Spark_Proc --> Heal --> Preview
+    Heal --> IDE
     Voice --> Term
 ```
 
@@ -301,21 +311,21 @@ flowchart LR
 sequenceDiagram
     autonumber
     participant Dev as Developer
-    participant SD as Stream Deck Key (0, 0)
-    participant Server as MuseDeck Bridge
-    participant Muse as Meta Muse Code CLI
+    participant SD as Stream Deck Key [0, 0]
+    participant Server as MuseDeck Bridge & Automator
+    participant Muse as Meta Muse Code CLI (Terminal.app)
 
-    Muse->>Server: State Transition -> WAITING_APPROVAL (Diff generated)
-    Server->>SD: Broadcast Telemetry (Breathing Alert Flashing, 650ms)
+    Muse->>Server: TUI Pauses for Confirmation -> WAITING_APPROVAL
+    Server->>SD: Broadcast Telemetry (650ms Breathing Alert Pulse)
     Note over SD: Top-left key alternates Green / Amber alert pulse
     Dev->>SD: Tap Key [READY / REVIEW]
-    SD->>Server: Open Review Submenu
-    Server->>Dev: Bring active Muse Terminal window to front
-    Note over SD: Review Submenu opens (Approve, Always, Reject, Feedback)
-    Dev->>SD: Press Key [OPTION 1: APPROVE]
-    SD->>Server: Dispatch "1" Keystroke + approve() signal
-    Server->>Muse: Inject '1' + Enter into Terminal
-    Muse->>Server: State Transition -> EXECUTING
+    SD->>Server: Open HITL Review Submenu
+    Server->>Muse: Focus Active Muse Terminal Window
+    Note over SD: Review Submenu displays Options 1..4 (Approve, Always, Reject, Feedback)
+    Dev->>SD: Press Key [OPTION 1: APPROVE ONCE]
+    SD->>Server: Dispatch Option "1" Selection
+    Server->>Muse: Inject "1" + Return via Native Swift CGEvent (mac-type)
+    Muse->>Server: TUI Resumes Execution -> WORKING (Quantum Beam Wave)
     Server->>SD: Restore Primary Page 1 Console Layout
 ```
 
