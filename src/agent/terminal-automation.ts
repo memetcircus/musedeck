@@ -773,7 +773,20 @@ end tell
    *    and returns "COMMITTING".
    */
   static async executeSafeGitCommit(rawCwd?: string): Promise<"COMMITTING" | "CLEAN" | "NO_GIT" | "NO_FOCUS" | "ERROR"> {
-    const cwd = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
+    let cwd = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
+    if (cwd.includes(".sdPlugin") || cwd.includes("com.elgato.StreamDeck")) {
+      cwd = "/Users/akif/Projects/musedeck/musedeck";
+      try {
+        const homeDir = process.env.HOME || "/Users/akif";
+        const cfgPath = path.join(homeDir, ".musedeck", "config.json");
+        if (fs.existsSync(cfgPath)) {
+          const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+          if (cfg.projectDir && !cfg.projectDir.includes(".sdPlugin")) {
+            cwd = cfg.projectDir;
+          }
+        }
+      } catch {}
+    }
 
     // 1. Defocus / Focus Check: Verify Terminal.app is frontmost and active window is Muse Code
     const focusCheckScript = `
@@ -847,7 +860,7 @@ end if
     silentIfMissing = false
   ): Promise<boolean> {
     const cleanText = snippetText.trim();
-    const textToInsert = pressEnter ? ` ${cleanText}` : ` ${cleanText} `;
+    const textToInsert = pressEnter ? cleanText : ` ${cleanText} `;
 
     // 1. Bring active Muse Terminal to front (verifies Muse session exists!)
     const hasMuseSession = await this.focusMuseTerminalWindow();
@@ -866,10 +879,10 @@ end if
     const macTypeBin = this.getMacTypeBin();
     if (macTypeBin) {
       try {
-        await execAsync(`"${macTypeBin}" text ${this.escapeForShell(textToInsert)}`);
         if (pressEnter) {
-          await new Promise((r) => setTimeout(r, 60));
-          await execAsync(`"${macTypeBin}" enter`);
+          await execAsync(`"${macTypeBin}" key ${this.escapeForShell(textToInsert)}`);
+        } else {
+          await execAsync(`"${macTypeBin}" text ${this.escapeForShell(textToInsert)}`);
         }
         console.log(`📝 [Terminal] Typed prompt snippet at cursor: "${cleanText}" (pressEnter=${pressEnter})`);
         return true;
@@ -879,7 +892,7 @@ end if
     }
 
     // Fallback: AppleScript System Events
-    const enterScript = pressEnter ? "\n  delay 0.05\n  key code 36" : "";
+    const enterScript = pressEnter ? "\n  delay 0.15\n  key code 36" : "";
     const appleScript = `
 tell application "Terminal" to activate
 delay 0.05

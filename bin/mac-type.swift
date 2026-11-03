@@ -22,8 +22,9 @@ func typeString(_ text: String) {
             keyUp.keyboardSetUnicodeString(stringLength: 1, unicodeString: &unichar)
             keyUp.post(tap: .cghidEventTap)
         }
-        usleep(1500)
+        usleep(2000)
     }
+    usleep(30000)
 }
 
 func pressOptionV() {
@@ -43,12 +44,15 @@ func pressOptionV() {
 func pressReturn() {
     let returnKeyCode: CGKeyCode = 0x24
     if let keyDown = CGEvent(keyboardEventSource: source, virtualKey: returnKeyCode, keyDown: true) {
+        keyDown.flags = []
         keyDown.post(tap: .cghidEventTap)
     }
-    usleep(10000)
+    usleep(25000)
     if let keyUp = CGEvent(keyboardEventSource: source, virtualKey: returnKeyCode, keyDown: false) {
+        keyUp.flags = []
         keyUp.post(tap: .cghidEventTap)
     }
+    usleep(60000)
 }
 
 func pressCtrlC() {
@@ -114,7 +118,7 @@ case "clear-and-type":
 case "key":
     if CommandLine.arguments.count > 2 {
         typeString(CommandLine.arguments[2])
-        usleep(50000)
+        usleep(150000)
         pressReturn()
     }
 case "ctrl-c":

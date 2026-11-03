@@ -235,8 +235,10 @@ class GitSubmenuManager {
     // (0, 2): CREATE PR
     if (col === 0 && row === 2) {
       console.log("🌿 [GitSubmenu] Opening PR creation in browser...");
+      const repoCwd = process.cwd().includes(".sdPlugin") ? "/Users/akif/Projects/musedeck/musedeck" : process.cwd();
       exec(
-        `gh pr create --web 2>/dev/null || open "https://github.com/$(git config --get remote.origin.url 2>/dev/null | sed -E 's/.*github.com[:\\/](.*)\\.git/\\1/')/pull/new/$(git branch --show-current 2>/dev/null)" 2>/dev/null || true`
+        `gh pr create --web 2>/dev/null || open "https://github.com/$(git config --get remote.origin.url 2>/dev/null | sed -E 's/.*github.com[:\\/](.*)\\.git/\\1/')/pull/new/$(git branch --show-current 2>/dev/null)" 2>/dev/null || true`,
+        { cwd: repoCwd }
       );
       return true;
     }
@@ -244,8 +246,10 @@ class GitSubmenuManager {
     // (1, 2): OPEN REPO
     if (col === 1 && row === 2) {
       console.log("🌿 [GitSubmenu] Opening repository in browser...");
+      const repoCwd = process.cwd().includes(".sdPlugin") ? "/Users/akif/Projects/musedeck/musedeck" : process.cwd();
       exec(
-        `open "$(git config --get remote.origin.url 2>/dev/null | sed -E 's/git@github.com:/https:\\/\\/github.com\\//')" 2>/dev/null || open .`
+        `open "$(git config --get remote.origin.url 2>/dev/null | sed -E 's/git@github.com:/https:\\/\\/github.com\\//')" 2>/dev/null || open .`,
+        { cwd: repoCwd }
       );
       return true;
     }
