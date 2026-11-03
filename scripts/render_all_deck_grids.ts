@@ -205,6 +205,50 @@ async function main() {
   ];
   await renderGrid(gitKeys, "./assets/deck_git_submenu.png");
 
+  // 9. IMG TO CODE SUBMENU
+  const imgToCodeKeys = [
+    SvgKeyRenderer.renderUpBackKey(),
+    SvgKeyRenderer.renderImgToCodeOptionKey("AUTO", "DETECT", "#10b981", "#a7f3d0", false),
+    SvgKeyRenderer.renderImgToCodeOptionKey("REACT", "TAILWIND", "#06b6d4", "#67e8f9", false),
+    SvgKeyRenderer.renderImgToCodeOptionKey("HTML", "+ CSS", "#f59e0b", "#fde047", false),
+    SvgKeyRenderer.renderImgToCodeOptionKey("VUE", "3 SFC", "#22c55e", "#86efac", false),
+
+    SvgKeyRenderer.renderImgToCodeOptionKey("SWIFTUI", "NATIVE", "#f97316", "#fdba74", false),
+    SvgKeyRenderer.renderImgToCodeOptionKey("COMPOSE", "KOTLIN", "#818cf8", "#c7d2fe", false),
+    SvgKeyRenderer.renderImgToCodeOptionKey("FLUTTER", "DART", "#38bdf8", "#7dd3fc", false),
+    SvgKeyRenderer.renderImgToCodeOptionKey("PYTHON", "UI", "#eab308", "#fef08a", false),
+    SvgKeyRenderer.renderOpenCodeKey(true),
+
+    SvgKeyRenderer.renderBottomBannerTile(0, "success", 0),
+    SvgKeyRenderer.renderBottomBannerTile(1, "success", 0),
+    SvgKeyRenderer.renderBottomBannerTile(2, "success", 0),
+    SvgKeyRenderer.renderBottomBannerTile(3, "success", 0),
+    SvgKeyRenderer.renderLivePreviewKey(true)
+  ];
+  await renderGrid(imgToCodeKeys, "./assets/deck_img_to_code_submenu.png");
+
+  // 10. VID TO CODE SUBMENU
+  const vidToCodeKeys = [
+    SvgKeyRenderer.renderUpBackKey(),
+    SvgKeyRenderer.renderVidToCodeOptionKey("FRAMER", "REACT MOTION", "#ec4899", "#f472b6", false),
+    SvgKeyRenderer.renderVidToCodeOptionKey("TAILWIND", "KEYFRAMES", "#06b6d4", "#67e8f9", false),
+    SvgKeyRenderer.renderVidToCodeOptionKey("SWIFTUI", "SPRING ANIM", "#f97316", "#fdba74", false),
+    SvgKeyRenderer.renderVidToCodeOptionKey("COMPOSE", "ANDROID ANIM", "#818cf8", "#c7d2fe", false),
+
+    SvgKeyRenderer.renderVidToCodeOptionKey("FLUTTER", "ANIMATED", "#38bdf8", "#7dd3fc", false),
+    SvgKeyRenderer.renderVidToCodeOptionKey("VUE", "TRANSITION", "#22c55e", "#86efac", false),
+    SvgKeyRenderer.renderVidToCodeOptionKey("GSAP", "WEB TIMELINE", "#a855f7", "#d8b4fe", false),
+    SvgKeyRenderer.renderVidToCodeOptionKey("AUTO", "SMART FLOW", "#10b981", "#a7f3d0", false),
+    SvgKeyRenderer.renderOpenCodeKey(true),
+
+    SvgKeyRenderer.renderBottomBannerTile(0, "recording", 1, 5),
+    SvgKeyRenderer.renderBottomBannerTile(1, "recording", 1, 5),
+    SvgKeyRenderer.renderBottomBannerTile(2, "recording", 1, 5),
+    SvgKeyRenderer.renderBottomBannerTile(3, "recording", 1, 5),
+    SvgKeyRenderer.renderLivePreviewKey(true)
+  ];
+  await renderGrid(vidToCodeKeys, "./assets/deck_vid_to_code_submenu.png");
+
   console.log("All deck grids rendered successfully!");
 }
 

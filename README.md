@@ -43,8 +43,8 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 | **[3,&nbsp;0]** | **STRUCT&nbsp;PROMPT** | In-place AI prompt refiner. Rewrites the current terminal input into a clear, well-structured English prompt for an AI coding assistant without auto-submitting. |
 | **[4,&nbsp;0]** | **SESSIONS** | Active session counter. Tap opens the tactile **13-Key Session Switcher & Drawer**. |
 | **[0,&nbsp;1]** | **SCREENSHOT** | Interactive macOS screen region snip. Dispatches to Meta SAM 3.1 to segment foreground UI components and injects coordinates at cursor. |
-| **[1,&nbsp;1]** | **IMG&nbsp;TO&nbsp;CODE** | Meta Muse Spark 1.3 visual frontend synthesizer. Transforms UI snips and mocks into clean React + Tailwind, Flutter, or Streamlit code. |
-| **[2,&nbsp;1]** | **VID&nbsp;TO&nbsp;CODE** | Video-to-Code engine. Records 5s UI interactions, runs perceptual motion checks, compiles an 8-frame timecoded filmstrip, and synthesizes animated fixes via Muse Spark 1.3. |
+| **[1,&nbsp;1]** | **IMG&nbsp;TO&nbsp;CODE** | Opens the **8-Framework Image-to-Code Submenu** (`AUTO`, `REACT`, `HTML+CSS`, `VUE`, `SWIFTUI`, `COMPOSE`, `FLUTTER`, `PYTHON`) powered by Meta SAM 3.1 & Muse Spark 1.3 with one-touch `OPEN CODE` and `RUN LIVE PREVIEW`. |
+| **[2,&nbsp;1]** | **VID&nbsp;TO&nbsp;CODE** | Opens the **8-Framework Video-to-Code Submenu** (`FRAMER`, `TAILWIND`, `SWIFTUI`, `COMPOSE`, `FLUTTER`, `VUE`, `GSAP`, `AUTO`). Records 5s UI flows, compiles an 8-frame timecoded contact sheet, and synthesizes animated components with live preview. |
 | **[3,&nbsp;1]** | **MUSE&nbsp;SETTINGS** | Launches the local Web Mission Control configuration console in your browser (`http://localhost:3456`). |
 | **[4,&nbsp;1]** | **CREDITS&nbsp;HUD** | Live Meta Model API credits tracker (`$148.01`). Tap opens the **10-Key Telemetry Dashboard**. |
 | **[0,&nbsp;2]** | **VIDEO&nbsp;RECORD** | One-touch desktop video recording trigger for capturing reproducible bug flows and UI glitches. |
@@ -70,18 +70,85 @@ When Muse Code generates file diffs and pauses for human verification, the top-l
 
 ---
 
-### 2. Sessions Drawer & Switcher Submenu
+### 2. Image-to-Code (`IMG TO CODE` + SAM 3.1) Submenu
+Tapping **`IMG TO CODE`** (`[1, 1]`) on the primary console opens a dedicated multi-framework visual synthesis cockpit powered by **Meta SAM 3.1** and **Muse Spark 1.3**:
+
+![MuseDeck Image-to-Code Submenu](assets/deck_img_to_code_submenu.png)
+
+#### Hardware Key Layout
+* **[0, 0] ↑ BACK:** Returns to the primary console (automatically locked during active screen capture or cloud inference).
+* **[1, 0] AUTO (DETECT):** Inspects the captured UI snip and automatically selects the optimal target stack.
+* **[2, 0] REACT (TAILWIND):** Synthesizes a self-contained React + Tailwind CSS component (`GeneratedComponent.tsx`).
+* **[3, 0] HTML (+ CSS):** Synthesizes clean, dependency-free HTML5 + CSS3 + JavaScript (`GeneratedComponent.html`).
+* **[4, 0] VUE (3 SFC):** Synthesizes a Vue 3 Single-File Component (`GeneratedComponent.vue`) with `<script setup>` and scoped styles.
+* **[0, 1] SWIFTUI (NATIVE):** Synthesizes a native macOS Apple SwiftUI view (`GeneratedComponent.swift`) with an `@main` executable harness.
+* **[1, 1] COMPOSE (KOTLIN):** Synthesizes an Android Jetpack Compose screen (`GeneratedComponent.kt`) with `@Preview(showBackground = true)`.
+* **[2, 1] FLUTTER (DART):** Synthesizes a complete Material 3 Flutter `StatelessWidget` / `StatefulWidget` (`GeneratedComponent.dart`).
+* **[3, 1] PYTHON (UI):** Synthesizes an interactive Python desktop/web UI script (`GeneratedComponent.py`).
+* **[4, 1] OPEN CODE (INSPECT ↗):** Appears automatically once synthesis finishes. Opens the generated source file in Xcode (for `.swift`), Android Studio (for `.kt`), or VS Code / Cursor.
+* **[0..3, 2] 4-Key Live Status Banner:** Displays real-time hardware progress across four bottom keys (`WAIT FOR MUSE SPARK`, `COMPILING PREVIEW`, `PREVIEW APP LIVE ON SCREEN`, or `AREA TOO SMALL`).
+* **[4, 2] PREVIEW (RUN LIVE ↗):** Appears automatically once synthesis finishes. Compiles, scaffolds, and launches an interactive live preview of the generated UI component.
+
+#### End-to-End Execution Pipeline
+1. **Interactive macOS Screen Snip:** Tapping any framework key inside `IMG TO CODE` activates the native macOS crosshair region selector (`screencapture -i`). Minimum capture area (`150×150 px`) is validated automatically.
+2. **Meta SAM 3.1 Segmentation:** Dispatches the captured region to Meta's **Segment Anything Model 3.1** via the Meta Model API to isolate foreground UI elements and compute spatial bounding coordinates.
+3. **Standalone & Terminal Dual-Dispatch:** Works standalone even if no terminal session is open; if an active Muse CLI terminal is present, coordinates and file references are also injected cleanly at the cursor.
+4. **Muse Spark 1.3 Synthesis & Live Preview:** Feeds the segmented UI component to **Muse Spark 1.3**, writes the production-ready component to `/tmp/musedeck/generated/`, unlocks `OPEN CODE` (`[4, 1]`) and `PREVIEW` (`[4, 2]`), and launches the live interactive preview.
+
+---
+
+### 3. Video-to-Code (`VID TO CODE`) Submenu
+Dynamic UI interactions (spring physics, keyframe transitions, multi-step flows, layout jitter) cannot be conveyed in a single static screenshot. Tapping **`VID TO CODE`** (`[2, 1]`) opens the temporal animation synthesis cockpit:
+
+![MuseDeck Video-to-Code Submenu](assets/deck_vid_to_code_submenu.png)
+
+#### Hardware Key Layout
+* **[0, 0] ↑ BACK:** Returns to the primary console.
+* **[1, 0] FRAMER (REACT MOTION):** Synthesizes a React + Tailwind + Framer Motion interactive animation component (`AnimatedComponent.tsx`).
+* **[2, 0] TAILWIND (KEYFRAMES):** Synthesizes a React + Tailwind CSS keyframe and transition component (`AnimatedComponent.tsx`).
+* **[3, 0] SWIFTUI (SPRING ANIM):** Synthesizes a native macOS SwiftUI animated view (`AnimatedComponent.swift`) with `@State`, `TimelineView`, and `.spring()` transitions.
+* **[4, 0] COMPOSE (ANDROID ANIM):** Synthesizes a Jetpack Compose animation screen (`AnimatedComponent.kt`) using `animate*AsState` and `AnimatedVisibility`.
+* **[0, 1] FLUTTER (ANIMATED):** Synthesizes an animated Flutter widget (`AnimatedComponent.dart`) using `AnimationController` and `AnimatedContainer`.
+* **[1, 1] VUE (TRANSITION):** Synthesizes a Vue 3 `<Transition>` / `<TransitionGroup>` Single-File Component (`AnimatedComponent.vue`).
+* **[2, 1] GSAP (WEB TIMELINE):** Synthesizes an HTML5 + GSAP 3 timeline animation (`AnimatedComponent.html`).
+* **[3, 1] AUTO (SMART FLOW):** Automatically selects the target animation stack based on the recorded interaction flow.
+* **[4, 1] OPEN CODE (INSPECT ↗):** Appears once synthesis completes to open the generated animation source file in the appropriate IDE.
+* **[0..3, 2] 4-Key Live Recording Countdown & Status HUD:** Displays `SELECT AREA TO RECORD` while aiming, counts down live (`0:05` to `0:01`) after mouse release with a physical **`STOP ■ (FINISH EARLY)`** key at `[3, 2]`, and animates synthesis/compilation status.
+* **[4, 2] PREVIEW (RUN LIVE ↗):** Compiles and launches the synthesized animation in a native window or browser sandbox.
+
+#### End-to-End Temporal Pipeline
+1. **Interactive Region Selection & Release-Triggered Recording:** Tapping any target key lets you drag a screen region; the 5-second recording countdown starts only after you release the mouse button (tap `STOP ■` at `[3, 2]` to finish early).
+2. **Perceptual Motion Detection:** Evaluates pixel delta across extracted frames using Sharp. If the recorded screen is static (`< 1.5%` delta), the 4-key banner alerts `STATIC SCREEN — USE IMG TO CODE` to prevent wasted API tokens.
+3. **Temporal Filmstrip & Contact Sheet Assembly:** Extracts 8 sequential keyframes via FFmpeg, overlays individual timecode badges (`#1 0.00s` to `#8 5.00s`), and stitches them into a unified 4×2 contact sheet (`flow_montage.png`) alongside a structured `flow_manifest.json`.
+4. **Multi-Frame Synthesis & Compiler Auto-Repair Loop:** Dispatches the 4×2 contact sheet and timeline manifest to **Meta Muse Spark 1.3**. For native SwiftUI targets, runs an automated `swiftc` pre-verification and compiler error auto-repair pass before unlocking `PREVIEW`.
+
+#### Live Preview Toolchain Requirements (`IMG TO CODE` & `VID TO CODE`)
+To use the **`PREVIEW (RUN LIVE ↗)`** key (`[4, 2]`) inside the `IMG TO CODE` and `VID TO CODE` submenus across all supported frameworks, install the corresponding SDKs/IDEs on macOS:
+
+| Hardware Key | Target Framework | Live Preview Mechanism | Required Local Toolchain |
+| :--- | :--- | :--- | :--- |
+| **`REACT` / `TAILWIND` / `FRAMER`** | React + Tailwind CSS + Framer Motion (`.tsx`) | Pre-transpiled via TypeScript (`ts.transpileModule`) into an interactive browser sandbox (`preview.html`) | **None** (Runs in default macOS browser) |
+| **`HTML` / `GSAP`** | HTML5 + CSS3 + GSAP 3 (`.html`) | Direct native browser rendering (`preview.html`) | **None** (Runs in default macOS browser) |
+| **`VUE`** | Vue 3 SFC (`.vue`) | Compiled into a live Vue 3 browser mount (`preview.html`) | **None** (Runs in default macOS browser) |
+| **`SWIFTUI`** | Apple SwiftUI (`.swift`) | Native macOS `.app` bundle compiled via `swiftc -parse-as-library` (`/tmp/musedeck/PreviewApp.app`) | **Xcode** & Command Line Tools (`xcode-select --install`) |
+| **`COMPOSE`** | Android Jetpack Compose (`.kt`) | Scaffolds `/tmp/musedeck/ComposePreview` & opens `@Preview` LayoutLib canvas in Android Studio | **Android Studio** (`/Applications/Android Studio.app`) |
+| **`FLUTTER`** | Flutter (`.dart`) | Scaffolds `/tmp/musedeck/FlutterPreview`, runs `flutter build web`, and serves at `http://localhost:3456/flutter` | **Flutter SDK** (`brew install --cask flutter` or `flutter` on `PATH`) |
+| **`VID TO CODE`** | All 8 Animation Targets (Video Input) | 8-frame temporal contact sheet extraction (`flow_montage.png`) | **FFmpeg** (`brew install ffmpeg`) |
+
+---
+
+### 4. Sessions Drawer & Switcher Submenu
 Effortlessly switch between concurrent terminal tabs and restore historical workspaces with zero terminal navigation commands:
 
 ![MuseDeck Sessions Drawer Submenu](assets/deck_sessions_submenu.png)
 
 * **[0, 0] ↑ BACK:** Return to the primary console.
-* **[1, 0] + NEW SESSION:** Launches a fresh, independent Meta Muse session in your active project workspace.
+* **[1, 0] + NEW SESSION:** Opens a native macOS folder selection dialog (`choose folder`) so you can choose which project directory to launch in a fresh Meta Muse terminal session.
 * **Cards [2..14]:** Automatically scanned from active terminals and disk history. Displays high-legibility date badges (`TODAY`, `YESTRDY`, `OCT 29`), project names (`MUSEDECK`, `GLOBAL`, `GRID`), and timestamps. Tapping any card focuses its terminal window and restores full prompt context.
 
 ---
 
-### 3. Prompt Snippets Submenu
+### 5. Prompt Snippets Submenu
 Inject concise, battle-tested agent steering qualifiers into your terminal cursor with a single physical tap:
 
 ![MuseDeck Snippets Submenu](assets/deck_snippets_submenu.png)
@@ -96,7 +163,7 @@ Inject concise, battle-tested agent steering qualifiers into your terminal curso
 
 ---
 
-### 4. Muse Memory (Living Documentation) Submenu
+### 6. Muse Memory (Living Documentation) Submenu
 Keeps autonomous agents strictly aligned with project architecture and institutional knowledge:
 
 ![MuseDeck Memory Submenu](assets/deck_memory_submenu.png)
@@ -110,7 +177,7 @@ Keeps autonomous agents strictly aligned with project architecture and instituti
 
 ---
 
-### 5. Muse Ops (Developer Operations) Submenu
+### 7. Muse Ops (Developer Operations) Submenu
 Triggers common daily refactoring and verification workflows directly from physical keys:
 
 ![MuseDeck Ops Submenu](assets/deck_ops_submenu.png)
@@ -125,7 +192,7 @@ Triggers common daily refactoring and verification workflows directly from physi
 
 ---
 
-### 6. Git Commands Submenu
+### 8. Git Commands Submenu
 Complete tactile version control cockpit eliminating routine terminal git typing:
 
 ![MuseDeck Git Submenu](assets/deck_git_submenu.png)
@@ -139,7 +206,7 @@ Complete tactile version control cockpit eliminating routine terminal git typing
 
 ---
 
-### 7. Credits & Telemetry Submenu
+### 9. Credits & Telemetry Submenu
 Real-time hardware HUD tracking Meta Model API resource utilization and cloud inference costs:
 
 ![MuseDeck Credits and Telemetry Submenu](assets/deck_telemetry_submenu.png)
@@ -150,35 +217,6 @@ Real-time hardware HUD tracking Meta Model API resource utilization and cloud in
 * **CACHE HIT RATE:** Model prompt caching efficiency (`57.7%`).
 * **LATENCY:** Average round-trip API inference speed (`38 ms`).
 * **BILLING CONSOLE ↗:** Quick shortcut to launch the official Meta Model API billing portal.
-
----
-
-## Multimodal Engine: Image-to-Code & Video-to-Code
-
-### Image-to-Code (`IMG TO CODE` + SAM 3.1)
-1. **Interactive macOS Screen Snip:** Tapping `SCREENSHOT` or any framework key inside `IMG TO CODE` activates native crosshair region selection.
-2. **Meta SAM 3.1 Segmentation:** Dispatched to Meta's **Segment Anything Model 3.1** via Meta Model API to isolate foreground UI elements and compute spatial bounding coordinates.
-3. **Cursor Injection:** Coordinates and image references are pasted directly into the active Muse CLI prompt without wiping user text.
-4. **Muse Spark 1.3 Synthesis & Live Preview:** Selecting a target framework key (`REACT`, `HTML5`, `SWIFTUI`, `COMPOSE`, or `FLUTTER`) feeds the isolated UI component to **Muse Spark 1.3**, synthesizes production-ready code, and automatically launches a live interactive preview via the `RUN PREVIEW` hardware key.
-
-### Video-to-Code (`VID TO CODE`)
-Dynamic UI interactions (animations, modal transitions, multi-step flows, layout jitter) cannot be conveyed in a single static image:
-1. **Interactive Region Video Capture:** Tapping `REACT`, `HTML5`, `SWIFTUI`, `COMPOSE`, or `FLUTTER` inside the `VID TO CODE` submenu selects a screen region and records the live UI interaction (`STOP REC` finishes recording).
-2. **Perceptual Motion Detection:** Evaluates pixel delta across keyframes using Sharp. If motion is static (< 1.5% delta), it advises switching to `IMG TO CODE` to prevent wasted tokens.
-3. **Temporal Filmstrip & Contact Sheet Assembly:** Extracts 8 sequential keyframes via FFmpeg, overlays individual timecode badges (`#1  0.00s` to `#8  5.00s`), and stitches them into a unified 4×2 contact sheet (`flow_montage.png`) alongside a structured `flow_manifest.json`.
-4. **Multi-Frame Temporal Synthesis & Live Preview:** Dispatches the contact sheet and temporal timeline metadata to **Meta Muse Spark 1.3** to synthesize animated components in React, HTML5/CSS, SwiftUI, Jetpack Compose, or Flutter, ready for instant execution via `RUN PREVIEW`.
-
-### Live Preview Toolchain Requirements (`IMG TO CODE` & `VID TO CODE`)
-To use the **`RUN PREVIEW`** button inside the `IMG TO CODE` and `VID TO CODE` hardware submenus across all 5 target frameworks, install the corresponding SDKs/IDEs on macOS:
-
-| Hardware Key | Target Framework | Live Preview Mechanism | Required Local Toolchain |
-| :--- | :--- | :--- | :--- |
-| **`REACT`** | React + Tailwind CSS | Interactive browser sandbox (`preview.html`) | **None** (Runs in default macOS browser) |
-| **`HTML5`** | HTML5 + CSS3 / JS | Native browser rendering | **None** (Runs in default macOS browser) |
-| **`SWIFTUI`** | Apple SwiftUI (`.swift`) | Native macOS SwiftUI app compiled via `swiftc -parse-as-library` | **Xcode** & Command Line Tools (`xcode-select --install`) |
-| **`COMPOSE`** | Android Jetpack Compose (`.kt`) | Scaffolds `/tmp/musedeck/ComposePreview` & opens `@Preview` LayoutLib canvas | **Android Studio** (`/Applications/Android Studio.app`) |
-| **`FLUTTER`** | Flutter (`.dart`) | Scaffolds `/tmp/musedeck/FlutterPreview`, runs `flutter build web`, and serves at `http://localhost:3456/flutter` | **Flutter SDK** (`brew install --cask flutter` or `flutter` on `PATH`) |
-| **`VID TO CODE`** | All 5 Frameworks (Video Input) | 8-frame temporal contact sheet extraction (`flow_montage.png`) | **FFmpeg** (`brew install ffmpeg`) |
 
 ---
 
