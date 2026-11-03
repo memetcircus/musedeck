@@ -37,7 +37,7 @@ Autonomous coding agents (such as Meta's **Muse Code CLI**) excel at end-to-end 
 
 | Key Position | Button | Function & Developer Capability |
 |:---:|:---:|---|
-| **[0,&nbsp;0]** | **READY&nbsp;/&nbsp;REVIEW** | Dynamic agent status telemetry (`READY`, `PLAN`, `RUNNING`). When awaiting human approval (`WAITING_APPROVAL`), pulses with a calm 650ms breathing alert; tap opens the **Review Submenu**. |
+| **[0,&nbsp;0]** | **READY&nbsp;/&nbsp;REVIEW** | Dynamic agent status & session launcher (`READY`, `PLAN`, `RUNNING`). When idle, tapping prompts for a project folder and launches a new **Muse Code** session. When awaiting human approval (`WAITING_APPROVAL`), pulses with a 650ms breathing alert and opens the **Review Submenu**. |
 | **[1,&nbsp;0]** | **VOICE** | Hardware `⌥+V` trigger for Meta Muse Voice Transcribe. Streams microphone audio directly into the active terminal cursor for zero-typing steering. |
 | **[2,&nbsp;0]** | **SNIPPETS** | Rapid steering qualifier drawer (`BE HONEST`, `DON'T CODE`, `SHORT`, `SHOW OPTS`, `GO!`). |
 | **[3,&nbsp;0]** | **STRUCT&nbsp;PROMPT** | In-place AI prompt refiner. Rewrites the current terminal input into a clear, well-structured English prompt for an AI coding assistant without auto-submitting. |
@@ -344,7 +344,7 @@ Tapping Key **[3, 1]** (`MUSE SETTINGS`) on your physical Stream Deck instantly 
    - **Test Ping Button**: Executes an instant test ping to Meta's inference servers, measuring real-time latency (e.g. `38ms`) and confirming connectivity with Meta's **Muse Spark 1.3** and **SAM 3.1** models.
 
 2. **Target Project Workspace Directory**:
-   - Defines the active project folder where the Meta Muse terminal automatically launches when you trigger actions from physical keys (`Voice`, `Fix Bug`, `Image-to-Code`, `Test Runner`).
+   - Defines the active project folder (automatically updated whenever you pick a folder via `NEW SESSION`, or configurable directly in the web console) used by Git, Memory, and Ops commands.
    - Includes a one-click **Current Path** reset button and native macOS directory browsing.
 
 3. **Environment & System Health Diagnostic**:
