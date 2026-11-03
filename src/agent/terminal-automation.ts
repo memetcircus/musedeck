@@ -285,23 +285,115 @@ end tell
   }
 
   /**
+   * Returns the last saved project directory from ~/.musedeck/config.json,
+   * or falls back to the current working directory (if not inside .sdPlugin) or user home directory.
+   */
+  static getSavedProjectDir(rawCwd?: string): string {
+    if (rawCwd && !rawCwd.includes(".sdPlugin") && !rawCwd.includes("com.elgato.StreamDeck")) {
+      return rawCwd;
+    }
+    const homeDir = process.env.HOME || "/Users/akif";
+    try {
+      const cfgPath = path.join(homeDir, ".musedeck", "config.json");
+      if (fs.existsSync(cfgPath)) {
+        const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+        const candidate = cfg.projectDir || cfg.workspacePath;
+        if (
+          candidate &&
+          typeof candidate === "string" &&
+          !candidate.includes(".sdPlugin") &&
+          !candidate.includes("com.elgato.StreamDeck") &&
+          fs.existsSync(candidate)
+        ) {
+          return candidate;
+        }
+      }
+    } catch {}
+
+    const cwd = process.cwd();
+    if (cwd && !cwd.includes(".sdPlugin") && !cwd.includes("com.elgato.StreamDeck")) {
+      return cwd;
+    }
+    return homeDir;
+  }
+
+  /**
+   * Saves the selected project directory into ~/.musedeck/config.json so subsequent
+   * commands (Git, Docs, Ops) operate in the user's chosen project.
+   */
+  static saveProjectDir(projectDir: string): void {
+    try {
+      const homeDir = process.env.HOME || "/Users/akif";
+      const cfgDir = path.join(homeDir, ".musedeck");
+      const cfgPath = path.join(cfgDir, "config.json");
+      fs.mkdirSync(cfgDir, { recursive: true });
+      let cfg: Record<string, any> = {};
+      if (fs.existsSync(cfgPath)) {
+        try {
+          cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+        } catch {}
+      }
+      cfg.projectDir = projectDir;
+      cfg.workspacePath = projectDir;
+      fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2), "utf8");
+      console.log(`💾 [Terminal] Saved active project directory to ~/.musedeck/config.json: ${projectDir}`);
+    } catch (e: any) {
+      console.warn("Could not save projectDir to ~/.musedeck/config.json:", e.message);
+    }
+  }
+
+  /**
+   * Prompts the user with a native macOS folder selection dialog to choose which project
+   * directory to open for the new Muse Code session.
+   * If the user clicks Cancel, aborts cleanly without opening any Terminal window.
+   */
+  static async promptAndLaunchMuseSession(prompt?: string): Promise<boolean> {
+    const homeDir = process.env.HOME || "/Users/akif";
+    const savedDir = this.getSavedProjectDir();
+    let defaultLocation = homeDir;
+    if (savedDir && savedDir !== homeDir && fs.existsSync(savedDir)) {
+      const parentDir = path.dirname(savedDir);
+      defaultLocation = fs.existsSync(parentDir) ? parentDir : savedDir;
+    } else {
+      const projectsDir = path.join(homeDir, "Projects");
+      if (fs.existsSync(projectsDir)) {
+        defaultLocation = projectsDir;
+      }
+    }
+
+    const appleScript = `
+tell application "System Events"
+  activate
+  set chosenFolder to choose folder with prompt "Select project folder for new Muse Code session:" default location (POSIX file "${this.escapeForAppleScript(defaultLocation)}")
+  return POSIX path of chosenFolder
+end tell
+    `.trim();
+
+    try {
+      const { stdout } = await execAsync(`osascript -e '${this.escapeForCli(appleScript)}'`);
+      let chosenDir = stdout.trim();
+      if (!chosenDir) {
+        console.log("ℹ️ [Terminal] Folder selection returned empty. Aborting new session launch.");
+        return false;
+      }
+      if (chosenDir.length > 1 && chosenDir.endsWith("/")) {
+        chosenDir = chosenDir.slice(0, -1);
+      }
+      this.saveProjectDir(chosenDir);
+      await this.launchMuseCodeTerminal(chosenDir, prompt);
+      return true;
+    } catch {
+      console.log("ℹ️ [Terminal] New session folder selection canceled by user. No window opened.");
+      return false;
+    }
+  }
+
+  /**
    * Launch a new muse session in a dedicated new Terminal.app window
    */
   static async launchMuseCodeTerminal(rawCwd?: string, prompt?: string): Promise<void> {
-    let projectDir = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
-    if (projectDir.includes(".sdPlugin") || projectDir.includes("com.elgato.StreamDeck")) {
-      projectDir = "/Users/akif/Projects/musedeck/musedeck";
-      try {
-        const homeDir = process.env.HOME || "/Users/akif";
-        const cfgPath = path.join(homeDir, ".musedeck", "config.json");
-        if (fs.existsSync(cfgPath)) {
-          const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-          if (cfg.projectDir && !cfg.projectDir.includes(".sdPlugin")) {
-            projectDir = cfg.projectDir;
-          }
-        }
-      } catch {}
-    }
+    const projectDir = this.getSavedProjectDir(rawCwd);
+    const projectName = (path.basename(projectDir) || "MUSE").toUpperCase();
 
     const command = prompt
       ? `export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH" && cd ${this.escapeForShell(projectDir)} && muse ${this.escapeForShell(prompt)}; exec $SHELL`
@@ -312,7 +404,7 @@ tell application "Terminal"
   set newTab to (do script "${this.escapeForAppleScript(command)}")
   activate
   try
-    set custom title of newTab to "MUSE_ACTIVE_SESSION"
+    set custom title of newTab to "MUSE_ACTIVE_SESSION — ${this.escapeForAppleScript(projectName)}"
     set title displays custom title of newTab to true
     set winId to id of window 1
     do shell script "mkdir -p /tmp/musedeck && echo " & winId & " > /tmp/musedeck/active_terminal_window_id.txt"
@@ -340,10 +432,7 @@ end tell
     updatePrompt: string,
     rawCwd?: string
   ): Promise<void> {
-    let projectDir = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
-    if (projectDir.includes(".sdPlugin")) {
-      projectDir = projectDir.split(/[\/\\]com\.memetcircus\.musedeck\.sdPlugin/)[0] || "/Users/akif/Projects/musedeck/musedeck";
-    }
+    const projectDir = this.getSavedProjectDir(rawCwd);
 
     const sessionTitle = `MUSE_${docKey.toUpperCase()}_SESSION`;
 
@@ -427,10 +516,7 @@ end tell
    * Run an automated context command in the active Muse terminal or a fresh session.
    */
   static async runContextAction(prompt: string, rawCwd?: string): Promise<void> {
-    let projectDir = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
-    if (projectDir.includes(".sdPlugin")) {
-      projectDir = projectDir.split(/[\/\\]com\.memetcircus\.musedeck\.sdPlugin/)[0] || "/Users/akif/Projects/musedeck/musedeck";
-    }
+    const projectDir = this.getSavedProjectDir(rawCwd);
 
     const hasFocused = await this.focusMuseTerminalWindow();
     if (hasFocused) {
@@ -773,20 +859,7 @@ end tell
    *    and returns "COMMITTING".
    */
   static async executeSafeGitCommit(rawCwd?: string): Promise<"COMMITTING" | "CLEAN" | "NO_GIT" | "NO_FOCUS" | "ERROR"> {
-    let cwd = rawCwd || process.cwd() || "/Users/akif/Projects/musedeck/musedeck";
-    if (cwd.includes(".sdPlugin") || cwd.includes("com.elgato.StreamDeck")) {
-      cwd = "/Users/akif/Projects/musedeck/musedeck";
-      try {
-        const homeDir = process.env.HOME || "/Users/akif";
-        const cfgPath = path.join(homeDir, ".musedeck", "config.json");
-        if (fs.existsSync(cfgPath)) {
-          const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-          if (cfg.projectDir && !cfg.projectDir.includes(".sdPlugin")) {
-            cwd = cfg.projectDir;
-          }
-        }
-      } catch {}
-    }
+    const cwd = this.getSavedProjectDir(rawCwd);
 
     // 1. Defocus / Focus Check: Verify Terminal.app is frontmost and active window is Muse Code
     const focusCheckScript = `

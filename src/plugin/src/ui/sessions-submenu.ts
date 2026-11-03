@@ -146,11 +146,13 @@ class SessionsSubmenuManager {
       return true;
     }
 
-    // 2. (1, 0): + NEW SESSION -> Launch new Terminal window running muse
+    // 2. (1, 0): + NEW SESSION -> Prompt user for project folder and launch new Terminal window running muse
     if (col === 1 && row === 0) {
-      console.log("🚀 [SessionsSubmenu] Launching new Muse Code Terminal session...");
-      await TerminalAutomation.launchMuseCodeTerminal();
-      this.close();
+      console.log("🚀 [SessionsSubmenu] Prompting for project folder to launch new Muse Code session...");
+      const launched = await TerminalAutomation.promptAndLaunchMuseSession();
+      if (launched) {
+        this.close();
+      }
       return true;
     }
 

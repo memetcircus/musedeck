@@ -324,10 +324,9 @@ export class AgentStatusAction extends SingletonAction {
     }
     this.lastLaunchTime = now;
 
-    // NEW SESSION action: Launch a single fresh Muse Code session via bridge daemon
-    console.log(`[StatusKey / NEW SESSION] Launching single new Muse Code Terminal session...`);
-    const projectDir = "/Users/akif/Projects/musedeck/musedeck";
-    await this.bridge.launchSession(projectDir);
+    // NEW SESSION action: Prompt user for project directory and launch a single fresh Muse Code session
+    console.log(`[StatusKey / NEW SESSION] Prompting user for project folder and launching new Muse Code session...`);
+    await TerminalAutomation.promptAndLaunchMuseSession();
   }
 }
 
